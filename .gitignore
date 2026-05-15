@@ -1,0 +1,41 @@
+# --- ENVIRONMENT SECRETS (CRITICAL) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+*.env.*
+
+# --- NEXT.JS / NODE ---
+node_modules/
+.next/
+out/
+build/
+.vercel
+.turbo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- PYTHON / FASTAPI ---
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.python-version
+.mypy_cache/
+
+# --- DOCKER ---
+.docker/
+# Only ignore data folders if you are using local volumes
+# pg_data/ 
+
+# --- OPERATING SYSTEM ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
