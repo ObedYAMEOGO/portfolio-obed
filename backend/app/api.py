@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy.future import select # type: ignore
+from sqlalchemy import func # type: ignore
 from typing import List
 
 from .database import get_db
-from .models import Subscriber, Post
+from .models import Lead, Material, Subscriber, Post
 from .schemas import (
     ProjectResponse, ProjectCreate, 
     LeadCreate, LeadResponse,
     SubscriberResponse, SubscriberCreate,
-    PostResponse, PostCreate
+    PostResponse, PostCreate,
+    MaterialCreate, MaterialResponse # Injected validation mirrors
 )
 from .crud import ProjectRepository, LeadRepository, PostRepository, SubscriberRepository
 from .config import settings
@@ -102,6 +104,15 @@ async def submit_lead(
     )
     return {"message": "Inquiry received. System notification dispatched."}
 
+# --- PUBLIC AI MATERIALS ROUTES ---
+
+@router.get("/materials", response_model=List[MaterialResponse])
+async def list_learning_materials(db: AsyncSession = Depends(get_db)):
+    """Public feed: Fetches all active AI training assets and streams."""
+    query = select(Material).where(Material.is_published == True).order_by(Material.created_at.desc())
+    result = await db.execute(query)
+    return result.scalars().all()
+
 # --- ADMIN ROUTES (DASHBOARD) ---
 
 @router.get("/admin/posts", response_model=List[PostResponse])
@@ -112,21 +123,17 @@ async def admin_list_posts(db: AsyncSession = Depends(get_db)):
 @router.post("/admin/posts")
 async def create_post(
     post: PostCreate, 
-    background_tasks: BackgroundTasks, # Correctly injected by FastAPI
+    background_tasks: BackgroundTasks, 
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a new post and broadcasts to subscribers if published."""
-    # 1. Create the post in DB
     new_post = await PostRepository.create(db, post)
     
-    # 2. If published, trigger the notification logic
     if new_post.is_published:
-        # Get active subscribers from repo
-        subscribers = await SubscriberRepository.get_active(db)
-        emails = [s.email for s in subscribers]
+        subsubscribers = await SubscriberRepository.get_active(db)
+        emails = [s.email for s in subsubscribers]
         
         if emails:
-            # Dispatch broadcast task
             background_tasks.add_task(
                 broadcast_new_post,
                 subscriber_emails=emails,
@@ -137,7 +144,7 @@ async def create_post(
             
     return new_post
 
-@router.get("/leads", response_model=List[LeadResponse])
+@router.get("/admin/leads", response_model=List[LeadResponse])
 async def list_leads(db: AsyncSession = Depends(get_db)):
     """Dashboard: Fetches all received leads/inquiries."""
     return await LeadRepository.get_all(db)
@@ -151,3 +158,72 @@ async def list_subscribers(db: AsyncSession = Depends(get_db)):
 async def create_project(project: ProjectCreate, db: AsyncSession = Depends(get_db)):
     """Dashboard: Adds a new project to the portfolio."""
     return await ProjectRepository.create(db, project)
+
+@router.get("/admin/stats")
+async def get_system_stats(db: AsyncSession = Depends(get_db)):
+    sub_count = await db.execute(select(func.count(Subscriber.id)).where(Subscriber.is_active == True))
+    lead_count = await db.execute(select(func.count(Lead.id)))
+    post_count = await db.execute(select(func.count(Post.id)))
+    material_count = await db.execute(select(func.count(Material.id)))
+    
+    return {
+        "active_subscribers": sub_count.scalar(),
+        "total_leads": lead_count.scalar(),
+        "total_articles": post_count.scalar(),
+        "total_materials": material_count.scalar(),
+        "system_status": "Operational"
+    }
+
+@router.delete("/admin/posts/{post_id}", status_code=status.HTTP_200_OK)
+async def delete_post(
+    post_id: int, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Dashboard: Permanently removes a research post from the repository."""
+    query = select(Post).where(Post.id == post_id)
+    result = await db.execute(query)
+    post = result.scalars().first()
+    
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Target node not found in repository logs."
+        )
+    
+    await db.delete(post)
+    await db.commit()
+    return {"status": "success", "message": "Log entry scrubbed successfully."}
+
+# --- ADMIN COURSE MATERIALS MANAGEMENT ENDPOINTS ---
+
+@router.post("/admin/materials", response_model=MaterialResponse, status_code=status.HTTP_201_CREATED)
+async def create_learning_material(
+    material: MaterialCreate, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Dashboard: Direct injection node for technical documentation or media assets."""
+    db_material = Material(**material.model_dump())
+    db.add(db_material)
+    await db.commit()
+    await db.refresh(db_material)
+    return db_material
+
+@router.delete("/admin/materials/{material_id}", status_code=status.HTTP_200_OK)
+async def delete_learning_material(
+    material_id: int, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Dashboard: Permanent excision of structural AI tracking entities."""
+    query = select(Material).where(Material.id == material_id)
+    result = await db.execute(query)
+    target_material = result.scalars().first()
+    
+    if not target_material:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Target training resource not found in data matrix."
+        )
+        
+    await db.delete(target_material)
+    await db.commit()
+    return {"status": "success", "message": "Material node systematically expunged."}

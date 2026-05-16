@@ -62,3 +62,4 @@ export const blogApi = {
   subscribe: (email: string) => api.post("/subscribe", { email }),
   unsubscribe: (email: string) => api.post(`/unsubscribe?email=${encodeURIComponent(email)}`),
 };
+

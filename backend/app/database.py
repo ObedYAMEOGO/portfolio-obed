@@ -14,9 +14,11 @@ DATABASE_URL = (
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True,
-    pool_recycle=300, 
-    pool_pre_ping=True,  
+    echo=True, # Keeps your logs visible
+    pool_pre_ping=True,       # <-- Checks if the connection is alive before using it
+    pool_recycle=300,         # <-- Recycles connections every 5 minutes to prevent idle timeouts
+    pool_size=5,              # Keeps connection footprint low on serverless databases
+    max_overflow=10 
 )
 
 AsyncSessionLocal = async_sessionmaker(

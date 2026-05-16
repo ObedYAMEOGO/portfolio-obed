@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { blogApi } from "@/lib/api";
+import api, { blogApi } from "@/lib/api"; // Injected your core 'api' instance for standard DELETE requests
 import { Post } from "@/types";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,12 @@ import {
 
 import { toast } from "sonner";
 
-export default function BlogTable() {
+// Accept a state refresh function from the dashboard wrapper
+interface BlogTableProps {
+  onRefresh?: () => void;
+}
+
+export default function BlogTable({ onRefresh }: BlogTableProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,11 +53,17 @@ export default function BlogTable() {
     if (!confirmed) return;
 
     try {
-      await blogApi.delete(id);
+      // --- THE FIXED PATH ROUTE ---
+      // This explicitly maps to your new FastAPI endpoint decorator path: @router.delete("/admin/posts/{post_id}")
+      await api.delete(`/admin/posts/${id}`);
 
       toast.success("Post deleted.");
 
-      fetchPosts();
+      // 1. Instantly drop the item from local table list
+      setPosts((prev) => prev.filter((post) => post.id !== id));
+      
+      // 2. Trigger the top overview metrics telemetry count update if provided
+      if (onRefresh) onRefresh();
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete post.");

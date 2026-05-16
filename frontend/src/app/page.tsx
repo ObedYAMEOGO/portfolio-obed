@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import ProjectCard from "@/components/ProjectCard";
+import CapabilityMatrix from "@/components/sections/SkillMatrix";
 import { Button } from "@/components/ui/button";
 
 import { ArrowRight, GraduationCap } from "lucide-react";
@@ -111,6 +112,7 @@ export default function HomePage() {
                 </Button>
               </div>
             </motion.div>
+            
             {/* RIGHT IMAGE SECTION */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -152,7 +154,7 @@ export default function HomePage() {
                     alt="Obed Yameogo"
                     fill
                     priority
-                    className=" pointer-events-none select-none object-cover md:object-contain md:p-2 "
+                    className="pointer-events-none select-none object-cover md:object-contain md:p-2"
                   />
                 </div>
 
@@ -161,7 +163,7 @@ export default function HomePage() {
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.9, duration: 0.5 }}
-                  className=" absolute bottom-0 left-0 right-0 z-30 md:hidden"
+                  className="absolute bottom-0 left-0 right-0 z-30 md:hidden"
                 >
                   <div className="w-full border-t border-white/40 bg-white/88 px-4 py-3 text-center backdrop-blur-md">
                     <p className="text-[1rem] font-bold uppercase tracking-[0.12em] leading-none text-[#050505]">
@@ -212,7 +214,6 @@ export default function HomePage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="h-px w-8 bg-neutral-700" />
-
                     <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-neutral-500">
                       Commit_Message
                     </span>
@@ -260,14 +261,14 @@ export default function HomePage() {
                     <p className="text-[17px] leading-relaxed text-neutral-400">
                       I am an engineer focused on understanding what it takes to
                       make AI systems actually deliver results in the real
-                      world. From architecting reliable pipelines to serving
+                      world. My skills range from rigorous problem-solving, architecting reliable pipelines to serving
                       predictive models efficiently at scale.
                     </p>
                   </div>
 
                   <div className="space-y-5">
                     <p className="text-[17px] leading-relaxed text-neutral-400">
-                      I specialize in MLE and LLM pipelines, improving RAG
+                      I specialize in MLE, building autonomous LLM and RAG matrices, improving their
                       performance, and solving the hard problems of scaling,
                       latency, and production reliability. If you are looking
                       for the same — I am your man.
@@ -304,6 +305,11 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* GEOMETRIC PROFILE & CAPABILITY PILLARS */}
+        <div className="w-full max-w-7xl">
+          <CapabilityMatrix />
+        </div>
 
         {/* PROJECTS SECTION */}
         <section className="mt-16 w-full max-w-7xl space-y-10">

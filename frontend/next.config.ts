@@ -6,6 +6,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com", // Allows auto-fetched course previews
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com", // Allows fallback playlist graphic assets
+      },
     ],
   },
 };

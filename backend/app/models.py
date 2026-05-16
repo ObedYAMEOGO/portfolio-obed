@@ -1,4 +1,6 @@
+from enum import Enum as PyEnum
 from datetime import datetime, timezone
+import enum
 
 from sqlalchemy import (  # type: ignore
     Column,
@@ -8,11 +10,11 @@ from sqlalchemy import (  # type: ignore
     DateTime,
     Boolean,
     JSON,
-    func,  # <--- ADDED THIS
+    func,
+    Enum,
 )
 
 from sqlalchemy.orm import DeclarativeBase  # type: ignore
-
 
 class Base(DeclarativeBase):
     pass
@@ -71,3 +73,32 @@ class Post(Base):
         server_default=func.now(), 
         onupdate=func.now()
     )
+    
+class MaterialType(str, enum.Enum):
+    DOCUMENT = "DOCUMENT"
+    VIDEO = "VIDEO"
+
+# New Enum tracking video arrangement type
+class VideoContext(str, enum.Enum):
+    SINGLE = "SINGLE"
+    PLAYLIST = "PLAYLIST"
+    NONE = "NONE" # Fallback designation for pure Text Documents
+
+class Material(Base):
+    __tablename__ = "materials"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    slug = Column(String, unique=True, index=True, nullable=False)
+    description = Column(Text, nullable=True)
+    
+    material_type = Column(Enum(MaterialType), nullable=False, default=MaterialType.DOCUMENT)
+    # Target column ensuring structural flexibility
+    video_context = Column(Enum(VideoContext), nullable=False, default=VideoContext.NONE)
+    
+    category = Column(String, nullable=False, default="General AI") 
+    resource_url = Column(String, nullable=False) # Maps to single YouTube link OR specific Playlist layout URL
+    thumbnail_url = Column(String, nullable=True)
+    
+    is_published = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())

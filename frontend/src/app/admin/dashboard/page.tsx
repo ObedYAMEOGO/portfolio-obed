@@ -9,6 +9,7 @@ import {
   Mail,
   FileText,
   Plus,
+  Radio,
 } from "lucide-react";
 
 import { useUser, SignOutButton } from "@clerk/nextjs";
@@ -19,9 +20,11 @@ import { Project, Subscriber, Lead } from "@/types";
 
 import { Button } from "@/components/ui/button";
 import CreateProjectForm from "@/components/admin/CreateProjectForm";
+import CreateMaterialForm from "@/components/admin/CreateMaterialForm"; // Imported Material Control Node
 import SubscriberTable from "@/components/admin/SubscriberTable";
 import LeadsTable from "@/components/admin/LeadsTable";
 import BlogTable from "@/components/admin/BlogTable";
+import MaterialsTable from "@/components/admin/MaterialsTable";
 
 import { toast } from "sonner";
 import Link from "next/link";
@@ -31,12 +34,11 @@ interface DashboardStats {
   subscribers: number;
   leads: number;
   posts: number;
-  status: string;
+  status: "ONLINE" | "DEGRADED" | "SYNCING";
 }
 
 export default function AdminDashboard() {
   const router = useRouter();
-
   const { isLoaded, isSignedIn, user } = useUser();
 
   const [stats, setStats] = useState<DashboardStats>({
@@ -44,7 +46,7 @@ export default function AdminDashboard() {
     subscribers: 0,
     leads: 0,
     posts: 0,
-    status: "Active",
+    status: "SYNCING",
   });
 
   const ADMIN_EMAIL = "obedyameogo4@gmail.com";
@@ -68,26 +70,27 @@ export default function AdminDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
+      setStats((prev) => ({ ...prev, status: "SYNCING" }));
+
       const [projectRes, subRes, leadsRes, postsRes] = await Promise.all([
         api.get<Project[]>("/projects"),
         api.get<Subscriber[]>("/subscribers"),
-        api.get<Lead[]>("/leads"),
+        api.get<Lead[]>("/admin/leads"),
         blogApi.adminGetAll(),
       ]);
-
       setStats({
         projects: projectRes.data.length,
         subscribers: subRes.data.length,
         leads: leadsRes.data.length,
         posts: postsRes.data.length,
-        status: "Active",
+        status: "ONLINE",
       });
     } catch (error) {
       console.error("Sync_Error:", error);
 
       setStats((prev) => ({
         ...prev,
-        status: "Degraded",
+        status: "DEGRADED",
       }));
 
       toast.error("System Sync Failed: Check Backend Connection");
@@ -109,7 +112,7 @@ export default function AdminDashboard() {
         <div className="mb-16 flex flex-col items-start justify-between gap-8 border-b border-neutral-300 pb-10 md:flex-row md:items-end">
           <div className="space-y-2">
             <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500">
-              <Activity className="h-3 w-3" />
+              <Activity className="h-3 w-3 animate-pulse" />
               Root Access Verified
             </div>
 
@@ -117,9 +120,35 @@ export default function AdminDashboard() {
               Command_Center
             </h1>
 
-            <p className="font-mono text-[11px] uppercase tracking-widest text-neutral-400">
-              Operator: {user?.primaryEmailAddress?.emailAddress}
-            </p>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-neutral-400">
+              <p>Operator: {user?.primaryEmailAddress?.emailAddress}</p>
+              <div className="hidden h-3 w-px bg-neutral-300 sm:block" />
+              <div className="flex items-center gap-2">
+                <Radio
+                  className={`h-3 w-3 ${
+                    stats.status === "ONLINE"
+                      ? "text-green-600 animate-pulse"
+                      : stats.status === "SYNCING"
+                      ? "text-amber-500 animate-spin"
+                      : "text-red-500"
+                  }`}
+                />
+                <span>
+                  Telemetry:{" "}
+                  <span
+                    className={
+                      stats.status === "ONLINE"
+                        ? "text-green-600 font-bold"
+                        : stats.status === "SYNCING"
+                        ? "text-amber-500"
+                        : "text-red-500 font-bold"
+                    }
+                  >
+                    {stats.status}
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-4">
@@ -154,6 +183,9 @@ export default function AdminDashboard() {
             {/* CREATE PROJECT */}
             <CreateProjectForm onRefresh={fetchDashboardStats} />
 
+            {/* MOUNTED COURSE MATERIALS CONTROLLER */}
+            <CreateMaterialForm onRefresh={fetchDashboardStats} />
+
             {/* SIGN OUT */}
             <SignOutButton>
               <Button
@@ -181,7 +213,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* STATS GRID */}
+        {/* UPDATED STATS GRID WITH YOUR SPECIFIC TECHNICAL METRICS */}
         <div className="mb-20 grid grid-cols-1 gap-0 border border-neutral-300 bg-neutral-300 shadow-sm md:grid-cols-2 lg:grid-cols-4">
           <DashboardStatCard
             title="Total_Projects"
@@ -190,19 +222,19 @@ export default function AdminDashboard() {
           />
 
           <DashboardStatCard
-            title="Research_Logs"
+            title="Log_Entries"
             value={stats.posts.toString()}
             icon={<FileText className="h-4 w-4" />}
           />
 
           <DashboardStatCard
-            title="Identity_Nodes"
+            title="Active_Nodes"
             value={stats.subscribers.toString()}
             icon={<Users className="h-4 w-4" />}
           />
 
           <DashboardStatCard
-            title="Inbound_Leads"
+            title="Inbound_Signals"
             value={stats.leads.toString()}
             icon={<Mail className="h-4 w-4" />}
           />
@@ -216,12 +248,10 @@ export default function AdminDashboard() {
               <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
                 Research_Repository
               </h2>
-
               <div className="h-px grow bg-neutral-300" />
             </div>
-
             <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
-              <BlogTable />
+              <BlogTable onRefresh={fetchDashboardStats} />
             </div>
           </div>
 
@@ -231,10 +261,8 @@ export default function AdminDashboard() {
               <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
                 Inbound_Communications
               </h2>
-
               <div className="h-px grow bg-neutral-300" />
             </div>
-
             <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
               <LeadsTable />
             </div>
@@ -246,12 +274,24 @@ export default function AdminDashboard() {
               <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
                 Subscriber_Registry
               </h2>
+              <div className="h-px grow bg-neutral-300" />
+            </div>
+            <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
+              <SubscriberTable />
+            </div>
+          </div>
 
+          {/* MATERIALS ARCHIVE REGISTRY */}
+          <div className="space-y-8 mt-20">
+            <div className="flex items-center gap-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
+                AI_Materials_Directory
+              </h2>
               <div className="h-px grow bg-neutral-300" />
             </div>
 
             <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
-              <SubscriberTable />
+              <MaterialsTable onRefresh={fetchDashboardStats} />
             </div>
           </div>
         </div>
@@ -277,12 +317,10 @@ function DashboardStatCard({
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] transition-colors group-hover:text-neutral-900">
           {title}
         </span>
-
         <div className="border border-neutral-200 p-2 transition-colors group-hover:border-neutral-900">
           {icon}
         </div>
       </div>
-
       <div
         className={`font-mono text-4xl font-bold tracking-tighter ${statusColor}`}
       >

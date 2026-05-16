@@ -20,9 +20,11 @@ export default function LeadsTable() {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const res = await api.get<Lead[]>("/leads");
+        // Targets the updated administrative route
+        const res = await api.get<Lead[]>("/admin/leads");
+        
         // Trier par date la plus récente
-        const sortedLeads = res.data.sort(
+        const sortedLeads = (res.data ?? []).sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         );
@@ -54,12 +56,12 @@ export default function LeadsTable() {
       <Table>
         <TableHeader className="bg-neutral-50">
           <TableRow className="border-b border-neutral-200 hover:bg-transparent">
-            <TableHead className="w-[200px] font-mono text-[10px] uppercase tracking-widest py-4">
+            <TableHead className="w-50 font-mono text-[10px] uppercase tracking-widest py-4">
               <div className="flex items-center gap-2">
                 <User className="w-3 h-3" /> Sender_Identity
               </div>
             </TableHead>
-            <TableHead className="w-[250px] font-mono text-[10px] uppercase tracking-widest py-4">
+            <TableHead className="w-62.5 font-mono text-[10px] uppercase tracking-widest py-4">
               <div className="flex items-center gap-2">
                 <Mail className="w-3 h-3" /> Contact_Endpoint
               </div>
@@ -69,7 +71,7 @@ export default function LeadsTable() {
                 <MessageSquare className="w-3 h-3" /> Encrypted_Message
               </div>
             </TableHead>
-            <TableHead className="w-[180px] font-mono text-[10px] uppercase tracking-widest py-4 text-right">
+            <TableHead className="w-45 font-mono text-[10px] uppercase tracking-widest py-4 text-right">
               <div className="flex items-center justify-end gap-2">
                 <Calendar className="w-3 h-3" /> Timestamp
               </div>
@@ -87,7 +89,7 @@ export default function LeadsTable() {
               </TableCell>
             </TableRow>
           ) : (
-            leads.map((lead) => (
+            Array.isArray(leads) && leads.map((lead) => (
               <TableRow
                 key={lead.id}
                 className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors group"

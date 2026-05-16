@@ -1,18 +1,19 @@
 from datetime import datetime
 from typing import List, Optional
-
-from pydantic import ( # type: ignore
+from enum import Enum
+from pydantic import (  # type: ignore
     BaseModel,
     ConfigDict,
     EmailStr,
     Field,
+    model_validator,
     field_validator,
 )
-
 
 # ---------------------------------------------------
 # DATETIME NORMALIZATION
 # ---------------------------------------------------
+
 
 def ensure_naive(v):
     if isinstance(v, datetime) and v.tzinfo is not None:
@@ -24,6 +25,7 @@ def ensure_naive(v):
 # ---------------------------------------------------
 # PROJECT SCHEMAS
 # ---------------------------------------------------
+
 
 class ProjectBase(BaseModel):
     title: str
@@ -49,9 +51,7 @@ class ProjectResponse(ProjectBase):
     id: int
     created_at: datetime
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator(
         "created_at",
@@ -66,6 +66,7 @@ class ProjectResponse(ProjectBase):
 # LEAD SCHEMAS
 # ---------------------------------------------------
 
+
 class LeadCreate(BaseModel):
     full_name: str
     email: EmailStr
@@ -76,9 +77,7 @@ class LeadResponse(LeadCreate):
     id: int
     created_at: datetime
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator(
         "created_at",
@@ -93,6 +92,7 @@ class LeadResponse(LeadCreate):
 # SUBSCRIBER SCHEMAS
 # ---------------------------------------------------
 
+
 class SubscriberBase(BaseModel):
     email: EmailStr
 
@@ -106,9 +106,7 @@ class SubscriberResponse(SubscriberBase):
     is_active: bool
     created_at: datetime
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator(
         "created_at",
@@ -122,6 +120,7 @@ class SubscriberResponse(SubscriberBase):
 # ---------------------------------------------------
 # BLOG / POST SCHEMAS
 # ---------------------------------------------------
+
 
 class PostBase(BaseModel):
     title: str
@@ -149,9 +148,7 @@ class PostResponse(PostBase):
 
     updated_at: Optional[datetime] = None
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator(
         "created_at",
@@ -161,3 +158,52 @@ class PostResponse(PostBase):
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)
+
+
+class MaterialTypeEnum(str, Enum):
+    DOCUMENT = "DOCUMENT"
+    VIDEO = "VIDEO"
+
+
+class VideoContextEnum(str, Enum):
+    SINGLE = "SINGLE"
+    PLAYLIST = "PLAYLIST"
+    NONE = "NONE"
+
+
+class MaterialBase(BaseModel):
+    title: str
+    slug: str
+    description: Optional[str] = None
+    material_type: MaterialTypeEnum
+    video_context: VideoContextEnum = VideoContextEnum.NONE
+    category: str
+    resource_url: str
+    thumbnail_url: Optional[str] = None
+    is_published: Optional[bool] = True
+
+    # Data Quality Guardrail: Ensures Video Context is supplied if the material is a video asset
+    @model_validator(mode="after")
+    def validate_video_parameters(self):
+        if (
+            self.material_type == MaterialTypeEnum.VIDEO
+            and self.video_context == VideoContextEnum.NONE
+        ):
+            raise ValueError(
+                "Video assets must specify configuration type: SINGLE or PLAYLIST."
+            )
+        if self.material_type == MaterialTypeEnum.DOCUMENT:
+            self.video_context = VideoContextEnum.NONE
+        return self
+
+
+class MaterialCreate(MaterialBase):
+    pass
+
+
+class MaterialResponse(MaterialBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
