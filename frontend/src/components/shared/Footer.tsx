@@ -1,81 +1,95 @@
-"use client";
-
-import Newsletter from "./NewsLetter";
 import Link from "next/link";
 import Image from "next/image";
+import Newsletter from "./NewsLetter";
+
+
+const socialLinks = [
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/obedyameogo/",
+  },
+  {
+    label: "GitHub",
+    href: "https://github.com/ObedYAMEOGO",
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/burkimbila10xxkrt",
+  },
+];
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="border-t border-neutral-200 bg-white py-12">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 px-6 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400 md:flex-row">
+    <footer className="border-t border-neutral-200 bg-white">
+      {/* NEWSLETTER */}
+      <Newsletter />
+
+      {/* FOOTER CORE */}
+      <div className="mx-auto flex max-w-7xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-center lg:justify-between">
         
         {/* IDENTITY */}
-        <div className="flex items-center gap-4">
-          
-          {/* PROFILE IMAGE */}
-          <div className="relative h-40 w-40 overflow-hidden border border-neutral-200">
+        <div className="flex items-center gap-5">
+          {/* IMAGE */}
+          <div className="relative h-24 w-24 overflow-hidden border border-neutral-200 bg-neutral-100">
             <Image
               src="/profile-obed.png"
               alt="Obed Yameogo"
               fill
+              priority={false}
+              sizes="96px"
               className="object-cover grayscale"
             />
           </div>
 
-          {/* NAME + TITLE */}
-          <div className="flex flex-col">
-            <span className="text-neutral-700">
-              OBED YAMEOGO
-            </span>
+          {/* TEXT */}
+          <div className="space-y-2">
+            <h3 className="font-mono text-sm font-semibold uppercase tracking-[0.2em] text-[#050505]">
+              Obed Yameogo
+            </h3>
 
-            <span className="mt-1 text-[9px] tracking-[0.18em] text-neutral-400">
-              PhD Scholar in AI, Machine Learning Engineer <br />© {currentYear} 
-            </span>
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+              PhD Scholar in AI · Machine Learning Engineer
+            </p>
+
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-400">
+              © {new Date().getFullYear()} All Rights Reserved
+            </p>
           </div>
         </div>
 
-        {/* NEWSLETTER */}
-        <div className="w-full md:w-auto">
-          <Newsletter />
+        {/* SOCIALS */}
+        <div className="flex flex-col items-start gap-4 lg:items-end">
+          <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-neutral-400">
+            Connect
+          </span>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {socialLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  border
+                  border-neutral-200
+                  px-4
+                  py-2
+                  font-mono
+                  text-[10px]
+                  uppercase
+                  tracking-[0.18em]
+                  text-neutral-500
+                  transition-colors
+                  hover:border-black
+                  hover:text-black
+                "
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
-
-{/* SOCIAL LINKS */}
-<div className="flex flex-col items-center gap-3">
-  
-  {/* FOLLOW ME TITLE */}
-  <span className="text-xs tracking-[0.35em] text-black">
-    Follow Me
-  </span>
-
-  {/* LINKS */}
-  <div className="flex items-center gap-3 text-[10px] tracking-[0.2em]">
-    
-    <Link
-      href="https://www.linkedin.com/in/obedyameogo/"
-      target="_blank"
-      className="border border-neutral-200 px-3 py-2 transition-all duration-300 hover:border-black hover:text-black"
-    >
-      LinkedIn
-    </Link>
-    <Link
-      href="https://github.com/ObedYAMEOGO"
-      target="_blank"
-      className="border border-neutral-200 px-3 py-2 transition-all duration-300 hover:border-black hover:text-black"
-    >
-      GitHub
-    </Link>
-
-    <Link
-      href="https://www.facebook.com/burkimbila10xxkrt"
-      target="_blank"
-      className="border border-neutral-200 px-3 py-2 transition-all duration-300 hover:border-black hover:text-black"
-    >
-      Facebook
-    </Link>
-  </div>
-</div>
       </div>
     </footer>
   );

@@ -1,65 +1,273 @@
+// src/lib/api.ts
+
 import axios from "axios";
-import { Post, PostCreate, Project, Subscriber, Lead } from "@/types";
 
-const getBaseURL = () => {
-  // Browser → localhost
-  if (typeof window !== "undefined") {
-    return "http://localhost:8000/api/v1";
-  }
+/* =========================================================
+   BASE CONFIG
+========================================================= */
 
-  // Docker server-side
-  return "http://backend:8000/api/v1";
-};
+const API_BASE_URL =
+  process.env
+    .NEXT_PUBLIC_API_URL;
+
+if (!API_BASE_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_API_URL is missing.",
+  );
+}
+
+/* =========================================================
+   AXIOS INSTANCE 
+========================================================= */
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || getBaseURL(),
+  baseURL: API_BASE_URL,
+
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type":
+      "application/json",
   },
 });
 
-export default api;
+/* =========================================================
+   ADMIN AUTH HEADER
+========================================================= */
 
-/**
- * PROJECT & SYSTEM API
- */
-export const systemApi = {
-  getProjects: () => api.get<Project[]>("/projects"),
+api.interceptors.request.use(
+  (config) => {
+    const adminKey =
+      process.env
+        .NEXT_PUBLIC_ADMIN_SECRET;
 
-  getSubscribers: () =>
-    api.get<Subscriber[]>("/subscribers"),
+    if (
+      adminKey &&
+      config.url?.includes(
+        "/admin",
+      )
+    ) {
+      config.headers[
+        "x-admin-key"
+      ] = adminKey;
+    }
 
-  getLeads: () =>
-    api.get<Lead[]>("/leads"),
-};
+    return config;
+  },
 
-/**
- * BLOG SYSTEM API
- */
+  (error) => {
+    return Promise.reject(
+      error,
+    );
+  },
+);
+
+/* =========================================================
+   RESPONSE ERROR HANDLER
+========================================================= */
+
+api.interceptors.response.use(
+  (response) =>
+    response,
+
+  (error) => {
+    const message =
+      error?.response?.data
+        ?.detail ||
+      error?.message ||
+      "Request failed.";
+
+    return Promise.reject(
+      new Error(message),
+    );
+  },
+);
+
+/* =========================================================
+   GENERIC REQUEST
+========================================================= */
+
+async function request<T>(
+  url: string,
+  options?: {
+    method?: string;
+    body?: unknown;
+  },
+): Promise<T> {
+  const response =
+    await api.request<T>({
+      url,
+      method:
+        options?.method ||
+        "GET",
+      data: options?.body,
+    });
+
+  return response.data;
+}
+
+/* =========================================================
+   BLOG API
+========================================================= */
+
 export const blogApi = {
-  // PUBLIC
-  getAllPublished: () =>
-    api.get<Post[]>("/posts"),
+  getAll: () =>
+    request("/posts"),
 
-  getBySlug: (slug: string) =>
-    api.get<Post>(`/posts/${slug}`),
+  getBySlug: (
+    slug: string,
+  ) =>
+    request(`/posts/${slug}`),
 
-  // ADMIN
-  adminGetAll: () =>
-    api.get<Post[]>("/admin/posts"),
+  create: (
+    data: unknown,
+  ) =>
+    request(
+      "/admin/posts",
+      {
+        method: "POST",
+        body: data,
+      },
+    ),
 
-  create: (data: PostCreate) =>
-    api.post<Post>("/admin/posts", data),
+  update: (
+    id: number,
+    data: unknown,
+  ) =>
+    request(
+      `/admin/posts/${id}`,
+      {
+        method: "PUT",
+        body: data,
+      },
+    ),
 
-  getById: (id: number) =>
-    api.get<Post>(`/admin/posts/${id}`),
-
-  update: (id: number, data: PostCreate) =>
-    api.put<Post>(`/admin/posts/${id}`, data),
-
-  delete: (id: number) =>
-    api.delete(`/admin/posts/${id}`),
-  subscribe: (email: string) => api.post("/subscribe", { email }),
-  unsubscribe: (email: string) => api.post(`/unsubscribe?email=${encodeURIComponent(email)}`),
+  delete: (
+    id: number,
+  ) =>
+    request(
+      `/admin/posts/${id}`,
+      {
+        method: "DELETE",
+      },
+    ),
 };
 
+/* =========================================================
+   PROJECT API
+========================================================= */
+
+export const projectApi = {
+  getAll: () =>
+    request("/projects"),
+
+  getById: (
+    id: number,
+  ) =>
+    request(
+      `/admin/projects/${id}`,
+    ),
+
+  create: (
+    data: unknown,
+  ) =>
+    request(
+      "/admin/projects",
+      {
+        method: "POST",
+        body: data,
+      },
+    ),
+
+  update: (
+    id: number,
+    data: unknown,
+  ) =>
+    request(
+      `/admin/projects/${id}`,
+      {
+        method: "PUT",
+        body: data,
+      },
+    ),
+
+  delete: (
+    id: number,
+  ) =>
+    request(
+      `/admin/projects/${id}`,
+      {
+        method: "DELETE",
+      },
+    ),
+};
+
+/* =========================================================
+   MATERIAL API
+========================================================= */
+
+export const materialApi = {
+  getAll: () =>
+    request("/materials"),
+
+  getById: (
+    id: number,
+  ) =>
+    request(
+      `/admin/materials/${id}`,
+    ),
+
+  create: (
+    data: unknown,
+  ) =>
+    request(
+      "/admin/materials",
+      {
+        method: "POST",
+        body: data,
+      },
+    ),
+
+  update: (
+    id: number,
+    data: unknown,
+  ) =>
+    request(
+      `/admin/materials/${id}`,
+      {
+        method: "PUT",
+        body: data,
+      },
+    ),
+
+  delete: (
+    id: number,
+  ) =>
+    request(
+      `/admin/materials/${id}`,
+      {
+        method: "DELETE",
+      },
+    ),
+};
+
+/* =========================================================
+   LEADS API
+========================================================= */
+
+export const leadsApi = {
+  getAll: () =>
+    request("/admin/leads"),
+};
+
+/* =========================================================
+   SUBSCRIBERS API
+========================================================= */
+
+export const subscribersApi =
+  {
+    getAll: () =>
+      request(
+        "/admin/subscribers",
+      ),
+  };
+
+export default api;

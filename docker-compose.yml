@@ -1,19 +1,33 @@
 services:
   backend:
     build: ./backend
+
     ports:
       - "8000:8000"
-    env_file: ./backend/.env
+
+    env_file:
+      - ./backend/.env
+
     volumes:
       - ./backend:/app
 
   frontend:
     build: ./frontend
+
     ports:
       - "3000:3000"
+
+    env_file:
+      - ./frontend/.env.local
+
     environment:
-      # Add the prefix here!
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - INTERNAL_API_URL=http://backend:8000/api/v1
+      - ADMIN_SECRET=my_super_secret_admin_key_2026
+
     volumes:
       - ./frontend:/app
       - /app/node_modules
+
+    depends_on:
+      - backend

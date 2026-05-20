@@ -1,20 +1,153 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from .api import router as api_router
+from fastapi.middleware.cors import (
+    CORSMiddleware,
+)
 
-app = FastAPI(title="Obed AI Systems Portfolio API")
+from app.routers.public.posts import (
+    router as public_posts_router,
+)
 
-# Configure CORS for Next.js
+from app.routers.public.projects import (
+    router as public_projects_router,
+)
+
+from app.routers.public.materials import (
+    router as public_materials_router,
+)
+
+from app.routers.public.leads import (
+    router as public_leads_router,
+)
+
+from app.routers.public.newsletter import (
+    router as public_newsletter_router,
+)
+
+from app.routers.admin.posts import (
+    router as admin_posts_router,
+)
+
+from app.routers.admin.projects import (
+    router as admin_projects_router,
+)
+
+from app.routers.admin.materials import (
+    router as admin_materials_router,
+)
+
+from app.routers.admin.leads import (
+    router as admin_leads_router,
+)
+
+from app.routers.admin.subscribers import (
+    router as admin_subscribers_router,
+)
+
+from app.routers.admin.stats import (
+    router as admin_stats_router,
+)
+
+app = FastAPI(
+    title="Portfolio API",
+    version="1.0.0",
+)
+
+# =========================================================
+# CORS
+# =========================================================
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "*",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(api_router, prefix="/api/v1")
+# =========================================================
+# PUBLIC ROUTES
+# =========================================================
 
-@app.get("/health")
-async def health():
-    return {"status": "online"}
+app.include_router(
+    public_posts_router,
+    prefix="/api/v1",
+    tags=["Public Posts"],
+)
+
+app.include_router(
+    public_projects_router,
+    prefix="/api/v1",
+    tags=["Public Projects"],
+)
+
+app.include_router(
+    public_materials_router,
+    prefix="/api/v1",
+    tags=["Public Materials"],
+)
+
+app.include_router(
+    public_leads_router,
+    prefix="/api/v1",
+    tags=["Public Leads"],
+)
+
+app.include_router(
+    public_newsletter_router,
+    prefix="/api/v1",
+    tags=["Newsletter"],
+)
+
+# =========================================================
+# ADMIN ROUTES
+# =========================================================
+
+app.include_router(
+    admin_posts_router,
+    prefix="/api/v1",
+    tags=["Admin Posts"],
+)
+
+app.include_router(
+    admin_projects_router,
+    prefix="/api/v1",
+    tags=["Admin Projects"],
+)
+
+app.include_router(
+    admin_materials_router,
+    prefix="/api/v1",
+    tags=["Admin Materials"],
+)
+
+app.include_router(
+    admin_leads_router,
+    prefix="/api/v1",
+    tags=["Admin Leads"],
+)
+
+app.include_router(
+    admin_subscribers_router,
+    prefix="/api/v1",
+    tags=["Admin Subscribers"],
+)
+
+app.include_router(
+    admin_stats_router,
+    prefix="/api/v1",
+    tags=["Admin Stats"],
+)
+
+# =========================================================
+# ROOT
+# =========================================================
+
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "service": "portfolio-api",
+        "version": "1.0.0",
+    }

@@ -1,6 +1,6 @@
 import resend # type: ignore
 import logging
-from .config import settings
+from .core.config import settings
 from typing import List
 
 # Initialize Resend with the API Key from your .env via settings

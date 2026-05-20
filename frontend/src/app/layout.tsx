@@ -1,21 +1,66 @@
+// app/layout.tsx
+
 import type { Metadata } from "next";
+
 import { ClerkProvider } from "@clerk/nextjs";
+
 import { Cormorant_Garamond } from "next/font/google";
 
-import Navbar from "@/components/shared/Navbar";
-
 import "./globals.css";
+
+import Navbar from "@/components/navbar/Navbar";
+
 import Footer from "@/components/shared/Footer";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
+
   variable: "--font-serif",
-  weight: ["300", "400", "500", "600", "700"],
+
+  display: "swap",
+
+  weight: [
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+  ],
 });
 
 export const metadata: Metadata = {
-  title: "Obed Yameogo",
-  description: "Machine Learning Engineer",
+  title: {
+    default: "Obed Yameogo",
+
+    template:
+      "%s | Obed Yameogo",
+  },
+
+  description:
+    "Machine Learning Engineer focused on production AI systems, LLM infrastructure, MLOps, and scalable intelligent applications.",
+
+  keywords: [
+    "Machine Learning Engineer",
+    "AI Engineer",
+    "LLM",
+    "RAG",
+    "MLOps",
+    "Next.js",
+    "FastAPI",
+    "Obed Yameogo",
+  ],
+
+  authors: [
+    {
+      name: "Obed Yameogo",
+    },
+  ],
+
+  creator: "Obed Yameogo",
+
+  metadataBase: new URL(
+    "http://localhost:3000",
+  ),
 };
 
 export default function RootLayout({
@@ -25,19 +70,33 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="scroll-smooth">
+      <html
+        lang="en"
+        className="scroll-smooth"
+        suppressHydrationWarning
+      >
         <body
-          className={`${cormorant.variable} bg-[#f5f5f5] font-serif antialiased text-[#050505] flex flex-col min-h-screen`}
+          className={`
+            ${cormorant.variable}
+            flex
+            min-h-screen
+            flex-col
+            bg-[#f5f5f5]
+            font-serif
+            text-[#050505]
+            antialiased
+          `}
         >
-          {/* PERSISTENT NAVIGATION */}
+          {/* NAVBAR */}
           <Navbar />
 
-          {/* MAIN CONTENT AREA */}
-          {/* pt-16 accounts for the fixed height of the Navbar */}
-          <main className="grow">
+          {/* MAIN */}
+          <main className="flex-1 pt-16">
             {children}
           </main>
-          <Footer/>
+
+          {/* FOOTER */}
+          <Footer />
         </body>
       </html>
     </ClerkProvider>

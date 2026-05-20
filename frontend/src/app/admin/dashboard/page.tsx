@@ -1,331 +1,608 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import {
-  Database,
-  LogOut,
-  Users,
-  Activity,
-  Mail,
-  FileText,
-  Plus,
-  Radio,
-} from "lucide-react";
+  auth,
+  currentUser,
+} from "@clerk/nextjs/server";
 
-import { useUser, SignOutButton } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
-import api, { blogApi } from "@/lib/api";
-import { Project, Subscriber, Lead } from "@/types";
-
-import { Button } from "@/components/ui/button";
-import CreateProjectForm from "@/components/admin/CreateProjectForm";
-import CreateMaterialForm from "@/components/admin/CreateMaterialForm"; // Imported Material Control Node
-import SubscriberTable from "@/components/admin/SubscriberTable";
-import LeadsTable from "@/components/admin/LeadsTable";
-import BlogTable from "@/components/admin/BlogTable";
-import MaterialsTable from "@/components/admin/MaterialsTable";
-
-import { toast } from "sonner";
 import Link from "next/link";
 
-interface DashboardStats {
-  projects: number;
-  subscribers: number;
-  leads: number;
-  posts: number;
-  status: "ONLINE" | "DEGRADED" | "SYNCING";
-}
+import {
+  Database,
+  Users,
+  Mail,
+  FileText,
+  Activity,
+  Radio,
+  Plus,
+  LogOut,
+  BookOpen,
+} from "lucide-react";
 
-export default function AdminDashboard() {
-  const router = useRouter();
-  const { isLoaded, isSignedIn, user } = useUser();
+import { SignOutButton } from "@clerk/nextjs";
 
-  const [stats, setStats] = useState<DashboardStats>({
-    projects: 0,
-    subscribers: 0,
-    leads: 0,
-    posts: 0,
-    status: "SYNCING",
-  });
+import { Button } from "@/components/ui/button";
 
-  const ADMIN_EMAIL = "obedyameogo4@gmail.com";
+import CreateProjectForm from "@/components/admin/projects/CreateProjectForm";
 
-  useEffect(() => {
-    if (isLoaded) {
-      if (!isSignedIn) {
-        router.push("/");
-      } else {
-        const userEmail = user?.primaryEmailAddress?.emailAddress;
+import CreateMaterialForm from "@/components/admin/materials/CreateMaterialForm";
 
-        if (userEmail !== ADMIN_EMAIL) {
-          toast.error("Access Denied: Admin Privileges Required");
-          router.push("/");
-        } else {
-          fetchDashboardStats();
-        }
-      }
-    }
-  }, [isLoaded, isSignedIn, user, router]);
+import ProjectsTable from "@/components/admin/projects/ProjectsTable";
 
-  const fetchDashboardStats = async () => {
-    try {
-      setStats((prev) => ({ ...prev, status: "SYNCING" }));
+import PostsTable from "@/components/admin/posts/PostsTable";
 
-      const [projectRes, subRes, leadsRes, postsRes] = await Promise.all([
-        api.get<Project[]>("/projects"),
-        api.get<Subscriber[]>("/subscribers"),
-        api.get<Lead[]>("/admin/leads"),
-        blogApi.adminGetAll(),
-      ]);
-      setStats({
-        projects: projectRes.data.length,
-        subscribers: subRes.data.length,
-        leads: leadsRes.data.length,
-        posts: postsRes.data.length,
-        status: "ONLINE",
-      });
-    } catch (error) {
-      console.error("Sync_Error:", error);
+import MaterialsTable from "@/components/admin/materials/MaterialsTable";
 
-      setStats((prev) => ({
-        ...prev,
-        status: "DEGRADED",
-      }));
+import LeadsTable from "@/components/admin/leads/LeadsTable";
 
-      toast.error("System Sync Failed: Check Backend Connection");
-    }
-  };
+import SubscribersTable from "@/components/admin/subscribers/SubscribersTable";
 
-  if (
-    !isLoaded ||
-    !isSignedIn ||
-    user?.primaryEmailAddress?.emailAddress !== ADMIN_EMAIL
-  ) {
-    return null;
+import {
+  getDashboardStats,
+} from "@/lib/server-admin-api";
+import type {
+  DashboardStats,
+} from "@/types";
+
+export const dynamic =
+  "force-dynamic";
+
+const ADMIN_EMAIL =
+  "obedyameogo4@gmail.com";
+
+export default async function AdminDashboardPage() {
+  const { userId } =
+    await auth();
+
+  if (!userId) {
+    redirect("/");
   }
 
+  const user =
+    await currentUser();
+
+  const email =
+    user?.primaryEmailAddress
+      ?.emailAddress;
+
+  if (email !== ADMIN_EMAIL) {
+    redirect("/");
+  }
+
+  let stats: DashboardStats =
+    {
+      total_projects: 0,
+      active_subscribers: 0,
+      total_leads: 0,
+      total_articles: 0,
+      total_materials: 0,
+      system_status:
+        "DEGRADED",
+    };
+
+  try {
+    stats =
+      await getDashboardStats();
+  } catch (error) {
+    console.error(
+      "Dashboard stats fetch failed:",
+      error,
+    );
+  }
+
+  const isOperational =
+    stats.system_status ===
+    "Operational";
+
   return (
-    <div className="min-h-screen bg-[#f5f5f5] font-sans text-[#050505] mt-16">
-      <div className="mx-auto max-w-7xl px-6 py-16">
+    <div className="min-h-screen bg-[#f5f5f5] pt-24 text-[#050505]">
+      <div className="mx-auto max-w-7xl px-6 py-12">
+
         {/* HEADER */}
-        <div className="mb-16 flex flex-col items-start justify-between gap-8 border-b border-neutral-300 pb-10 md:flex-row md:items-end">
-          <div className="space-y-2">
+        <div className="mb-16 flex flex-col gap-8 border-b border-neutral-300 pb-10 lg:flex-row lg:items-end lg:justify-between">
+
+          {/* LEFT */}
+          <div className="space-y-3">
+
             <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+
               <Activity className="h-3 w-3 animate-pulse" />
+
               Root Access Verified
+
             </div>
 
-            <h1 className="font-mono text-4xl font-bold uppercase tracking-tighter">
+            <h1 className="font-mono text-4xl font-bold uppercase tracking-tighter md:text-5xl">
+
               Command_Center
+
             </h1>
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-neutral-400">
-              <p>Operator: {user?.primaryEmailAddress?.emailAddress}</p>
-              <div className="hidden h-3 w-px bg-neutral-300 sm:block" />
-              <div className="flex items-center gap-2">
-                <Radio
-                  className={`h-3 w-3 ${
-                    stats.status === "ONLINE"
-                      ? "text-green-600 animate-pulse"
-                      : stats.status === "SYNCING"
-                      ? "text-amber-500 animate-spin"
-                      : "text-red-500"
-                  }`}
-                />
-                <span>
-                  Telemetry:{" "}
-                  <span
-                    className={
-                      stats.status === "ONLINE"
-                        ? "text-green-600 font-bold"
-                        : stats.status === "SYNCING"
-                        ? "text-amber-500"
-                        : "text-red-500 font-bold"
-                    }
-                  >
-                    {stats.status}
-                  </span>
+            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-neutral-400">
+
+              <Radio
+                className={`h-3 w-3 ${
+                  isOperational
+                    ? "animate-pulse text-green-600"
+                    : "text-red-500"
+                }`}
+              />
+
+              <span>
+                Telemetry:
+
+                <span
+                  className={
+                    isOperational
+                      ? "ml-2 font-bold text-green-600"
+                      : "ml-2 font-bold text-red-500"
+                  }
+                >
+                  {
+                    stats.system_status
+                  }
                 </span>
-              </div>
+
+              </span>
+
             </div>
+
           </div>
 
-          <div className="flex flex-wrap gap-4">
-            {/* BLOG BUTTON */}
+          {/* ACTIONS */}
+          <div className="flex flex-wrap items-center gap-3">
+
             <Button
               asChild
-              className="
-                h-11
-                rounded-none
-                border
-                border-[#050505]
-                bg-[#050505]
-                px-6
-                font-mono
-                text-[10px]
-                uppercase
-                tracking-[0.18em]
-                text-[#f5f5f5]
-                transition-all
-                duration-300
-                hover:border-neutral-800
-                hover:bg-neutral-800
-                active:scale-[0.98]
-              "
+              className="h-11 rounded-none border border-black bg-black px-6 font-mono text-[10px] uppercase tracking-[0.2em] text-white hover:bg-neutral-800"
             >
-              <Link href="/admin/dashboard/blog/new">
+              <Link href="/admin/dashboard/posts/new">
+
                 <Plus className="mr-2 h-4 w-4" />
-                Initialize_New_Post
+
+                New Post
+
               </Link>
             </Button>
 
-            {/* CREATE PROJECT */}
-            <CreateProjectForm onRefresh={fetchDashboardStats} />
+            <CreateProjectForm />
 
-            {/* MOUNTED COURSE MATERIALS CONTROLLER */}
-            <CreateMaterialForm onRefresh={fetchDashboardStats} />
+            <CreateMaterialForm />
 
-            {/* SIGN OUT */}
             <SignOutButton>
+
               <Button
                 variant="outline"
-                className="
-                  h-11
-                  rounded-none
-                  border-neutral-300
-                  bg-transparent
-                  px-6
-                  font-mono
-                  text-[10px]
-                  uppercase
-                  tracking-widest
-                  transition-all
-                  hover:border-red-200
-                  hover:bg-red-50
-                  hover:text-red-600
-                "
+                className="h-11 rounded-none border border-neutral-300 bg-white px-6 font-mono text-[10px] uppercase tracking-[0.2em] hover:bg-neutral-100"
               >
+
                 <LogOut className="mr-2 h-4 w-4" />
-                Terminate_Session
+
+                Terminate Session
+
               </Button>
+
             </SignOutButton>
+
           </div>
+
         </div>
 
-        {/* UPDATED STATS GRID WITH YOUR SPECIFIC TECHNICAL METRICS */}
-        <div className="mb-20 grid grid-cols-1 gap-0 border border-neutral-300 bg-neutral-300 shadow-sm md:grid-cols-2 lg:grid-cols-4">
-          <DashboardStatCard
-            title="Total_Projects"
-            value={stats.projects.toString()}
-            icon={<Database className="h-4 w-4" />}
+        {/* STATS */}
+        <div className="mb-20 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+
+          <StatCard
+            title="Projects"
+            value={
+              stats.total_projects
+            }
+            icon={
+              <Database className="h-4 w-4" />
+            }
           />
 
-          <DashboardStatCard
-            title="Log_Entries"
-            value={stats.posts.toString()}
-            icon={<FileText className="h-4 w-4" />}
+          <StatCard
+            title="Posts"
+            value={
+              stats.total_articles
+            }
+            icon={
+              <FileText className="h-4 w-4" />
+            }
           />
 
-          <DashboardStatCard
-            title="Active_Nodes"
-            value={stats.subscribers.toString()}
-            icon={<Users className="h-4 w-4" />}
+          <StatCard
+            title="Subscribers"
+            value={
+              stats.active_subscribers
+            }
+            icon={
+              <Users className="h-4 w-4" />
+            }
           />
 
-          <DashboardStatCard
-            title="Inbound_Signals"
-            value={stats.leads.toString()}
-            icon={<Mail className="h-4 w-4" />}
+          <StatCard
+            title="Leads"
+            value={
+              stats.total_leads
+            }
+            icon={
+              <Mail className="h-4 w-4" />
+            }
           />
+
+          <StatCard
+            title="Materials"
+            value={
+              stats.total_materials
+            }
+            icon={
+              <BookOpen className="h-4 w-4" />
+            }
+          />
+
         </div>
 
         {/* TABLES */}
-        <div className="grid grid-cols-1 gap-20">
-          {/* BLOG */}
-          <div className="space-y-8">
-            <div className="flex items-center gap-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
-                Research_Repository
-              </h2>
-              <div className="h-px grow bg-neutral-300" />
-            </div>
-            <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
-              <BlogTable onRefresh={fetchDashboardStats} />
-            </div>
-          </div>
+        <div className="space-y-16">
 
-          {/* LEADS */}
-          <div className="space-y-8">
-            <div className="flex items-center gap-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
-                Inbound_Communications
-              </h2>
-              <div className="h-px grow bg-neutral-300" />
-            </div>
-            <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
-              <LeadsTable />
-            </div>
-          </div>
+          <PostsTable />
 
-          {/* SUBSCRIBERS */}
-          <div className="space-y-8">
-            <div className="flex items-center gap-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
-                Subscriber_Registry
-              </h2>
-              <div className="h-px grow bg-neutral-300" />
-            </div>
-            <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
-              <SubscriberTable />
-            </div>
-          </div>
+          <ProjectsTable />
 
-          {/* MATERIALS ARCHIVE REGISTRY */}
-          <div className="space-y-8 mt-20">
-            <div className="flex items-center gap-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[#050505]">
-                AI_Materials_Directory
-              </h2>
-              <div className="h-px grow bg-neutral-300" />
-            </div>
+          <MaterialsTable />
 
-            <div className="overflow-hidden rounded-none border border-neutral-300 bg-white shadow-sm">
-              <MaterialsTable onRefresh={fetchDashboardStats} />
-            </div>
-          </div>
+          <LeadsTable />
+
+          <SubscribersTable />
+
         </div>
+
       </div>
     </div>
   );
 }
 
-function DashboardStatCard({
+function StatCard({
   title,
   value,
   icon,
-  statusColor = "text-[#050505]",
 }: {
   title: string;
-  value: string;
+  value: number;
   icon: React.ReactNode;
-  statusColor?: string;
 }) {
   return (
-    <div className="group flex flex-col gap-6 bg-[#f5f5f5] p-8 transition-colors hover:bg-white">
-      <div className="flex items-center justify-between text-neutral-400">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] transition-colors group-hover:text-neutral-900">
+    <div className="border border-neutral-300 bg-white p-6 transition-all hover:border-black">
+
+      <div className="mb-4 flex items-center justify-between">
+
+        <span className="font-mono text-xs uppercase tracking-widest text-neutral-500">
+
           {title}
+
         </span>
-        <div className="border border-neutral-200 p-2 transition-colors group-hover:border-neutral-900">
-          {icon}
-        </div>
+
+        {icon}
+
       </div>
-      <div
-        className={`font-mono text-4xl font-bold tracking-tighter ${statusColor}`}
-      >
+
+      <div className="font-mono text-4xl font-bold">
+
         {value}
+
       </div>
+
     </div>
   );
 }
+
+
+
+
+// // src/app/admin/dashboard/page.tsx
+
+// import {
+//   auth,
+//   currentUser,
+// } from "@clerk/nextjs/server";
+
+// import { redirect } from "next/navigation";
+
+// import Link from "next/link";
+
+// import {
+//   Database,
+//   Users,
+//   Mail,
+//   FileText,
+//   Activity,
+//   Radio,
+//   Plus,
+//   LogOut,
+//   BookOpen,
+// } from "lucide-react";
+
+// import { SignOutButton } from "@clerk/nextjs";
+
+// import { Button } from "@/components/ui/button";
+
+// import CreateProjectForm from "@/components/admin/CreateProjectForm";
+
+// import CreateMaterialForm from "@/components/admin/CreateMaterialForm";
+
+// import SubscriberTable from "@/components/admin/SubscriberTable";
+
+// import LeadsTable from "@/components/admin/LeadsTable";
+
+// import BlogTable from "@/components/admin/BlogTable";
+
+// import MaterialsTable from "@/components/admin/MaterialsTable";
+
+// import {
+//   getDashboardStats,
+//   DashboardStats,
+// } from "@/lib/server-api";
+
+// export const dynamic =
+//   "force-dynamic";
+
+// const ADMIN_EMAIL =
+//   "obedyameogo4@gmail.com";
+
+// /* =========================================================
+//    PAGE
+// ========================================================= */
+
+// export default async function AdminDashboardPage() {
+//   const { userId } = await auth();
+
+//   if (!userId) {
+//     redirect("/");
+//   }
+
+//   const user =
+//     await currentUser();
+
+//   const email =
+//     user?.primaryEmailAddress
+//       ?.emailAddress;
+
+//   if (email !== ADMIN_EMAIL) {
+//     redirect("/");
+//   }
+
+//   let stats: DashboardStats = {
+//     total_projects: 0,
+//     active_subscribers: 0,
+//     total_leads: 0,
+//     total_articles: 0,
+//     total_materials: 0,
+//     system_status: "DEGRADED",
+//   };
+
+//   try {
+//     stats =
+//       await getDashboardStats();
+//   } catch (error) {
+//     console.error(
+//       "Dashboard stats fetch failed:",
+//       error,
+//     );
+//   }
+
+//   const isOperational =
+//     stats.system_status ===
+//     "Operational";
+
+//   return (
+//     <div className="min-h-screen bg-[#f5f5f5] pt-24 text-[#050505]">
+//       <div className="mx-auto max-w-7xl px-6 py-12">
+
+//         {/* =========================================================
+//             HEADER
+//         ========================================================= */}
+
+//         <div className="mb-16 flex flex-col gap-8 border-b border-neutral-300 pb-10 lg:flex-row lg:items-end lg:justify-between">
+
+//           {/* LEFT */}
+//           <div className="space-y-3">
+
+//             <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+
+//               <Activity className="h-3 w-3 animate-pulse" />
+
+//               Root Access Verified
+
+//             </div>
+
+//             <h1 className="font-mono text-4xl font-bold uppercase tracking-tighter md:text-5xl">
+
+//               Command_Center
+
+//             </h1>
+
+//             <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-neutral-400">
+
+//               <Radio
+//                 className={`h-3 w-3 ${
+//                   isOperational
+//                     ? "animate-pulse text-green-600"
+//                     : "text-red-500"
+//                 }`}
+//               />
+
+//               <span>
+//                 Telemetry:{" "}
+
+//                 <span
+//                   className={
+//                     isOperational
+//                       ? "font-bold text-green-600"
+//                       : "font-bold text-red-500"
+//                   }
+//                 >
+//                   {stats.system_status}
+//                 </span>
+//               </span>
+
+//             </div>
+
+//           </div>
+
+//           {/* =========================================================
+//               ACTIONS
+//           ========================================================= */}
+
+//           <div className="flex flex-wrap items-center gap-3">
+
+//             {/* NEW POST */}
+//             <Button
+//               asChild
+//               className="h-11 rounded-none border border-black bg-black px-6 font-mono text-[10px] uppercase tracking-[0.2em] text-white hover:bg-neutral-800"
+//             >
+//               <Link href="/admin/dashboard/blog/new">
+
+//                 <Plus className="mr-2 h-4 w-4" />
+
+//                 New Post
+
+//               </Link>
+//             </Button>
+
+//             {/* NEW PROJECT */}
+//             <CreateProjectForm />
+
+//             {/* NEW MATERIAL */}
+//             <CreateMaterialForm />
+
+//             {/* LOGOUT */}
+//             <SignOutButton>
+
+//               <Button
+//                 variant="outline"
+//                 className="h-11 rounded-none border border-neutral-300 bg-white px-6 font-mono text-[10px] uppercase tracking-[0.2em] hover:bg-neutral-100"
+//               >
+
+//                 <LogOut className="mr-2 h-4 w-4" />
+
+//                 Terminate Session
+
+//               </Button>
+
+//             </SignOutButton>
+
+//           </div>
+
+//         </div>
+
+//         {/* =========================================================
+//             STATS
+//         ========================================================= */}
+
+//         <div className="mb-20 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+
+//           <StatCard
+//             title="Projects"
+//             value={stats.total_projects}
+//             icon={
+//               <Database className="h-4 w-4" />
+//             }
+//           />
+
+//           <StatCard
+//             title="Posts"
+//             value={stats.total_articles}
+//             icon={
+//               <FileText className="h-4 w-4" />
+//             }
+//           />
+
+//           <StatCard
+//             title="Subscribers"
+//             value={
+//               stats.active_subscribers
+//             }
+//             icon={
+//               <Users className="h-4 w-4" />
+//             }
+//           />
+
+//           <StatCard
+//             title="Leads"
+//             value={stats.total_leads}
+//             icon={
+//               <Mail className="h-4 w-4" />
+//             }
+//           />
+
+//           <StatCard
+//             title="Materials"
+//             value={
+//               stats.total_materials
+//             }
+//             icon={
+//               <BookOpen className="h-4 w-4" />
+//             }
+//           />
+
+//         </div>
+
+//         {/* =========================================================
+//             TABLES
+//         ========================================================= */}
+
+//         <div className="space-y-16">
+
+//           <BlogTable />
+
+//           <MaterialsTable />
+
+//           <LeadsTable />
+
+//           <SubscriberTable />
+
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+// /* =========================================================
+//    STAT CARD
+// ========================================================= */
+
+// function StatCard({
+//   title,
+//   value,
+//   icon,
+// }: {
+//   title: string;
+//   value: number;
+//   icon: React.ReactNode;
+// }) {
+//   return (
+//     <div className="border border-neutral-300 bg-white p-6 transition-all hover:border-black">
+
+//       <div className="mb-4 flex items-center justify-between">
+
+//         <span className="font-mono text-xs uppercase tracking-widest text-neutral-500">
+
+//           {title}
+
+//         </span>
+
+//         {icon}
+
+//       </div>
+
+//       <div className="font-mono text-4xl font-bold">
+
+//         {value}
+
+//       </div>
+
+//     </div>
+//   );
+// }
