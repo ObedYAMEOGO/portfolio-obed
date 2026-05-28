@@ -8,14 +8,7 @@ import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 export default function ManifestoSection() {
   return (
     <section
-      className="
-        relative
-        w-full
-        overflow-hidden
-        bg-neutral-950
-        py-20
-        md:py-28
-      "
+      className="relative w-full overflow-hidden bg-neutral-950 py-20 md:py-28"
     >
       {/* Dotted Glow Background Layer */}
       <DottedGlowBackground
@@ -49,27 +42,19 @@ export default function ManifestoSection() {
       {/* Main Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[160px_1fr]">
+
           {/* SIDE LABEL */}
           <aside className="hidden lg:block">
-            <p
-              className="
-                sticky
-                top-32
-                text-[10px]
-                font-semibold
-                uppercase
-                tracking-[0.3em]
-                text-neutral-400
-              "
-            >
+            <p className="sticky top-32 text-[10px] font-semibold uppercase tracking-[0.3em] text-neutral-400">
               Philosophy
             </p>
           </aside>
 
           {/* CONTENT */}
           <div className="space-y-10">
+
             {/* EYEBROW */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center md:justify-start gap-3">
               <div className="h-px w-6 bg-neutral-700" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neutral-400">
                 Commit_Message
@@ -86,7 +71,7 @@ export default function ManifestoSection() {
                 italic
                 leading-[1.1]
                 tracking-[-0.02em]
-                 text-[#c17650]
+                text-[#c17650]
                 sm:text-[2.5rem]
                 md:text-[3rem]
               "
@@ -94,8 +79,7 @@ export default function ManifestoSection() {
               {" "}
               &quot;I don&apos;t only experiment with AI tools.
               <br />
-              <span
-                className="not-italic text-white">
+              <span className="not-italic text-white">
                 {" "}
                 I build the tools.
               </span>
@@ -116,7 +100,7 @@ export default function ManifestoSection() {
               "
             >
               {/* LEFT */}
-              <p className="text-[16px] font-semibold leading-[1.85] text-neutral-300">
+              <p className="text-[16px] font-semibold leading-[1.85] text-neutral-300 text-center md:text-left">
                 I&apos;m an engineer focused on understanding what it takes to
                 make AI systems actually deliver results in the real world. My
                 skills range from rigorous problem-solving and architecting
@@ -126,7 +110,7 @@ export default function ManifestoSection() {
 
               {/* RIGHT */}
               <div className="flex flex-col justify-between gap-8">
-                <p className="text-[16px] font-semibold leading-[1.85] text-neutral-300">
+                <p className="text-[16px] font-semibold leading-[1.85] text-neutral-300 text-center md:text-left">
                   I specialize in Machine Learning Engineering, autonomous LLM
                   systems, retrieval architectures, and RAG infrastructures
                   solving the hard problems of scaling, latency, orchestration,
@@ -141,6 +125,8 @@ export default function ManifestoSection() {
                     group
                     inline-flex
                     w-fit
+                    self-center
+                    md:self-start
                     items-center
                     gap-2
                     rounded-full
@@ -173,6 +159,7 @@ export default function ManifestoSection() {
                 </Link>
               </div>
             </div>
+
           </div>
         </div>
       </div>

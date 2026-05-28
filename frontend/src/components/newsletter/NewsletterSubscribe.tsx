@@ -72,7 +72,7 @@ export default function NewsletterSubscribe() {
             disabled={pending}
             className="
               inline-flex items-center justify-center gap-2 rounded-full
-              bg-[#9b5c3d] px-6 py-3 text-[12px] font-semibold uppercase
+              bg-[#c17650] px-6 py-3 text-[12px] font-semibold uppercase
               text-white shadow-xs transition-all duration-300
               hover:bg-[#7f4b31] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
             "

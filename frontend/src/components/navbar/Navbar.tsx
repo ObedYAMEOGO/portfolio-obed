@@ -78,7 +78,7 @@ export default function Navbar() {
             items-center
             justify-center
             rounded-full
-            bg-[#9b5c3d]
+            bg-[#c17650]
             px-6
             py-3
             text-[12px]
