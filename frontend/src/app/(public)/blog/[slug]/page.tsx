@@ -165,7 +165,7 @@ export default async function PostPage({ params }: PostPageProps) {
             alt={alt || ""}
             width={700}
             height={400}
-            className="rounded-[5px] w-full h-auto shadow-md"
+            className="rounded-[1px] w-full h-auto shadow-md"
             unoptimized={
               !imageSrc.startsWith("/") && !imageSrc.startsWith("http")
             }
