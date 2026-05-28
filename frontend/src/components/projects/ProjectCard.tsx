@@ -72,23 +72,37 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
 
         <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-7 lg:p-8 pb-6 md:pb-8 lg:pb-10">
 
-          {/* TOP ROW: category + github (github icon always visible) */}
+          {/* TOP ROW: category + live (mobile) / github (desktop) */}
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all duration-300 group-hover:bg-black/60 group-hover:border-white/30 group-hover:scale-105">
               Featured Project
             </span>
 
+            {/* MOBILE: View Live */}
+            {project.live_url && (
+              <a
+                href={project.live_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="md:hidden flex items-center gap-1.5 text-[11px] font-medium text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all duration-300 hover:bg-black/60 hover:border-white/30 active:scale-95"
+              >
+                View Live
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            )}
+
+            {/* DESKTOP: Github */}
             {project.github_url && (
               <a
                 href={project.github_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub repository"
-                className="flex items-center gap-1.5 text-[11px] font-medium text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all duration-300 hover:bg-black/60 hover:border-white/30 hover:scale-105 hover:gap-2"
+                className="hidden md:flex items-center gap-1.5 text-[11px] font-medium text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all duration-300 hover:bg-black/60 hover:border-white/30 hover:scale-105 hover:gap-2"
               >
                 <Github className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Source Code</span>
-                <span className="sm:hidden">Source</span>
+                Source Code
               </a>
             )}
           </div>
@@ -97,27 +111,11 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
           <div className="space-y-3 transform translate-y-2 transition-all duration-500 ease-out group-hover:translate-y-0">
 
             {/* TITLE + MOBILE LIVE BUTTON ROW */}
-            <div className="flex items-end justify-between gap-2">
-              <div className="relative inline-block">
-                <h3 className="text-[20px] sm:text-[22px] md:text-[24px] lg:text-[26px] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-lg transition-all duration-300">
-                  {project.title}
-                </h3>
-                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-white to-white/50 transition-all duration-500 group-hover:w-full" />
-              </div>
-
-              {/* MOBILE LIVE BUTTON — always visible, bottom-right of title row */}
-              {project.live_url && (
-                <a
-                  href={project.live_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="md:hidden shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-900 shadow-lg transition-all duration-200 active:scale-95"
-                >
-                  View Live
-                  <ArrowUpRight className="h-3 w-3" />
-                </a>
-              )}
+            <div className="relative inline-block">
+              <h3 className="text-[20px] sm:text-[22px] md:text-[24px] lg:text-[26px] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-lg transition-all duration-300">
+                {project.title}
+              </h3>
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-white to-white/50 transition-all duration-500 group-hover:w-full" />
             </div>
 
             {/* DESCRIPTION */}
