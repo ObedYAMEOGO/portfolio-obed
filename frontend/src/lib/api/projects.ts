@@ -1,7 +1,3 @@
-// src/lib/api/projects.ts
-
-"use client";
-
 import api from "./index";
 
 import {
@@ -10,10 +6,62 @@ import {
 } from "@/types";
 
 /* =========================================================
-   CLIENT PROJECT API
+   PROJECTS API
 ========================================================= */
 
 export const projectsApi = {
+  /* ======================================================
+     GET ALL PROJECTS
+  ====================================================== */
+
+  async getAll(): Promise<
+    Project[]
+  > {
+    try {
+      const response =
+        await api.get(
+          "/admin/projects",
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to fetch projects:",
+        error,
+      );
+
+      throw error;
+    }
+  },
+
+  /* ======================================================
+     GET PROJECT BY ID
+  ====================================================== */
+
+  async getById(
+    id: number,
+  ): Promise<Project> {
+    try {
+      const response =
+        await api.get(
+          `/admin/projects/${id}`,
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to fetch project:",
+        error,
+      );
+
+      throw error;
+    }
+  },
+
+  /* ======================================================
+     CREATE PROJECT
+  ====================================================== */
+
   async create(
     data: ProjectCreate,
   ): Promise<Project> {
@@ -34,6 +82,10 @@ export const projectsApi = {
       throw error;
     }
   },
+
+  /* ======================================================
+     UPDATE PROJECT
+  ====================================================== */
 
   async update(
     id: number,
@@ -56,6 +108,10 @@ export const projectsApi = {
       throw error;
     }
   },
+
+  /* ======================================================
+     DELETE PROJECT
+  ====================================================== */
 
   async delete(
     id: number,
