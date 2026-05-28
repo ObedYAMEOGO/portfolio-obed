@@ -1,7 +1,10 @@
-from pydantic_settings import ( # type: ignore
+from functools import lru_cache
+from typing import Optional
+
+from pydantic_settings import (  # type: ignore
     BaseSettings,
     SettingsConfigDict,
-)  # type: ignore
+)
 
 
 class Settings(BaseSettings):
@@ -25,27 +28,27 @@ class Settings(BaseSettings):
     # RESEND / EMAIL
     # =========================================================
 
-    RESEND_API_KEY: str
+    RESEND_API_KEY: Optional[str] = None
 
-    EMAIL_FROM: str
+    EMAIL_FROM: Optional[str] = None
 
-    ADMIN_EMAIL: str
+    ADMIN_EMAIL: Optional[str] = None
 
     # =========================================================
     # CLERK
     # =========================================================
 
-    CLERK_SECRET_KEY: str
+    CLERK_SECRET_KEY: Optional[str] = None
 
-    CLERK_PUBLISHABLE_KEY: str
+    CLERK_PUBLISHABLE_KEY: Optional[str] = None
 
     # =========================================================
     # CLERK JWT VERIFICATION
     # =========================================================
 
-    CLERK_JWKS_URL: str
+    CLERK_JWKS_URL: Optional[str] = None
 
-    CLERK_ISSUER: str
+    CLERK_ISSUER: Optional[str] = None
 
     CLERK_JWT_AUDIENCE: str = "backend"
 
@@ -55,15 +58,15 @@ class Settings(BaseSettings):
 
     REDIS_URL: str = "redis://localhost:6379/0"
 
-    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
+    CELERY_BROKER_URL: Optional[str] = None
 
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND: Optional[str] = None
 
     # =========================================================
     # SECURITY
     # =========================================================
 
-    ADMIN_SECRET: str
+    ADMIN_SECRET: Optional[str] = None
 
     # =========================================================
     # CONFIG
@@ -72,7 +75,28 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",
+        case_sensitive=True,
     )
 
+    # =========================================================
+    # POST INIT
+    # =========================================================
 
-settings = Settings()
+    def model_post_init(self, __context) -> None:
+        """
+        Fallback Celery values to REDIS_URL
+        """
+
+        if not self.CELERY_BROKER_URL:
+            self.CELERY_BROKER_URL = self.REDIS_URL
+
+        if not self.CELERY_RESULT_BACKEND:
+            self.CELERY_RESULT_BACKEND = self.REDIS_URL
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+settings = get_settings()
