@@ -4,11 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { notFound } from "next/navigation";
 import type { Components } from "react-markdown";
 
-import {
-  ArrowLeft,
-  Clock,
-  CalendarDays,
-} from "lucide-react";
+import { ArrowLeft, Clock, CalendarDays } from "lucide-react";
 
 import { Post } from "@/types";
 
@@ -72,18 +68,52 @@ export default async function PostPage({ params }: PostPageProps) {
   const readingTime = calculateReadingTime(post.content || "");
 
   const markdownComponents: Components = {
-    h1: ({ children }) => <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mt-12 mb-6">{children}</h1>,
+    h1: ({ children }) => (
+      <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mt-12 mb-6">
+        {children}
+      </h1>
+    ),
     h2: ({ children }) => {
-      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
-      return <h2 id={id} className="text-3xl font-semibold text-neutral-800 mt-12 mb-4 pb-2 border-b border-neutral-200">{children}</h2>;
+      const id =
+        children
+          ?.toString()
+          .toLowerCase()
+          .replace(/[^\w]+/g, "-") || "";
+      return (
+        <h2
+          id={id}
+          className="text-3xl font-semibold text-neutral-800 mt-12 mb-4 pb-2 border-b border-neutral-200"
+        >
+          {children}
+        </h2>
+      );
     },
     h3: ({ children }) => {
-      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
-      return <h3 id={id} className="text-2xl font-semibold text-neutral-800 mt-8 mb-3">{children}</h3>;
+      const id =
+        children
+          ?.toString()
+          .toLowerCase()
+          .replace(/[^\w]+/g, "-") || "";
+      return (
+        <h3
+          id={id}
+          className="text-2xl font-semibold text-neutral-800 mt-8 mb-3"
+        >
+          {children}
+        </h3>
+      );
     },
-    h4: ({ children }) => <h4 className="text-xl font-semibold text-neutral-800 mt-6 mb-3">{children}</h4>,
-    p: ({ children }) => <p className="text-[16px] leading-[1.8] text-neutral-700 mb-6">{children}</p>,
-    
+    h4: ({ children }) => (
+      <h4 className="text-xl font-semibold text-neutral-800 mt-6 mb-3">
+        {children}
+      </h4>
+    ),
+    p: ({ children }) => (
+      <p className="text-[16px] leading-[1.8] text-neutral-700 mb-6">
+        {children}
+      </p>
+    ),
+
     pre: ({ children }) => (
       <div className="overflow-hidden rounded-xl border border-neutral-200 bg-[#0a0a0a] shadow-lg my-8">
         <div className="flex items-center gap-2 border-b border-neutral-800 bg-[#161616] px-5 py-3">
@@ -101,8 +131,10 @@ export default async function PostPage({ params }: PostPageProps) {
     ),
 
     code: ({ node, className, children, ...props }) => {
-      const isInline = !className || (!className.includes('language-') && String(children).length < 100);
-      
+      const isInline =
+        !className ||
+        (!className.includes("language-") && String(children).length < 100);
+
       if (isInline) {
         return (
           <code
@@ -113,7 +145,7 @@ export default async function PostPage({ params }: PostPageProps) {
           </code>
         );
       }
-      
+
       return (
         <code
           className={`font-mono text-[14px] text-neutral-100 ${className || ""}`}
@@ -127,14 +159,16 @@ export default async function PostPage({ params }: PostPageProps) {
     img: ({ src, alt }) => {
       const imageSrc = src ? String(src) : "";
       return (
-        <div className="relative my-10 mx-auto max-w-2xl">
+        <div className="relative my-10 w-full">
           <Image
             src={imageSrc}
             alt={alt || ""}
             width={700}
             height={400}
-            className="rounded-xl w-full h-auto shadow-md"
-            unoptimized={!imageSrc.startsWith('/') && !imageSrc.startsWith('http')}
+            className="rounded-[5px] w-full h-auto shadow-md"
+            unoptimized={
+              !imageSrc.startsWith("/") && !imageSrc.startsWith("http")
+            }
           />
           {alt && (
             <p className="text-center text-sm text-neutral-500 mt-3 italic">
@@ -146,20 +180,30 @@ export default async function PostPage({ params }: PostPageProps) {
     },
 
     a: ({ href, children }) => (
-      <a 
-        href={href} 
-        target="_blank" 
-        rel="noopener noreferrer" 
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         className="text-neutral-600 hover:text-neutral-900 underline decoration-neutral-300 hover:decoration-neutral-600 transition-colors"
       >
         {children}
       </a>
     ),
 
-    ul: ({ children }) => <ul className="list-disc pl-6 mb-6 space-y-2 text-neutral-700">{children}</ul>,
-    ol: ({ children }) => <ol className="list-decimal pl-6 mb-6 space-y-2 text-neutral-700">{children}</ol>,
-    li: ({ children }) => <li className="text-[16px] leading-[1.8]">{children}</li>,
-    
+    ul: ({ children }) => (
+      <ul className="list-disc pl-6 mb-6 space-y-2 text-neutral-700">
+        {children}
+      </ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="list-decimal pl-6 mb-6 space-y-2 text-neutral-700">
+        {children}
+      </ol>
+    ),
+    li: ({ children }) => (
+      <li className="text-[16px] leading-[1.8]">{children}</li>
+    ),
+
     blockquote: ({ children }) => (
       <blockquote className="border-l-4 border-neutral-300 pl-6 my-8 py-2 bg-neutral-50 rounded-r-xl italic text-neutral-600">
         {children}
@@ -167,7 +211,7 @@ export default async function PostPage({ params }: PostPageProps) {
     ),
 
     hr: () => <hr className="my-12 border-neutral-200" />,
-    
+
     table: ({ children }) => (
       <div className="overflow-x-auto my-8">
         <table className="min-w-full border-collapse border border-neutral-200 rounded-lg">
@@ -175,15 +219,21 @@ export default async function PostPage({ params }: PostPageProps) {
         </table>
       </div>
     ),
-    th: ({ children }) => <th className="border border-neutral-200 bg-neutral-50 px-4 py-3 text-left font-semibold text-neutral-800">{children}</th>,
-    td: ({ children }) => <td className="border border-neutral-200 px-4 py-3 text-neutral-700">{children}</td>,
+    th: ({ children }) => (
+      <th className="border border-neutral-200 bg-neutral-50 px-4 py-3 text-left font-semibold text-neutral-800">
+        {children}
+      </th>
+    ),
+    td: ({ children }) => (
+      <td className="border border-neutral-200 px-4 py-3 text-neutral-700">
+        {children}
+      </td>
+    ),
   };
 
   return (
     <div className="min-h-screen bg-white">
-      
       <main className="mx-auto max-w-4xl px-6 pb-32 pt-28">
-
         {/* =========================================================
             BACK BUTTON
         ========================================================= */}
@@ -329,7 +379,7 @@ export default async function PostPage({ params }: PostPageProps) {
             ARTICLE CONTENT
         ========================================================= */}
 
-        <article className="prose prose-lg max-w-none">
+        <article className="prose prose-lg max-w-none px-8 md:px-16 [&_img]:-mx-8! [&_img]:md:-mx-16! [&_img]:w-[calc(100%+4rem)]! [&_img]:md:w-[calc(100%+8rem)]!">
           <ReactMarkdown components={markdownComponents}>
             {post.content}
           </ReactMarkdown>
@@ -340,7 +390,6 @@ export default async function PostPage({ params }: PostPageProps) {
         ========================================================= */}
 
         <div className="mt-20 space-y-8">
-          
           {/* Divider */}
           <div className="border-t border-neutral-200" />
 
@@ -372,8 +421,9 @@ export default async function PostPage({ params }: PostPageProps) {
               </div>
 
               <p className="max-w-2xl text-[14px] leading-relaxed text-neutral-600">
-                Building scalable intelligent systems, machine learning infrastructure,
-                and production AI architectures. Passionate about bridging research and engineering.
+                Building scalable intelligent systems, machine learning
+                infrastructure, and production AI architectures. Passionate
+                about bridging research and engineering.
               </p>
             </div>
 
@@ -388,12 +438,11 @@ export default async function PostPage({ params }: PostPageProps) {
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                 Share this article
               </p>
-              
+
               <ShareButtons />
             </div>
           </div>
         </div>
-
       </main>
     </div>
   );
