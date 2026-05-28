@@ -78,14 +78,14 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
               Featured Project
             </span>
 
-            {/* MOBILE: View Live */}
+            {/* MOBILE: View Live — white pill */}
             {project.live_url && (
               <a
                 href={project.live_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="md:hidden flex items-center gap-1.5 text-[11px] font-medium text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all duration-300 hover:bg-black/60 hover:border-white/30 active:scale-95"
+                className="md:hidden flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-900 bg-white px-3 py-1.5 rounded-full shadow-lg transition-all duration-300 hover:bg-neutral-100 active:scale-95"
               >
                 View Live
                 <ArrowUpRight className="h-3.5 w-3.5" />
@@ -110,7 +110,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
           {/* BOTTOM CONTENT */}
           <div className="space-y-3 transform translate-y-2 transition-all duration-500 ease-out group-hover:translate-y-0">
 
-            {/* TITLE + MOBILE LIVE BUTTON ROW */}
+            {/* TITLE */}
             <div className="relative inline-block">
               <h3 className="text-[20px] sm:text-[22px] md:text-[24px] lg:text-[26px] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-lg transition-all duration-300">
                 {project.title}
