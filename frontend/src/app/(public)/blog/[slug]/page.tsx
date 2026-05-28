@@ -82,7 +82,7 @@ export default async function PostPage({ params }: PostPageProps) {
       return <h3 id={id} className="text-2xl font-semibold text-neutral-800 mt-8 mb-3">{children}</h3>;
     },
     h4: ({ children }) => <h4 className="text-xl font-semibold text-neutral-800 mt-6 mb-3">{children}</h4>,
-    p: ({ children }) => <p className="text-[16px] leading-[1.8] text-neutral-700 mb-6 text-justify">{children}</p>,
+    p: ({ children }) => <p className="text-[16px] leading-[1.8] text-neutral-700 mb-6">{children}</p>,
     
     pre: ({ children }) => (
       <div className="overflow-hidden rounded-xl border border-neutral-200 bg-[#0a0a0a] shadow-lg my-8">

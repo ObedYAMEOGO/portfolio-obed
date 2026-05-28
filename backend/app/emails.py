@@ -93,7 +93,6 @@ def base_wrapper(
               "
             >
 
-              <!-- HEADER -->
               <tr>
                 <td style="background:#111;padding:20px 40px;">
 
@@ -119,7 +118,6 @@ def base_wrapper(
 
               {content}
 
-              <!-- FOOTER -->
               <tr>
                 <td style="
                   padding:24px 40px;
@@ -239,7 +237,7 @@ def send_welcome_email(
 
     resend.Emails.send(
         {
-            "from": settings.EMAIL_FROM,
+            "from": str(settings.EMAIL_FROM),
             "to": [to_email],
             "subject": "Welcome to the AI Engineering Newsletter",
             "html": base_wrapper(
@@ -306,8 +304,8 @@ def send_lead_notification(
 
     resend.Emails.send(
         {
-            "from": settings.EMAIL_FROM,
-            "to": [settings.ADMIN_EMAIL],
+            "from": str(settings.EMAIL_FROM),
+            "to": [str(settings.ADMIN_EMAIL)],
             "subject": f"New message from {lead_name}",
             "html": base_wrapper(
                 content,
@@ -365,7 +363,7 @@ def broadcast_new_post(
 
         resend.Emails.send(
             {
-                "from": settings.EMAIL_FROM,
+                "from": str(settings.EMAIL_FROM),
                 "to": [email],
                 "subject": f"New Post: {post_title}",
                 "html": base_wrapper(
@@ -426,7 +424,7 @@ def broadcast_new_project(
 
         resend.Emails.send(
             {
-                "from": settings.EMAIL_FROM,
+                "from": str(settings.EMAIL_FROM),
                 "to": [email],
                 "subject": f"New Project: {project_title}",
                 "html": base_wrapper(
@@ -487,7 +485,7 @@ def broadcast_new_material(
 
         resend.Emails.send(
             {
-                "from": settings.EMAIL_FROM,
+                "from": str(settings.EMAIL_FROM),
                 "to": [email],
                 "subject": f"New Material: {material_title}",
                 "html": base_wrapper(

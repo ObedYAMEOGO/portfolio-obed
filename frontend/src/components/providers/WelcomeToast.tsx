@@ -27,7 +27,7 @@ export default function WelcomeToast() {
         right-0
         top-[calc(100%+8px)]
         z-50
-        w-[272px]
+        w-68
         rounded-xl
         border
         border-neutral-200/80
