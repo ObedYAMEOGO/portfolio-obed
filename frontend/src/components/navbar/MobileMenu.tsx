@@ -39,9 +39,9 @@ export default function MobileMenu({ items }: MobileMenuProps) {
     setOpen(false);
   }, [pathname]);
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
+
+  const closeMenu = () => setTimeout(() => setOpen(false), 100);
 
   return (
     <div className="md:hidden">
@@ -134,15 +134,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
           </div>
 
           {/* NAVIGATION */}
-          <div
-            className="
-              flex
-              flex-col
-              gap-1
-              px-6
-              py-8
-            "
-          >
+          <div className="flex flex-col gap-1 px-6 py-8">
             {items.map((item) => {
               const isActive = pathname === item.path;
 
@@ -150,7 +142,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                 <Link
                   key={item.path}
                   href={item.path}
-                  onClick={() => setOpen(false)}
+                  onClick={closeMenu}
                   className={cn(
                     `
                       relative
@@ -163,15 +155,8 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                       duration-200
                     `,
                     isActive
-                      ? `
-                        bg-neutral-100
-                        text-neutral-900
-                      `
-                      : `
-                        text-neutral-500
-                        hover:bg-neutral-50
-                        hover:text-neutral-900
-                      `,
+                      ? "bg-neutral-100 text-neutral-900"
+                      : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900",
                   )}
                 >
                   {item.name}
@@ -188,7 +173,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
             {/* CONTACT */}
             <Link
               href="/contact"
-              onClick={() => setOpen(false)}
+              onClick={closeMenu}
               className="
                 flex
                 w-full
@@ -243,18 +228,10 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                   </button>
                 </SignInButton>
               ) : (
-                <div
-                  className="
-                    flex
-                    items-center
-                    justify-center
-                  "
-                >
+                <div className="flex items-center justify-center">
                   <UserButton
                     appearance={{
-                      elements: {
-                        avatarBox: "h-10 w-10",
-                      },
+                      elements: { avatarBox: "h-10 w-10" },
                     }}
                   />
                 </div>
@@ -262,14 +239,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
           </div>
 
           {/* SOCIALS */}
-          <div
-            className="
-              border-t
-              border-neutral-200
-              px-6
-              py-6
-            "
-          >
+          <div className="border-t border-neutral-200 px-6 py-6">
             <p
               className="
                 mb-4

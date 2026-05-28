@@ -20,3 +20,4 @@ export interface PostCreate {
   feature_image_url?: string;
   is_published: boolean;
 }
+
