@@ -402,7 +402,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                     >
                       {isTechExpanded
                         ? "Show less"
-                        : `+${project.tech_stack.length - 5} more`}
+                        : `+${project.tech_stack.length - 4} more`}
                     </button>
                   )}
                 </div>
