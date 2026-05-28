@@ -14,19 +14,37 @@ export const leadsApi = {
   async getAll(): Promise<
     Lead[]
   > {
-    const response =
-      await api.get(
-        "/admin/leads",
+    try {
+      const response =
+        await api.get(
+          "/admin/leads",
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to fetch leads:",
+        error,
       );
 
-    return response.data;
+      throw error;
+    }
   },
 
   async delete(
     id: number,
   ): Promise<void> {
-    await api.delete(
-      `/admin/leads/${id}`,
-    );
+    try {
+      await api.delete(
+        `/admin/leads/${id}`,
+      );
+    } catch (error) {
+      console.error(
+        "Failed to delete lead:",
+        error,
+      );
+
+      throw error;
+    }
   },
 };

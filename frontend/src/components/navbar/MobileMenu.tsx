@@ -2,33 +2,25 @@
 
 import Link from "next/link";
 
-import {
-  usePathname,
-} from "next/navigation";
+import { usePathname } from "next/navigation";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  Menu,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 
-import {
-  cn,
-} from "@/lib/utils";
+import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
+
+import { cn } from "@/lib/utils";
 
 import {
   Sheet,
   SheetContent,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
 
-import {
-  Button,
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 interface NavItem {
   name: string;
@@ -42,17 +34,21 @@ interface MobileMenuProps {
 export default function MobileMenu({
   items,
 }: MobileMenuProps) {
-  const pathname =
-    usePathname();
+  const pathname = usePathname();
 
-  const [
-    mounted,
-    setMounted,
-  ] = useState(false);
+  const { isSignedIn, isLoaded } = useUser();
+
+  const [mounted, setMounted] = useState(false);
+
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   if (!mounted) {
     return null;
@@ -60,44 +56,114 @@ export default function MobileMenu({
 
   return (
     <div className="md:hidden">
-      <Sheet>
-
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-
           <Button
             variant="ghost"
             size="icon"
             className="
+              h-10
+              w-10
+              rounded-full
               border
-              border-neutral-300
-              bg-white/70
+              border-neutral-200
+              bg-white/80
               backdrop-blur-sm
+              transition-all
+              duration-200
+              hover:bg-white
+              hover:border-neutral-300
+              active:scale-95
             "
           >
+            <Menu className="h-5 w-5 text-neutral-700" />
 
-            <Menu className="h-5 w-5" />
-
+            <span className="sr-only">
+              Open menu
+            </span>
           </Button>
-
         </SheetTrigger>
 
         <SheetContent
           side="right"
           className="
+            w-75
             border-l
             border-neutral-200
-            bg-[#f5f5f5]
-            px-8
-            pt-20
+            bg-white/95
+            backdrop-blur-xl
+            px-0
+            py-0
+            sm:w-87.5
+            [&>button]:hidden
           "
         >
-
           <SheetTitle className="sr-only">
             Mobile Navigation Menu
           </SheetTitle>
 
-          <div className="flex flex-col gap-8">
+          {/* HEADER */}
 
+          <div
+            className="
+              flex
+              h-16
+              items-center
+              justify-between
+              border-b
+              border-neutral-200
+              px-6
+            "
+          >
+            <span
+              className="
+                text-sm
+                font-medium
+                uppercase
+                tracking-widest
+                text-neutral-400
+              "
+            >
+              Menu
+            </span>
+
+            <SheetClose asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="
+                  h-8
+                  w-8
+                  rounded-full
+                  border
+                  border-neutral-200
+                  bg-white
+                  transition-all
+                  duration-200
+                  hover:bg-neutral-50
+                  active:scale-95
+                "
+              >
+                <X className="h-4 w-4 text-neutral-700" />
+
+                <span className="sr-only">
+                  Close menu
+                </span>
+              </Button>
+            </SheetClose>
+          </div>
+
+          {/* NAVIGATION */}
+
+          <div
+            className="
+              flex
+              flex-col
+              gap-1
+              px-6
+              py-8
+            "
+          >
             {items.map((item) => {
               const isActive =
                 pathname === item.path;
@@ -109,31 +175,23 @@ export default function MobileMenu({
                   className={cn(
                     `
                       relative
-                      w-fit
-                      text-[1.1rem]
-                      font-semibold
-                      uppercase
-                      tracking-[0.01em]
-                      transition-colors
-                      duration-300
-                      after:absolute
-                      after:-bottom-2
-                      after:left-0
-                      after:h-px
-                      after:bg-[#050505]
-                      after:transition-all
-                      after:duration-300
+                      rounded-lg
+                      px-4
+                      py-3
+                      text-[15px]
+                      font-medium
+                      transition-all
+                      duration-200
                     `,
                     isActive
                       ? `
-                        text-[#050505]
-                        after:w-full
+                        bg-neutral-100
+                        text-neutral-900
                       `
                       : `
                         text-neutral-500
-                        hover:text-[#050505]
-                        after:w-0
-                        hover:after:w-full
+                        hover:bg-neutral-50
+                        hover:text-neutral-900
                       `,
                   )}
                 >
@@ -141,36 +199,164 @@ export default function MobileMenu({
                 </Link>
               );
             })}
+          </div>
+
+          {/* DIVIDER */}
+
+          <div className="mx-6 h-px bg-neutral-200" />
+
+          {/* CTA + AUTH */}
+
+          <div className="space-y-4 px-6 py-8">
+            {/* CONTACT */}
 
             <Link
               href="/contact"
               className="
-                mt-4
-                inline-flex
+                flex
+                w-full
                 items-center
                 justify-center
-                rounded-sm
-                bg-[#050505]
-                px-5
+                rounded-full
+                bg-neutral-900
+                px-6
                 py-3
                 text-[12px]
-                font-medium
+                font-semibold
                 uppercase
-                tracking-[0.08em]
-                text-[#f5f5f5]
+                tracking-widest
+                text-white
                 transition-all
-                hover:bg-neutral-800
+                duration-200
+                hover:bg-neutral-700
+                active:scale-[0.98]
               "
             >
-
               Let&apos;s Connect
-
             </Link>
 
+            {/* AUTH */}
+
+            {isLoaded &&
+              (!isSignedIn ? (
+                <SignInButton mode="modal">
+                  <button
+                    className="
+                      flex
+                      w-full
+                      items-center
+                      justify-center
+                      rounded-full
+                      border
+                      border-neutral-300
+                      bg-white
+                      px-6
+                      py-3
+                      text-[12px]
+                      font-semibold
+                      uppercase
+                      tracking-widest
+                      text-neutral-900
+                      transition-all
+                      duration-200
+                      hover:bg-neutral-50
+                      active:scale-[0.98]
+                    "
+                  >
+                    Login
+                  </button>
+                </SignInButton>
+              ) : (
+                <div
+                  className="
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox:
+                          "h-10 w-10",
+                      },
+                    }}
+                  />
+                </div>
+              ))}
           </div>
 
-        </SheetContent>
+          {/* SOCIALS */}
 
+          <div
+            className="
+              border-t
+              border-neutral-200
+              px-6
+              py-6
+            "
+          >
+            <p
+              className="
+                mb-4
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-[0.25em]
+                text-neutral-400
+              "
+            >
+              Connect
+            </p>
+
+            <div className="flex gap-3">
+              <a
+                href="https://www.linkedin.com/in/obedyameogo/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  text-[12px]
+                  text-neutral-500
+                  transition-colors
+                  duration-200
+                  hover:text-neutral-900
+                "
+              >
+                LinkedIn
+              </a>
+
+              <a
+                href="https://github.com/ObedYAMEOGO"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  text-[12px]
+                  text-neutral-500
+                  transition-colors
+                  duration-200
+                  hover:text-neutral-900
+                "
+              >
+                GitHub
+              </a>
+
+              <a
+                href="https://www.facebook.com/burkimbila10xxkrt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  text-[12px]
+                  text-neutral-500
+                  transition-colors
+                  duration-200
+                  hover:text-neutral-900
+                "
+              >
+                Facebook
+              </a>
+            </div>
+          </div>
+        </SheetContent>
       </Sheet>
     </div>
   );

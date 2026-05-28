@@ -1,304 +1,231 @@
 "use client";
 
-import { useState } from "react";
-
+import { useState, useRef } from "react";
 import api from "@/lib/api";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-import {
-  Send,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
+import styles from "@/components/contact/ContactPage.module.css";
 
 export default function ContactPage() {
-
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
     message: "",
   });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const particlesRef = useRef<HTMLDivElement>(null);
 
-  const [status, setStatus] = useState<
-    "idle" |
-    "loading" |
-    "success" |
-    "error"
-  >("idle");
+  const fireParticles = () => {
+    const container = particlesRef.current;
+    if (!container) return;
+    container.innerHTML = "";
 
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+    const colors = ["#9b5c3d", "#d4a574", "#171717", "#a3a3a3", "#e5e5e5"];
+    const count = 20;
 
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement("div");
+      p.className = styles.particle;
+      const angle = (i / count) * 360;
+      const dist = 60 + Math.random() * 60;
+      const size = 3 + Math.random() * 5;
+      const rx = Math.cos((angle * Math.PI) / 180) * dist;
+      const ry = Math.sin((angle * Math.PI) / 180) * dist;
+      const isRound = Math.random() > 0.5;
+
+      p.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        background: ${colors[i % colors.length]};
+        border-radius: ${isRound ? "50%" : "2px"};
+        --rx: ${rx}px;
+        --ry: ${ry}px;
+        animation: particleBurst 0.7s ease-out ${i * 25}ms forwards;
+      `;
+      container.appendChild(p);
+    }
+
+    setTimeout(() => {
+      if (container) container.innerHTML = "";
+    }, 1500);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Prevent double submit
     if (status === "loading") return;
 
     setStatus("loading");
+    fireParticles();
 
     try {
-
-      await api.post(
-        "/leads",
-        formData
-      );
-
-      setStatus("success");
-
-      setFormData({
-        full_name: "",
-        email: "",
-        message: "",
-      });
-
+      await api.post("/leads", formData);
+      setTimeout(() => {
+        setStatus("success");
+        setFormData({ full_name: "", email: "", message: "" });
+      }, 900);
     } catch (error) {
-
-      console.error(
-        "Submission error:",
-        error
-      );
-
-      setStatus("error");
+      console.error("Submission error:", error);
+      setTimeout(() => setStatus("error"), 900);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] selection:bg-neutral-200">
+    <div className={styles.page}>
+      <main className={styles.wrap}>
 
-      <main className="mx-auto flex max-w-7xl flex-col gap-20 px-6 pb-24 pt-32 lg:flex-row">
+        {/* ── LEFT ─────────────────────────────────── */}
+        <div className={styles.left}>
+          <p className={styles.eyebrow}>Contact</p>
 
-        {/* LEFT SIDE */}
-        <div className="space-y-8 lg:w-1/3">
+          <h1 className={styles.h1}>
+            Let&apos;s build<br />
+            <em>something.</em>
+          </h1>
 
-          <header className="space-y-4">
+          <p className={styles.sub}>
+            Available for freelance collaborations on Data Science,
+            Machine Learning projects, and AI Systems Engineering.
+          </p>
 
-            <h2 className="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-400">
-              03 // Connection_Point
-            </h2>
-
-            <h1 className="font-serif text-6xl font-bold tracking-tighter text-[#050505]">
-              Get in Touch.
-            </h1>
-
-          </header>
-
-          <div className="space-y-6 font-serif text-lg leading-relaxed text-neutral-600">
-
-            <p>
-              Available for collaborations on ML projects,
-              system architecture, or research assignments.
-            </p>
-
-            <div className="space-y-2 pt-6 font-mono text-[11px] uppercase tracking-widest text-[#050505]">
-
-              <p className="text-neutral-400">
-                Location
-              </p>
-
-              <p>
-                Remote / Global
-              </p>
-
-            </div>
+          <div className={styles.meta}>
+            <p className={styles.metaLabel}>Location</p>
+            <p className={styles.metaVal}>Remote / Global</p>
           </div>
+
+          <div className={styles.divider} />
+
+          <p className={styles.note}>
+            Typically responds within 48 hours.
+          </p>
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="lg:w-2/3">
+        {/* ── RIGHT ────────────────────────────────── */}
+        <div className={styles.right}>
 
           {status === "success" ? (
 
-            <div
-              className="
-                animate-in
-                fade-in
-                slide-in-from-bottom-2
-                flex
-                h-100
-                flex-col
-                items-center
-                justify-center
-                space-y-4
-                border
-                border-neutral-300
-                bg-white
-              "
-            >
+            <div className={styles.successCard}>
+              <div className={styles.checkCircle}>
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                  <path
+                    className={styles.checkPath}
+                    d="M5 14l5 5L21 8"
+                    stroke="#16a34a"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
 
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
+              <div className={styles.successText}>
+                <p className={styles.successTitle}>Message sent!</p>
+                <p className={styles.successSub}>
+                  I&apos;ll get back to you within 48 hours.
+                </p>
+              </div>
 
-              <p className="font-mono text-xs uppercase tracking-widest">
-                Message_Received_Successfully
-              </p>
-
-              <Button
-                variant="outline"
-                className="rounded-none font-mono text-[10px] uppercase tracking-widest"
+              <button
                 onClick={() => setStatus("idle")}
+                className={styles.resetBtn}
               >
-                Send Another
-              </Button>
-
+                Send another →
+              </button>
             </div>
 
           ) : (
 
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-px border border-neutral-300 bg-neutral-300"
-            >
+            <form onSubmit={handleSubmit} className={styles.form}>
 
-              <div className="space-y-8 bg-white p-8">
+              <div className={styles.formCard}>
 
                 {/* NAME */}
-                <div className="space-y-2">
-
-                  <label className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">
-                    Full Name
-                  </label>
-
+                <div className={styles.field}>
+                  <label className={styles.fieldLabel}>Full Name</label>
                   <Input
                     required
                     placeholder="John Doe"
                     value={formData.full_name}
                     onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        full_name: e.target.value,
-                      }))
+                      setFormData((p) => ({ ...p, full_name: e.target.value }))
                     }
-                    className="
-                      rounded-none
-                      border-none
-                      px-0
-                      font-serif
-                      text-xl
-                      placeholder:text-neutral-200
-                      focus-visible:ring-0
-                    "
+                    className={styles.fieldInput}
                   />
-
                 </div>
 
                 {/* EMAIL */}
-                <div className="space-y-2 border-t border-neutral-100 pt-8">
-
-                  <label className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">
-                    Email Address
-                  </label>
-
+                <div className={`${styles.field} ${styles.fieldBorder}`}>
+                  <label className={styles.fieldLabel}>Email Address</label>
                   <Input
                     required
                     type="email"
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
+                      setFormData((p) => ({ ...p, email: e.target.value }))
                     }
-                    className="
-                      rounded-none
-                      border-none
-                      px-0
-                      font-serif
-                      text-xl
-                      placeholder:text-neutral-200
-                      focus-visible:ring-0
-                    "
+                    className={styles.fieldInput}
                   />
-
                 </div>
 
                 {/* MESSAGE */}
-                <div className="space-y-2 border-t border-neutral-100 pt-8">
-
-                  <label className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">
-                    Your Message
-                  </label>
-
+                <div className={`${styles.field} ${styles.fieldBorder}`}>
+                  <label className={styles.fieldLabel}>Message</label>
                   <Textarea
                     required
-                    placeholder="Tell me about your project..."
+                    placeholder="Tell me about your project…"
                     value={formData.message}
                     onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        message: e.target.value,
-                      }))
+                      setFormData((p) => ({ ...p, message: e.target.value }))
                     }
-                    className="
-                      min-h-37.5
-                      resize-none
-                      rounded-none
-                      border-none
-                      px-0
-                      font-serif
-                      text-xl
-                      placeholder:text-neutral-200
-                      focus-visible:ring-0
-                    "
+                    className={`${styles.fieldInput} ${styles.textarea}`}
                   />
-
                 </div>
+
               </div>
 
               {/* SUBMIT */}
               <button
+                ref={btnRef}
                 type="submit"
                 disabled={status === "loading"}
-                className="
-                  flex
-                  w-full
-                  items-center
-                  justify-center
-                  gap-3
-                  bg-[#050505]
-                  py-6
-                  font-mono
-                  text-[11px]
-                  uppercase
-                  tracking-[0.3em]
-                  text-white
-                  transition-colors
-                  hover:bg-neutral-800
-                  disabled:bg-neutral-400
-                "
+                className={`${styles.submitBtn} ${status === "loading" ? styles.submitBtnLoading : ""}`}
               >
+                <div ref={particlesRef} className={styles.particles} aria-hidden="true" />
 
                 {status === "loading" ? (
                   <>
-                    <Send className="h-4 w-4 animate-pulse" />
-                    Transmitting...
+                    <span className={styles.spinner} />
+                    Sending…
                   </>
                 ) : (
                   <>
                     Send Message
-                    <Send className="h-4 w-4" />
+                    <span className={styles.btnArrow} aria-hidden="true">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
                   </>
                 )}
-
               </button>
+
+              {/* ERROR */}
+              {status === "error" && (
+                <div className={styles.errorBanner}>
+                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                    <circle cx="7.5" cy="7.5" r="6.5" stroke="#dc2626" strokeWidth="1.2" />
+                    <path d="M7.5 4.5v4M7.5 10.5v.5" stroke="#dc2626" strokeWidth="1.4" strokeLinecap="round" />
+                  </svg>
+                  Something went wrong. Please try again.
+                </div>
+              )}
+
             </form>
+
           )}
 
-          {/* ERROR */}
-          {status === "error" && (
-
-            <div className="mt-4 flex items-center gap-2 font-mono text-[10px] uppercase text-red-500">
-
-              <AlertCircle className="h-4 w-4" />
-
-              Error_during_transmission.
-              Try_again.
-
-            </div>
-          )}
         </div>
       </main>
     </div>

@@ -1,15 +1,15 @@
 from typing import List
 
-from fastapi import (
+from fastapi import ( # type: ignore
     APIRouter,
     Depends,
 )
 
-from fastapi.responses import (
+from fastapi.responses import ( # type: ignore
     JSONResponse,
 )
 
-from sqlalchemy.ext.asyncio import (
+from sqlalchemy.ext.asyncio import ( # type: ignore
     AsyncSession,
 )
 

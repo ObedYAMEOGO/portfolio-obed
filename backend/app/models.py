@@ -16,6 +16,7 @@ from sqlalchemy import (  # type: ignore
 
 from sqlalchemy.orm import DeclarativeBase  # type: ignore
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -69,20 +70,21 @@ class Post(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
-        DateTime(timezone=True), 
-        server_default=func.now(), 
-        onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-    
+
+
 class MaterialType(str, enum.Enum):
     DOCUMENT = "DOCUMENT"
     VIDEO = "VIDEO"
+
 
 # New Enum tracking video arrangement type
 class VideoContext(str, enum.Enum):
     SINGLE = "SINGLE"
     PLAYLIST = "PLAYLIST"
-    NONE = "NONE" # Fallback designation for pure Text Documents
+    NONE = "NONE"  # Fallback designation for pure Text Documents
+
 
 class Material(Base):
     __tablename__ = "materials"
@@ -91,14 +93,87 @@ class Material(Base):
     title = Column(String, nullable=False)
     slug = Column(String, unique=True, index=True, nullable=False)
     description = Column(Text, nullable=True)
-    
-    material_type = Column(Enum(MaterialType), nullable=False, default=MaterialType.DOCUMENT)
+
+    material_type = Column(
+        Enum(MaterialType), nullable=False, default=MaterialType.DOCUMENT
+    )
     # Target column ensuring structural flexibility
-    video_context = Column(Enum(VideoContext), nullable=False, default=VideoContext.NONE)
-    
-    category = Column(String, nullable=False, default="General AI") 
-    resource_url = Column(String, nullable=False) # Maps to single YouTube link OR specific Playlist layout URL
+    video_context = Column(
+        Enum(VideoContext), nullable=False, default=VideoContext.NONE
+    )
+
+    category = Column(String, nullable=False, default="General AI")
+    resource_url = Column(
+        String, nullable=False
+    )  # Maps to single YouTube link OR specific Playlist layout URL
     thumbnail_url = Column(String, nullable=True)
-    
+
     is_published = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
+
+
+class SiteSettings(Base):
+    __tablename__ = "site_settings"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    resume_url = Column(
+        String,
+        nullable=True,
+    )
+
+    updated_at = Column(
+        DateTime(
+            timezone=True,
+        ),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    clerk_id = Column(
+        String,
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    email = Column(
+        String,
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    full_name = Column(
+        String,
+        nullable=True,
+    )
+
+    receive_notifications = Column(
+        Boolean,
+        default=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+    
+    is_admin = Column(
+        Boolean,
+        default=False,
+    )

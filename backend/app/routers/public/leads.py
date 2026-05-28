@@ -1,50 +1,37 @@
-from fastapi import (
-    APIRouter,
-    BackgroundTasks,
-    Depends,
-)
-
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-)
+from fastapi import APIRouter, Depends, status # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 
 from app.database import get_db
-
-from app.schemas import (
-    LeadCreate,
-)
-
-from app.crud import (
-    LeadRepository,
-)
-
-from app.tasks import (
-    send_lead_notification,
-)
+from app.schemas import LeadCreate, LeadResponse
+from app.crud import LeadRepository
+from app.tasks import send_lead_notification_task
 
 router = APIRouter(
-    tags=["Public Leads"],
+    prefix="/leads",
+    tags=["Leads"],
 )
 
 
-@router.post("/leads")
+@router.post(
+    "",
+    response_model=LeadResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def submit_lead(
-    lead: LeadCreate,
-    background_tasks: BackgroundTasks,
+    data: LeadCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    await LeadRepository.create(
-        db,
-        lead,
+    lead = await LeadRepository.create(
+        db=db,
+        lead=data,
     )
 
-    background_tasks.add_task(
-        send_lead_notification,
-        lead.email,
-        lead.full_name,
-        lead.message,
+    # IMPORTANT:
+    # Use positional arguments OR exact keyword names
+    send_lead_notification_task.delay(
+        full_name=lead.full_name,
+        email=lead.email,
+        message=lead.message,
     )
 
-    return {
-        "message": "Inquiry received.",
-    }
+    return lead

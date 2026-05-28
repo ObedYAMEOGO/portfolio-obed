@@ -1,40 +1,37 @@
 // app/admin/layout.tsx
 
-import {
-  auth,
-  currentUser,
-} from "@clerk/nextjs/server";
-
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-const ADMIN_EMAILS = [
-  "obedyameogo4@gmail.com",
-];
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect("/");
-  }
-
   const user = await currentUser();
 
-  const email =
-    user?.emailAddresses?.[0]
-      ?.emailAddress;
-
-  const isAdmin =
-    email &&
-    ADMIN_EMAILS.includes(email);
-
-  if (!isAdmin) {
+  if (!user) {
     redirect("/");
   }
 
-  return <>{children}</>;
+  const primaryEmail =
+    user.primaryEmailAddress?.emailAddress;
+
+  console.log("PRIMARY EMAIL:", primaryEmail);
+  console.log("ADMIN EMAIL:", ADMIN_EMAIL);
+
+  if (
+    !primaryEmail ||
+    primaryEmail !== ADMIN_EMAIL
+  ) {
+    redirect("/");
+  }
+
+  return (
+    <div className="min-h-screen">
+      {children}
+    </div>
+  );
 }

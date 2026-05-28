@@ -1,62 +1,103 @@
-// src/lib/api/index.ts
-
 import axios from "axios";
 
-/* =========================================================
-   SERVER VS CLIENT URL
-========================================================= */
-
-const API_BASE_URL =
-  typeof window === "undefined"
-    ? process.env.INTERNAL_API_URL
-    : process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_BASE_URL) {
-  throw new Error(
-    "API URL is missing."
-  );
+  throw new Error("NEXT_PUBLIC_API_URL is missing");
 }
-
-/* =========================================================
-   AXIOS INSTANCE
-========================================================= */
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-
   headers: {
-    "Content-Type":
-      "application/json",
+    "Content-Type": "application/json",
   },
 });
 
-/* =========================================================
-   ADMIN HEADER
-========================================================= */
+/* =======================================================
+   HELPERS
+======================================================= */
+
+/**
+ * Waits for window.Clerk to be loaded and have an active
+ * session before resolving. Times out after 5 s to avoid
+ * hanging requests on unauthenticated pages.
+ */
+function waitForClerkSession(timeoutMs = 5000): Promise<string | null> {
+  return new Promise((resolve) => {
+    const deadline = Date.now() + timeoutMs;
+
+    const attempt = async () => {
+      if (typeof window === "undefined") {
+        resolve(null);
+        return;
+      }
+
+      const clerk = window.Clerk;
+
+      if (clerk?.session) {
+        // Session is ready — grab the token
+        try {
+          const token = await clerk.session.getToken();
+          resolve(token ?? null);
+        } catch {
+          resolve(null);
+        }
+        return;
+      }
+
+      if (Date.now() >= deadline) {
+        // Timed out — no session found
+        resolve(null);
+        return;
+      }
+
+      // Clerk not ready yet — retry in 100 ms
+      setTimeout(attempt, 100);
+    };
+
+    attempt();
+  });
+}
+
+/* =======================================================
+   REQUEST INTERCEPTOR
+======================================================= */
 
 api.interceptors.request.use(
-  (config) => {
-    const adminKey =
-      process.env
-        .NEXT_PUBLIC_ADMIN_SECRET;
+  async (config) => {
+    try {
+      const token = await waitForClerkSession();
 
-    if (
-      adminKey &&
-      config.url?.includes(
-        "/admin"
-      )
-    ) {
-      config.headers[
-        "x-admin-key"
-      ] = adminKey;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.warn("No Clerk session token available for", config.url);
+      }
+    } catch (error) {
+      console.error("TOKEN_INJECTION_ERROR:", error);
     }
 
     return config;
-  }
+  },
+  (error) => Promise.reject(error),
 );
 
-/* =========================================================
-   EXPORT
-========================================================= */
+/* =======================================================
+   RESPONSE INTERCEPTOR
+======================================================= */
+
+api.interceptors.response.use(
+  (response) => response,
+
+  (error) => {
+    const status = error?.response?.status;
+    const url = error?.config?.url;
+    const data = error?.response?.data;
+
+    console.error(`API error ${status} on ${url}:`, data);
+
+    return Promise.reject(error);
+  },
+);
 
 export default api;

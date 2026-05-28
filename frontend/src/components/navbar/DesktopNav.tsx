@@ -1,5 +1,3 @@
-// components/navbar/DesktopNav.tsx
-
 "use client";
 
 import Link from "next/link";
@@ -24,6 +22,9 @@ export default function DesktopNav({
 
   return (
     <nav className="hidden items-center gap-10 md:flex">
+
+      {/* NAV LINKS */}
+
       {items.map((item) => {
         const isActive =
           pathname === item.path;
@@ -67,6 +68,7 @@ export default function DesktopNav({
           </Link>
         );
       })}
+
     </nav>
   );
 }

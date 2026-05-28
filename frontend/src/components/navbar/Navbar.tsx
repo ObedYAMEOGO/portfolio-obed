@@ -1,26 +1,21 @@
-// components/navbar/Navbar.tsx
+"use client";
 
 import Link from "next/link";
+
+import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
 
 import DesktopNav from "./DesktopNav";
 import MobileMenu from "./MobileMenu";
 
 const navItems = [
-  {
-    name: "Projects",
-    path: "/projects",
-  },
-  {
-    name: "Blog",
-    path: "/blog",
-  },
-  {
-    name: "Courses",
-    path: "/courses",
-  },
+  { name: "Projects", path: "/projects" },
+  { name: "Blog", path: "/blog" },
+  { name: "Courses", path: "/courses" },
 ];
 
 export default function Navbar() {
+  const { isSignedIn, isLoaded } = useUser();
+
   return (
     <header
       className="
@@ -29,8 +24,8 @@ export default function Navbar() {
         z-50
         w-full
         border-b
-        border-neutral-300/70
-        bg-[#f5f5f5]/85
+        border-neutral-200/80
+        bg-white/80
         backdrop-blur-xl
       "
     >
@@ -42,60 +37,114 @@ export default function Navbar() {
           max-w-7xl
           items-center
           justify-between
-          px-4
-          sm:px-6
+          px-6
         "
       >
-        {/* LOGO */}
-        <Link
-          href="/"
-          className="
-            text-[1rem]
-            font-semibold
-            tracking-[-0.03em]
-            text-[#050505]
-            transition-opacity
-            hover:opacity-80
-            sm:text-[1.05rem]
-          "
-        >
-          OBED_YAMEOGO
-        </Link>
+        {/* LEFT — LOGO */}
 
-        {/* RIGHT SIDE */}
-        <div className="flex items-center gap-10">
-          {/* DESKTOP NAV */}
+        <div className="flex items-center">
+          <Link
+            href="/"
+            className="
+             text-[25px]
+              font-semibold
+              tracking-widest
+              text-neutral-900
+              transition-colors
+              duration-150
+              hover:text-neutral-600
+              whitespace-nowrap
+            "
+          >
+            obed.ai
+          </Link>
+        </div>
+
+        {/* CENTER — NAV */}
+
+        <div className="hidden flex-1 justify-center md:flex">
           <DesktopNav items={navItems} />
+        </div>
 
-          {/* CONTACT BUTTON */}
+        {/* RIGHT */}
+
+        <div className="flex items-center gap-5">
+          {/* CONTACT */}
+
           <Link
             href="/contact"
             className="
-              hidden
-              sm:inline-flex
-              items-center
-              justify-center
-              rounded-sm
-              bg-[#050505]
-              px-5
-              py-2.5
-              text-[12px]
-              font-medium
-              tracking-[0.08em]
-              uppercase
-              text-[#f5f5f5]
-              shadow-sm
-              transition-all
-              duration-300
-              hover:scale-[1.03]
-              hover:bg-neutral-800
-              active:scale-[0.98]
-            "
+            hidden
+            items-center
+            justify-center
+            rounded-full
+            bg-[#9b5c3d]
+            px-6
+            py-3
+            text-[12px]
+            font-semibold
+            uppercase
+            tracking-widest
+            text-white
+            shadow-xs
+            transition-all
+            duration-300
+            hover:bg-[#7f4b31]
+            hover:scale-[1.02]
+            hover:shadow-lg
+            active:scale-[0.98]
+            md:inline-flex
+          "
           >
-            Let&apos;s Connect
+            Contact_Me
           </Link>
 
-          {/* MOBILE MENU */}
+          {/* AUTH */}
+
+          {isLoaded &&
+            (!isSignedIn ? (
+              <SignInButton mode="modal">
+                <button
+                  className="
+                  hidden
+                  items-center
+                  justify-center
+                  rounded-full
+                  border
+                  border-neutral-900
+                  bg-white
+                  px-6
+                  py-3
+                  text-[12px]
+                  font-semibold
+                  uppercase
+                  tracking-widest
+                  text-black
+                  transition-all
+                  duration-300
+                  hover:bg-black
+                  hover:border-white
+                  hover:text-white
+                  hover:shadow-lg
+                  active:scale-[0.98]
+                  md:inline-flex
+                "
+                >
+                  Login
+                </button>
+              </SignInButton>
+            ) : (
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "h-9 w-9",
+                  },
+                }}
+              />
+            ))}
+
+          {/* MOBILE */}
+
           <MobileMenu items={navItems} />
         </div>
       </div>

@@ -1,426 +1,349 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2, Upload, X } from "lucide-react";
+import api from "@/lib/api";
 
-import {
-  Loader2,
-  Plus,
-} from "lucide-react";
-
-import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-import { Input } from "@/components/ui/input";
-
-import { Label } from "@/components/ui/label";
-
-import { Textarea } from "@/components/ui/textarea";
-
-import { projectApi } from "@/lib/api";
-
-/* =========================================================
-   TYPES
-========================================================= */
-
-interface ProjectFormData {
-  title: string;
-  description: string;
-  image_url: string;
-  github_url: string;
-  live_url: string;
-  tech_stack: string;
+function toSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
-/* =========================================================
-   INITIAL STATE
-========================================================= */
-
-const initialFormData: ProjectFormData =
-  {
-    title: "",
-    description: "",
-    image_url: "",
-    github_url: "",
-    live_url: "",
-    tech_stack: "",
-  };
-
-/* =========================================================
-   COMPONENT
-========================================================= */
-
 export default function CreateProjectForm() {
-  const router =
-    useRouter();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [techInput, setTechInput] = useState("");
 
-  const [mounted, setMounted] =
-    useState(false);
-
-  const [open, setOpen] =
-    useState(false);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [formData, setFormData] =
-    useState<ProjectFormData>(
-      initialFormData,
-    );
+  const [formData, setFormData] = useState({
+    title:        "",
+    slug:         "",
+    description:  "",
+    content:      "",
+    tech_stack:   [] as string[],
+    github_url:   "",
+    live_url:     "",
+    image_url:    "",
+    is_published: false,
+  });
 
   /* =========================================================
-     FIX HYDRATION
+     HELPERS
   ========================================================= */
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    const { name, value, type } = e.target;
+    const val = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+    setFormData((prev) => ({ ...prev, [name]: val }));
+  }
 
-  if (!mounted) {
-    return null;
+  function handleTitleChange(e: ChangeEvent<HTMLInputElement>) {
+    const title = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      title,
+      slug: toSlug(title),
+    }));
   }
 
   /* =========================================================
-     INPUT CHANGE
+     CLOUDINARY UPLOAD
   ========================================================= */
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >,
-  ) => {
-    const { name, value } =
-      e.target;
+  async function uploadImage(file: File) {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
 
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: "POST", body: data }
+    );
+
+    if (!response.ok) throw new Error("Upload failed");
+    const result = await response.json();
+    return result.secure_url as string;
+  }
+
+  async function handleFileUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploading(true);
+      const imageUrl = await uploadImage(file);
+      setFormData((prev) => ({ ...prev, image_url: imageUrl }));
+    } catch (err) {
+      console.error(err);
+      alert("Image upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  /* =========================================================
+     TECH STACK
+  ========================================================= */
+
+  function addTech() {
+    const trimmed = techInput.trim();
+    if (!trimmed || formData.tech_stack.includes(trimmed)) {
+      setTechInput("");
+      return;
+    }
+    setFormData((prev) => ({ ...prev, tech_stack: [...prev.tech_stack, trimmed] }));
+    setTechInput("");
+  }
+
+  function removeTech(tech: string) {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      tech_stack: prev.tech_stack.filter((t) => t !== tech),
     }));
-  };
+  }
 
   /* =========================================================
      SUBMIT
   ========================================================= */
 
-  const handleSubmit =
-    async (
-      e: React.FormEvent<HTMLFormElement>,
-    ) => {
-      e.preventDefault();
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      await api.post("/admin/projects", formData);
+      router.push("/admin/dashboard/projects");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create project.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-      if (loading) return;
+  const inputClass =
+    "w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-[14px] text-neutral-900 outline-none transition-colors focus:border-neutral-400 focus:bg-white placeholder:text-neutral-300";
 
-      if (
-        !formData.title ||
-        !formData.description
-      ) {
-        toast.error(
-          "Title and description are required.",
-        );
+  const labelClass =
+    "block text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400";
 
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        const payload = {
-          title:
-            formData.title,
-
-          slug:
-            formData.title
-              .toLowerCase()
-              .trim()
-              .replace(
-                /[^a-z0-9]+/g,
-                "-",
-              )
-              .replace(
-                /(^-|-$)/g,
-                "",
-              ),
-
-          description:
-            formData.description ||
-            null,
-
-          content:
-            formData.description ||
-            null,
-
-          tech_stack:
-            formData.tech_stack
-              .split(",")
-              .map((tech) =>
-                tech.trim(),
-              )
-              .filter(Boolean),
-
-          github_url:
-            formData.github_url ||
-            null,
-
-          live_url:
-            formData.live_url ||
-            null,
-
-          image_url:
-            formData.image_url ||
-            null,
-
-          is_published: true,
-        };
-
-        await projectApi.create(
-          payload,
-        );
-
-        toast.success(
-          "Project successfully deployed.",
-        );
-
-        setFormData(
-          initialFormData,
-        );
-
-        setOpen(false);
-
-        router.refresh();
-      } catch (
-        error: unknown
-      ) {
-        console.error(
-          "CREATE_PROJECT_ERROR:",
-          error,
-        );
-
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to create project.";
-
-        toast.error(message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-    >
+    <form onSubmit={handleSubmit} className="space-y-8">
 
-      {/* =========================================================
-          TRIGGER
-      ========================================================= */}
+      {/* TITLE + SLUG */}
+      <div className="grid gap-5 md:grid-cols-2">
 
-      <DialogTrigger asChild>
+        <div className="space-y-2">
+          <label className={labelClass}>Title</label>
+          <input
+            type="text"
+            name="title"
+            required
+            value={formData.title}
+            onChange={handleTitleChange}
+            placeholder="My Project"
+            className={inputClass}
+          />
+        </div>
 
-        <Button className="h-11 rounded-none border border-black bg-black px-6 font-mono text-[10px] uppercase tracking-[0.2em] text-white hover:bg-neutral-800">
+        <div className="space-y-2">
+          <label className={labelClass}>Slug</label>
+          <input
+            type="text"
+            name="slug"
+            required
+            value={formData.slug}
+            onChange={handleChange}
+            placeholder="my-project"
+            className={inputClass}
+          />
+          {formData.slug && (
+            <p className="font-mono text-[10px] tracking-[0.12em] text-neutral-400">
+              /projects/<span className="text-neutral-600">{formData.slug}</span>
+            </p>
+          )}
+        </div>
 
-          <Plus className="mr-2 h-4 w-4" />
+      </div>
 
-          New Project
+      {/* DESCRIPTION */}
+      <div className="space-y-2">
+        <label className={labelClass}>Description</label>
+        <textarea
+          name="description"
+          rows={3}
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Short project description…"
+          className={`${inputClass} resize-none`}
+        />
+      </div>
 
-        </Button>
+      {/* CONTENT */}
+      <div className="space-y-2">
+        <label className={labelClass}>Content</label>
+        <textarea
+          name="content"
+          rows={10}
+          value={formData.content}
+          onChange={handleChange}
+          placeholder="Write in Markdown…"
+          className={`${inputClass} resize-y font-mono text-[13px]`}
+        />
+      </div>
 
-      </DialogTrigger>
+      {/* GITHUB + LIVE URL */}
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="space-y-2">
+          <label className={labelClass}>GitHub URL</label>
+          <input
+            type="text"
+            name="github_url"
+            value={formData.github_url}
+            onChange={handleChange}
+            placeholder="https://github.com/…"
+            className={inputClass}
+          />
+        </div>
 
-      {/* =========================================================
-          MODAL
-      ========================================================= */}
+        <div className="space-y-2">
+          <label className={labelClass}>Live URL</label>
+          <input
+            type="text"
+            name="live_url"
+            value={formData.live_url}
+            onChange={handleChange}
+            placeholder="https://…"
+            className={inputClass}
+          />
+        </div>
+      </div>
 
-      <DialogContent className="max-w-2xl border-neutral-300 bg-[#f5f5f5]">
+      {/* IMAGE URL */}
+      <div className="space-y-2">
+        <label className={labelClass}>Image URL</label>
+        <input
+          type="text"
+          name="image_url"
+          value={formData.image_url}
+          onChange={handleChange}
+          placeholder="https://…"
+          className={inputClass}
+        />
+      </div>
 
-        <DialogHeader>
+      {/* FILE UPLOAD */}
+      <div className="space-y-3">
+        <label className={labelClass}>Upload Image</label>
 
-          <DialogTitle className="font-mono text-lg uppercase tracking-widest">
+        <label className="flex h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400">
+          {uploading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+          ) : (
+            <Upload className="h-5 w-5 text-neutral-400" />
+          )}
+          <span className="text-[11px] font-medium text-neutral-400">
+            {formData.image_url ? "Replace image" : "Click to upload"}
+          </span>
+          <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+        </label>
 
-            Create_Project
-
-          </DialogTitle>
-
-        </DialogHeader>
-
-        {/* =========================================================
-            FORM
-        ========================================================= */}
-
-        <form
-          onSubmit={
-            handleSubmit
-          }
-          className="space-y-6"
-        >
-
-          {/* TITLE */}
-
-          <div className="space-y-2">
-
-            <Label htmlFor="title">
-              Project Title
-            </Label>
-
-            <Input
-              id="title"
-              name="title"
-              value={
-                formData.title
-              }
-              onChange={
-                handleChange
-              }
-              placeholder="AI Portfolio Platform"
-              required
-              disabled={loading}
+        {formData.image_url && (
+          <div className="relative overflow-hidden rounded-xl border border-neutral-200">
+            <img
+              src={formData.image_url}
+              alt="Preview"
+              className="h-52 w-full object-cover"
             />
-
+            <button
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, image_url: "" }))}
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-neutral-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-white hover:text-red-500"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
+        )}
+      </div>
 
-          {/* DESCRIPTION */}
+      {/* TECH STACK */}
+      <div className="space-y-3">
+        <label className={labelClass}>Tech Stack</label>
 
-          <div className="space-y-2">
-
-            <Label htmlFor="description">
-
-              Description
-
-            </Label>
-
-            <Textarea
-              id="description"
-              name="description"
-              value={
-                formData.description
-              }
-              onChange={
-                handleChange
-              }
-              rows={5}
-              placeholder="Describe the project..."
-              required
-              disabled={loading}
-            />
-
-          </div>
-
-          {/* LINKS */}
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-            <div className="space-y-2">
-
-              <Label htmlFor="github_url">
-
-                GitHub URL
-
-              </Label>
-
-              <Input
-                id="github_url"
-                name="github_url"
-                type="url"
-                value={
-                  formData.github_url
-                }
-                onChange={
-                  handleChange
-                }
-                placeholder="https://github.com/..."
-                disabled={loading}
-              />
-
-            </div>
-
-            <div className="space-y-2">
-
-              <Label htmlFor="live_url">
-
-                Live URL
-
-              </Label>
-
-              <Input
-                id="live_url"
-                name="live_url"
-                type="url"
-                value={
-                  formData.live_url
-                }
-                onChange={
-                  handleChange
-                }
-                placeholder="https://..."
-                disabled={loading}
-              />
-
-            </div>
-
-          </div>
-
-          {/* TECH STACK */}
-
-          <div className="space-y-2">
-
-            <Label htmlFor="tech_stack">
-
-              Tech Stack
-
-            </Label>
-
-            <Input
-              id="tech_stack"
-              name="tech_stack"
-              placeholder="Next.js, FastAPI, PostgreSQL"
-              value={
-                formData.tech_stack
-              }
-              onChange={
-                handleChange
-              }
-              disabled={loading}
-            />
-
-          </div>
-
-          {/* SUBMIT */}
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="h-11 w-full rounded-none bg-black font-mono text-[10px] uppercase tracking-[0.2em] text-white hover:bg-neutral-800"
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={techInput}
+            onChange={(e) => setTechInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTech())}
+            placeholder="e.g. React"
+            className={`${inputClass} flex-1`}
+          />
+          <button
+            type="button"
+            onClick={addTech}
+            className="rounded-full bg-neutral-900 px-5 text-[12px] font-semibold text-white transition-colors hover:bg-neutral-700"
           >
+            Add
+          </button>
+        </div>
 
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deploying...
-              </>
-            ) : (
-              "Create Project"
-            )}
+        {formData.tech_stack.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {formData.tech_stack.map((tech) => (
+              <span
+                key={tech}
+                className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-[11px] font-medium text-neutral-600"
+              >
+                {tech}
+                <button
+                  type="button"
+                  onClick={() => removeTech(tech)}
+                  className="text-neutral-400 transition-colors hover:text-red-500"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
-          </Button>
+      {/* PUBLISHED + SUBMIT */}
+      <div className="flex items-center justify-between border-t border-neutral-200 pt-6">
 
-        </form>
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            type="checkbox"
+            name="is_published"
+            checked={formData.is_published}
+            onChange={handleChange}
+            className="h-4 w-4 accent-neutral-900"
+          />
+          <span className="text-[13px] font-medium text-neutral-600">
+            Publish immediately
+          </span>
+        </label>
 
-      </DialogContent>
+        <button
+          type="submit"
+          disabled={loading || uploading}
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-neutral-900 px-6 text-[12px] font-semibold uppercase tracking-widest text-white transition-colors hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+          {loading ? "Creating…" : "Create Project"}
+        </button>
 
-    </Dialog>
+      </div>
+
+    </form>
   );
 }

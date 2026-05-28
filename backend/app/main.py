@@ -1,7 +1,11 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import (
+from fastapi import FastAPI  # type: ignore
+from fastapi.middleware.cors import (  # type: ignore
     CORSMiddleware,
 )
+
+# =========================================================
+# PUBLIC ROUTERS
+# =========================================================
 
 from app.routers.public.posts import (
     router as public_posts_router,
@@ -22,6 +26,20 @@ from app.routers.public.leads import (
 from app.routers.public.newsletter import (
     router as public_newsletter_router,
 )
+
+from app.routers.public.subscribers import (
+    router as public_subscribers_router,
+)  
+from app.routers.public.users import (
+    router as public_users_router,
+)
+
+from app.routers.public.notifications import (
+    router as notifications_router,
+)
+# =========================================================
+# ADMIN ROUTERS
+# =========================================================
 
 from app.routers.admin.posts import (
     router as admin_posts_router,
@@ -46,6 +64,18 @@ from app.routers.admin.subscribers import (
 from app.routers.admin.stats import (
     router as admin_stats_router,
 )
+
+from app.routers.admin.admin_settings import (
+    router as admin_settings_router,
+)
+from app.routers.admin import users
+
+from app.routers.admin import auth
+
+
+# =========================================================
+# APP
+# =========================================================
 
 app = FastAPI(
     title="Portfolio API",
@@ -100,6 +130,18 @@ app.include_router(
     tags=["Newsletter"],
 )
 
+app.include_router(
+    public_users_router,
+    prefix="/api/v1",
+    tags=["Public Users"],
+)
+
+app.include_router(
+    notifications_router,
+    prefix="/api/v1",
+    tags=["Notifications"],
+)
+
 # =========================================================
 # ADMIN ROUTES
 # =========================================================
@@ -140,6 +182,29 @@ app.include_router(
     tags=["Admin Stats"],
 )
 
+app.include_router(
+    admin_settings_router,
+    prefix="/api/v1",
+    tags=["Admin Settings"],
+)
+
+app.include_router(
+    public_subscribers_router,
+    prefix="/api/v1",
+    tags=["Public Subscribers"],
+)
+
+app.include_router(
+    users.router,
+    prefix="/api/v1",
+    tags=["Admin Users"],
+)
+
+app.include_router(
+    auth.router,
+    prefix="/api/v1",
+)
+
 # =========================================================
 # ROOT
 # =========================================================
@@ -151,3 +216,7 @@ async def root():
         "service": "portfolio-api",
         "version": "1.0.0",
     }
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}

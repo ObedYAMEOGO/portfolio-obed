@@ -33,14 +33,22 @@ export interface PostCreate {
 
 export interface Project {
   id: number;
+
   title: string;
   slug: string;
-  description: string;
+
+  description?: string;
+  content?: string;
+
   tech_stack: string[];
+
   github_url?: string;
   live_url?: string;
+
   image_url?: string;
+
   is_published: boolean;
+
   created_at?: string;
   updated_at?: string;
 }
@@ -48,12 +56,18 @@ export interface Project {
 export interface ProjectCreate {
   title: string;
   slug: string;
-  description: string;
+
+  description?: string;
+  content?: string;
+
   tech_stack: string[];
+
   github_url?: string;
   live_url?: string;
+
   image_url?: string;
-  is_published: boolean;
+
+  is_published?: boolean;
 }
 
 /* =========================================================
@@ -130,4 +144,18 @@ export interface DashboardStats {
   total_leads: number;
   active_subscribers: number;
   system_status: string;
+}
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+  has_prev: boolean;
+  has_next: boolean;
+}
+
+export interface PaginatedPosts {
+  items: Post[];
+  pagination: PaginationMeta;
 }

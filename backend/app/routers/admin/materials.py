@@ -24,6 +24,14 @@ from app.schemas import (
     MaterialResponse,
 )
 
+from app.crud import (
+    UserRepository,
+)
+
+from app.tasks import (
+    broadcast_new_material_task,
+)
+
 from app.core.security import (
     verify_admin,
 )
@@ -115,6 +123,35 @@ async def create_material(
 
     await db.refresh(db_material)
 
+    # =========================================================
+    # SEND NOTIFICATION TO USERS
+    # =========================================================
+
+    if db_material.is_published:
+
+        users = (
+            await UserRepository.get_notification_users(
+                db
+            )
+        )
+
+        emails = [
+            u.email
+            for u in users
+        ]
+
+        if emails:
+
+            broadcast_new_material_task.delay(
+                subscriber_emails=emails,
+                material_title=db_material.title,
+                material_description=(
+                    db_material.description
+                    or "New learning material available."
+                ),
+                material_slug=db_material.slug,
+            )
+
     return db_material
 
 
@@ -142,6 +179,14 @@ async def update_material(
             detail="Material not found.",
         )
 
+    # =========================================================
+    # CHECK PREVIOUS STATE
+    # =========================================================
+
+    was_published = (
+        material.is_published
+    )
+
     update_data = (
         payload.model_dump()
     )
@@ -154,6 +199,39 @@ async def update_material(
     await db.commit()
 
     await db.refresh(material)
+
+    # =========================================================
+    # SEND ONLY IF:
+    # DRAFT -> PUBLISHED
+    # =========================================================
+
+    if (
+        not was_published
+        and material.is_published
+    ):
+
+        users = (
+            await UserRepository.get_notification_users(
+                db
+            )
+        )
+
+        emails = [
+            u.email
+            for u in users
+        ]
+
+        if emails:
+
+            broadcast_new_material_task.delay(
+                subscriber_emails=emails,
+                material_title=material.title,
+                material_description=(
+                    material.description
+                    or "New learning material available."
+                ),
+                material_slug=material.slug,
+            )
 
     return material
 

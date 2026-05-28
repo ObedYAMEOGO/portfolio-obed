@@ -1,19 +1,19 @@
 from typing import List
 
-from fastapi import (
+from fastapi import ( # type: ignore
     APIRouter,
     Depends,
 )
 
-from fastapi.responses import (
+from fastapi.responses import ( # type: ignore
     JSONResponse,
 )
 
-from sqlalchemy.ext.asyncio import (
+from sqlalchemy.ext.asyncio import ( # type: ignore
     AsyncSession,
 )
 
-from sqlalchemy.future import select
+from sqlalchemy.future import select # type: ignore
 
 from app.database import get_db
 
@@ -33,16 +33,12 @@ router = APIRouter(
     response_model=List[MaterialResponse],
 )
 async def list_learning_materials(
-    skip: int = 0,
-    limit: int = 12,
     db: AsyncSession = Depends(get_db),
 ):
     query = (
         select(Material)
         .where(Material.is_published.is_(True))
         .order_by(Material.created_at.desc())
-        .offset(skip)
-        .limit(limit)
     )
 
     result = await db.execute(query)

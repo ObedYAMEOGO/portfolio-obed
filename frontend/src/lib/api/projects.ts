@@ -1,5 +1,7 @@
 // src/lib/api/projects.ts
 
+"use client";
+
 import api from "./index";
 
 import {
@@ -8,62 +10,67 @@ import {
 } from "@/types";
 
 /* =========================================================
-   PROJECTS API
+   CLIENT PROJECT API
 ========================================================= */
 
 export const projectsApi = {
-  async getAll(): Promise<
-    Project[]
-  > {
-    const response =
-      await api.get(
-        "/admin/projects",
-      );
-
-    return response.data;
-  },
-
-  async getById(
-    id: number,
-  ): Promise<Project> {
-    const response =
-      await api.get(
-        `/admin/projects/${id}`,
-      );
-
-    return response.data;
-  },
-
   async create(
     data: ProjectCreate,
   ): Promise<Project> {
-    const response =
-      await api.post(
-        "/admin/projects",
-        data,
+    try {
+      const response =
+        await api.post(
+          "/admin/projects",
+          data,
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to create project:",
+        error,
       );
 
-    return response.data;
+      throw error;
+    }
   },
 
   async update(
     id: number,
     data: ProjectCreate,
   ): Promise<Project> {
-    const response =
-      await api.put(
-        `/admin/projects/${id}`,
-        data,
+    try {
+      const response =
+        await api.put(
+          `/admin/projects/${id}`,
+          data,
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to update project:",
+        error,
       );
 
-    return response.data;
+      throw error;
+    }
   },
 
   async delete(
     id: number,
   ): Promise<void> {
-    await api.delete(
-      `/admin/projects/${id}`,
-    );
+    try {
+      await api.delete(
+        `/admin/projects/${id}`,
+      );
+    } catch (error) {
+      console.error(
+        "Failed to delete project:",
+        error,
+      );
+
+      throw error;
+    }
   },
 };

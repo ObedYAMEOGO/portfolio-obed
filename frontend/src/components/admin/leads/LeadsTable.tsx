@@ -1,26 +1,6 @@
 // src/components/admin/LeadsTable.tsx
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import {
-  getLeads,
-} from "@/lib/server-api";
-
-import {
-  Mail,
-  MessageSquare,
-  User,
-  Calendar,
-  Trash2,
-} from "lucide-react";
-
+import { getLeads } from "@/lib/server-api";
 import DeleteLeadButton from "../leads/DeleteLeadButton";
 
 interface Lead {
@@ -32,154 +12,106 @@ interface Lead {
 }
 
 export default async function LeadsTable() {
-  const leads: Lead[] =
-    await getLeads();
+  const leads: Lead[] = await getLeads();
+  const validLeads = Array.isArray(leads) ? leads : [];
 
   return (
-    <section className="space-y-6">
+    <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+
       {/* HEADER */}
-      <div>
-        <h2 className="font-mono text-xs uppercase tracking-widest text-neutral-500">
-          Leads
-        </h2>
+      <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-5">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neutral-400">
+            Contact
+          </p>
+          <h2 className="mt-0.5 text-lg font-semibold tracking-tight text-neutral-900">
+            Leads
+          </h2>
+        </div>
+
+        <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11px] font-semibold text-neutral-500">
+          {validLeads.length} total
+        </span>
       </div>
 
-      {/* TABLE */}
-      <div className="overflow-hidden border border-neutral-200 bg-white">
-        <Table>
-          <TableHeader className="bg-neutral-50">
-            <TableRow className="border-b border-neutral-200 hover:bg-transparent">
-              <TableHead className="w-55 py-4 font-mono text-[10px] uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <User className="h-3 w-3" />
-                  Sender_Identity
-                </div>
-              </TableHead>
+      {/* EMPTY */}
+      {validLeads.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16">
+          <p className="text-sm text-neutral-400">No leads yet.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
 
-              <TableHead className="w-65 py-4 font-mono text-[10px] uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-3 w-3" />
-                  Contact_Endpoint
-                </div>
-              </TableHead>
+            <thead>
+              <tr className="border-b border-neutral-100 bg-neutral-50">
+                {["Name", "Email", "Message", "Date", ""].map((h) => (
+                  <th
+                    key={h}
+                    className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400 last:text-right"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
-              <TableHead className="py-4 font-mono text-[10px] uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-3 w-3" />
-                  Encrypted_Message
-                </div>
-              </TableHead>
+            <tbody className="divide-y divide-neutral-100">
+              {validLeads.map((lead) => (
+                <tr key={lead.id} className="group transition-colors hover:bg-neutral-50">
 
-              <TableHead className="w-45 py-4 text-right font-mono text-[10px] uppercase tracking-widest">
-                <div className="flex items-center justify-end gap-2">
-                  <Calendar className="h-3 w-3" />
-                  Timestamp
-                </div>
-              </TableHead>
-
-              <TableHead className="w-32 py-4 text-right font-mono text-[10px] uppercase tracking-widest">
-                <div className="flex items-center justify-end gap-2">
-                  <Trash2 className="h-3 w-3" />
-                  Actions
-                </div>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {!Array.isArray(leads) ||
-            leads.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="h-32 text-center font-mono text-[10px] uppercase tracking-widest text-neutral-400"
-                >
-                  NO_INBOUND_COMMUNICATIONS_FOUND
-                </TableCell>
-              </TableRow>
-            ) : (
-              leads.map((lead) => (
-                <TableRow
-                  key={lead.id}
-                  className="group border-b border-neutral-100 transition-colors hover:bg-neutral-50"
-                >
                   {/* NAME */}
-                  <TableCell className="py-5">
-                    <span className="font-mono text-[12px] text-[#050505]">
-                      {lead.full_name ??
-                        "Unknown"}
+                  <td className="px-6 py-4">
+                    <span className="text-[14px] font-medium text-neutral-900">
+                      {lead.full_name ?? "—"}
                     </span>
-                  </TableCell>
+                  </td>
 
                   {/* EMAIL */}
-                  <TableCell>
-                    <span className="font-mono text-[11px] lowercase text-neutral-500">
-                      {lead.email ??
-                        "No Email"}
-                    </span>
-                  </TableCell>
+                  <td className="px-6 py-4">
+                    <a
+                      href={`mailto:${lead.email}`}
+                      className="text-[13px] text-neutral-500 transition-colors hover:text-neutral-900"
+                    >
+                      {lead.email ?? "—"}
+                    </a>
+                  </td>
 
                   {/* MESSAGE */}
-                  <TableCell>
-                    <p className="max-w-md font-sans text-[13px] text-neutral-600 transition-all duration-300 line-clamp-1 group-hover:line-clamp-none">
-                      {lead.message ??
-                        "No message provided."}
+                  <td className="px-6 py-4">
+                    <p className="max-w-sm line-clamp-1 text-[13px] leading-relaxed text-neutral-500 transition-all duration-300 group-hover:line-clamp-none">
+                      {lead.message ?? "No message provided."}
                     </p>
-                  </TableCell>
+                  </td>
 
                   {/* DATE */}
-                  <TableCell className="text-right">
-                    <span className="font-mono text-[10px] text-neutral-400">
+                  <td className="px-6 py-4">
+                    <span className="text-[12px] text-neutral-400">
                       {lead.created_at
-                        ? new Date(
-                            lead.created_at ??
-                              "",
-                          )
-                            .toLocaleString(
-                              "en-GB",
-                              {
-                                year:
-                                  "numeric",
-                                month:
-                                  "2-digit",
-                                day:
-                                  "2-digit",
-                                hour:
-                                  "2-digit",
-                                minute:
-                                  "2-digit",
-                                hour12:
-                                  false,
-                              },
-                            )
-                            .replace(
-                              ",",
-                              "",
-                            )
-                            .replace(
-                              /\//g,
-                              ".",
-                            )
-                        : "N/A"}
+                        ? new Date(lead.created_at).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "2-digit",
+                          })
+                        : "—"}
                     </span>
-                  </TableCell>
+                  </td>
 
                   {/* ACTIONS */}
-                  <TableCell>
+                  <td className="px-6 py-4">
                     <div className="flex justify-end">
-                      <DeleteLeadButton
-                        leadId={Number(
-                          lead.id,
-                        )}
-                      />
+                      <DeleteLeadButton leadId={Number(lead.id)} />
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  </td>
+
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+        </div>
+      )}
+
     </section>
   );
 }

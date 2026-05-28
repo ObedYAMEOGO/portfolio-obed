@@ -1,7 +1,13 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
+
 WORKDIR /app
+
 COPY package*.json ./
+
 RUN npm install
+
 COPY . .
-# Development target
+
+EXPOSE 3000
+
 CMD ["npm", "run", "dev"]

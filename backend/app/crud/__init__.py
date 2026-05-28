@@ -17,6 +17,7 @@ from app.crud.leads import (
 from app.crud.subscribers import (
     SubscriberRepository,
 )
+from .users import UserRepository
 
 __all__ = [
     "PostRepository",
@@ -24,4 +25,5 @@ __all__ = [
     "MaterialRepository",
     "LeadRepository",
     "SubscriberRepository",
+    "UserRepository",
 ]

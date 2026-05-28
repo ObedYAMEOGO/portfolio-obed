@@ -12,56 +12,103 @@ import {
 ========================================================= */
 
 export const postsApi = {
-  async getAll(): Promise<Post[]> {
-    const response =
-      await api.get(
-        "/admin/posts",
+  async getAll(): Promise<
+    Post[]
+  > {
+    try {
+      const response =
+        await api.get(
+          "/admin/posts",
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to fetch posts:",
+        error,
       );
 
-    return response.data;
+      throw error;
+    }
   },
 
   async getById(
     id: number,
   ): Promise<Post> {
-    const response =
-      await api.get(
-        `/admin/posts/${id}`,
+    try {
+      const response =
+        await api.get(
+          `/admin/posts/${id}`,
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to fetch post:",
+        error,
       );
 
-    return response.data;
+      throw error;
+    }
   },
 
   async create(
     data: PostCreate,
   ): Promise<Post> {
-    const response =
-      await api.post(
-        "/admin/posts",
-        data,
+    try {
+      const response =
+        await api.post(
+          "/admin/posts",
+          data,
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to create post:",
+        error,
       );
 
-    return response.data;
+      throw error;
+    }
   },
 
   async update(
     id: number,
     data: PostCreate,
   ): Promise<Post> {
-    const response =
-      await api.put(
-        `/admin/posts/${id}`,
-        data,
+    try {
+      const response =
+        await api.put(
+          `/admin/posts/${id}`,
+          data,
+        );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to update post:",
+        error,
       );
 
-    return response.data;
+      throw error;
+    }
   },
 
   async delete(
     id: number,
   ): Promise<void> {
-    await api.delete(
-      `/admin/posts/${id}`,
-    );
+    try {
+      await api.delete(
+        `/admin/posts/${id}`,
+      );
+    } catch (error) {
+      console.error(
+        "Failed to delete post:",
+        error,
+      );
+
+      throw error;
+    }
   },
 };

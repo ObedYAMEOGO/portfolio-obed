@@ -1,30 +1,31 @@
-from fastapi import (
+from fastapi import (  # type: ignore
     APIRouter,
-    BackgroundTasks,
     Depends,
     HTTPException,
 )
 
-from sqlalchemy.ext.asyncio import (
+from sqlalchemy.ext.asyncio import (  # type: ignore
     AsyncSession,
 )
 
-from sqlalchemy.future import select
+from sqlalchemy.future import select  # type: ignore
 
 from app.database import get_db
 
-from app.models import Subscriber
+from app.models import (
+    Subscriber,
+)
 
 from app.schemas import (
     SubscriberCreate,
 )
 
-from app.crud import (
-    SubscriberRepository,
-)
+# =========================================================
+# CELERY TASK
+# =========================================================
 
 from app.tasks import (
-    send_welcome_email,
+    send_welcome_email_task,
 )
 
 router = APIRouter(
@@ -32,10 +33,13 @@ router = APIRouter(
 )
 
 
+# =========================================================
+# SUBSCRIBE TO BLOG NEWSLETTER
+# =========================================================
+
 @router.post("/subscribe")
 async def subscribe(
     subscriber: SubscriberCreate,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Subscriber).where(
@@ -44,42 +48,73 @@ async def subscribe(
 
     result = await db.execute(query)
 
-    existing_sub = (
+    existing_subscriber = (
         result.scalars().first()
     )
 
-    if existing_sub:
+    # =====================================================
+    # EXISTING SUBSCRIBER
+    # =====================================================
 
-        if existing_sub.is_active:
+    if existing_subscriber:
+
+        # Already subscribed
+        if existing_subscriber.is_active:
             raise HTTPException(
                 status_code=400,
                 detail="Already subscribed.",
             )
 
-        existing_sub.is_active = True
+        # Re-enable newsletter
+        existing_subscriber.is_active = True
 
         await db.commit()
 
+        # =================================================
+        # SEND WELCOME EMAIL VIA CELERY
+        # =================================================
+
+        send_welcome_email_task.delay(
+            existing_subscriber.email
+        )
+
         return {
             "status": "success",
-            "message": "Subscription re-activated.",
+            "message": "Newsletter subscription re-activated.",
         }
 
-    await SubscriberRepository.create(
-        db,
-        subscriber,
+    # =====================================================
+    # NEW SUBSCRIBER
+    # =====================================================
+
+    new_subscriber = Subscriber(
+        email=subscriber.email,
+        is_active=True,
     )
 
-    background_tasks.add_task(
-        send_welcome_email,
-        subscriber.email,
+    db.add(new_subscriber)
+
+    await db.commit()
+
+    await db.refresh(new_subscriber)
+
+    # =====================================================
+    # SEND WELCOME EMAIL VIA CELERY
+    # =====================================================
+
+    send_welcome_email_task.delay(
+        new_subscriber.email
     )
 
     return {
         "status": "success",
-        "message": "Subscription initialized.",
+        "message": "Successfully subscribed to newsletter.",
     }
 
+
+# =========================================================
+# UNSUBSCRIBE FROM BLOG NEWSLETTER
+# =========================================================
 
 @router.post("/unsubscribe")
 async def unsubscribe(
@@ -92,19 +127,29 @@ async def unsubscribe(
 
     result = await db.execute(query)
 
-    sub = result.scalars().first()
+    existing_subscriber = (
+        result.scalars().first()
+    )
 
-    if not sub:
+    if not existing_subscriber:
         raise HTTPException(
             status_code=404,
-            detail="Email not found.",
+            detail="Subscriber not found.",
         )
 
-    sub.is_active = False
+    # Already unsubscribed
+    if not existing_subscriber.is_active:
+        return {
+            "status": "success",
+            "message": "Already unsubscribed.",
+        }
+
+    # Disable newsletter
+    existing_subscriber.is_active = False
 
     await db.commit()
 
     return {
         "status": "success",
-        "message": "Unsubscribed.",
+        "message": "Successfully unsubscribed from newsletter.",
     }

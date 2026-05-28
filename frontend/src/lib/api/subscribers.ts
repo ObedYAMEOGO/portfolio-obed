@@ -2,7 +2,9 @@
 
 import api from "./index";
 
-import { Subscriber } from "@/types";
+import {
+  Subscriber,
+} from "@/types";
 
 export const subscribersApi = {
   async subscribe(

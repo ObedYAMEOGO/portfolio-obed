@@ -1,23 +1,23 @@
 // src/lib/api.ts
 
-import axios from "axios";
-
 /* =========================================================
-   BASE CONFIG
+   CLIENT API
+   Browser-safe axios instance
 ========================================================= */
 
+import axios from "axios";
+
 const API_BASE_URL =
-  process.env
-    .NEXT_PUBLIC_API_URL;
+  process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_BASE_URL) {
   throw new Error(
-    "NEXT_PUBLIC_API_URL is missing.",
+    "NEXT_PUBLIC_API_URL is missing",
   );
 }
 
 /* =========================================================
-   AXIOS INSTANCE 
+   AXIOS INSTANCE
 ========================================================= */
 
 const api = axios.create({
@@ -27,41 +27,12 @@ const api = axios.create({
     "Content-Type":
       "application/json",
   },
+
+  timeout: 30000,
 });
 
 /* =========================================================
-   ADMIN AUTH HEADER
-========================================================= */
-
-api.interceptors.request.use(
-  (config) => {
-    const adminKey =
-      process.env
-        .NEXT_PUBLIC_ADMIN_SECRET;
-
-    if (
-      adminKey &&
-      config.url?.includes(
-        "/admin",
-      )
-    ) {
-      config.headers[
-        "x-admin-key"
-      ] = adminKey;
-    }
-
-    return config;
-  },
-
-  (error) => {
-    return Promise.reject(
-      error,
-    );
-  },
-);
-
-/* =========================================================
-   RESPONSE ERROR HANDLER
+   RESPONSE INTERCEPTOR
 ========================================================= */
 
 api.interceptors.response.use(
@@ -69,205 +40,51 @@ api.interceptors.response.use(
     response,
 
   (error) => {
-    const message =
-      error?.response?.data
-        ?.detail ||
-      error?.message ||
-      "Request failed.";
+    try {
+      console.error(
+        "CLIENT_API_ERROR:",
+        {
+          message:
+            error?.message ||
+            "Unknown error",
+
+          status:
+            error?.response
+              ?.status,
+
+          url:
+            error?.config
+              ?.url,
+
+          method:
+            error?.config
+              ?.method,
+
+          isNetworkError:
+            !error?.response,
+
+          isTimeout:
+            error?.code ===
+            "ECONNABORTED",
+        },
+      );
+    } catch (
+      loggingError
+    ) {
+      console.error(
+        "API_LOGGING_FAILED:",
+        loggingError,
+      );
+    }
 
     return Promise.reject(
-      new Error(message),
+      error,
     );
   },
 );
 
 /* =========================================================
-   GENERIC REQUEST
+   EXPORT
 ========================================================= */
-
-async function request<T>(
-  url: string,
-  options?: {
-    method?: string;
-    body?: unknown;
-  },
-): Promise<T> {
-  const response =
-    await api.request<T>({
-      url,
-      method:
-        options?.method ||
-        "GET",
-      data: options?.body,
-    });
-
-  return response.data;
-}
-
-/* =========================================================
-   BLOG API
-========================================================= */
-
-export const blogApi = {
-  getAll: () =>
-    request("/posts"),
-
-  getBySlug: (
-    slug: string,
-  ) =>
-    request(`/posts/${slug}`),
-
-  create: (
-    data: unknown,
-  ) =>
-    request(
-      "/admin/posts",
-      {
-        method: "POST",
-        body: data,
-      },
-    ),
-
-  update: (
-    id: number,
-    data: unknown,
-  ) =>
-    request(
-      `/admin/posts/${id}`,
-      {
-        method: "PUT",
-        body: data,
-      },
-    ),
-
-  delete: (
-    id: number,
-  ) =>
-    request(
-      `/admin/posts/${id}`,
-      {
-        method: "DELETE",
-      },
-    ),
-};
-
-/* =========================================================
-   PROJECT API
-========================================================= */
-
-export const projectApi = {
-  getAll: () =>
-    request("/projects"),
-
-  getById: (
-    id: number,
-  ) =>
-    request(
-      `/admin/projects/${id}`,
-    ),
-
-  create: (
-    data: unknown,
-  ) =>
-    request(
-      "/admin/projects",
-      {
-        method: "POST",
-        body: data,
-      },
-    ),
-
-  update: (
-    id: number,
-    data: unknown,
-  ) =>
-    request(
-      `/admin/projects/${id}`,
-      {
-        method: "PUT",
-        body: data,
-      },
-    ),
-
-  delete: (
-    id: number,
-  ) =>
-    request(
-      `/admin/projects/${id}`,
-      {
-        method: "DELETE",
-      },
-    ),
-};
-
-/* =========================================================
-   MATERIAL API
-========================================================= */
-
-export const materialApi = {
-  getAll: () =>
-    request("/materials"),
-
-  getById: (
-    id: number,
-  ) =>
-    request(
-      `/admin/materials/${id}`,
-    ),
-
-  create: (
-    data: unknown,
-  ) =>
-    request(
-      "/admin/materials",
-      {
-        method: "POST",
-        body: data,
-      },
-    ),
-
-  update: (
-    id: number,
-    data: unknown,
-  ) =>
-    request(
-      `/admin/materials/${id}`,
-      {
-        method: "PUT",
-        body: data,
-      },
-    ),
-
-  delete: (
-    id: number,
-  ) =>
-    request(
-      `/admin/materials/${id}`,
-      {
-        method: "DELETE",
-      },
-    ),
-};
-
-/* =========================================================
-   LEADS API
-========================================================= */
-
-export const leadsApi = {
-  getAll: () =>
-    request("/admin/leads"),
-};
-
-/* =========================================================
-   SUBSCRIBERS API
-========================================================= */
-
-export const subscribersApi =
-  {
-    getAll: () =>
-      request(
-        "/admin/subscribers",
-      ),
-  };
 
 export default api;

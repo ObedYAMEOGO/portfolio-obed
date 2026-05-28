@@ -1,125 +1,76 @@
-import {
-  Terminal,
-  Cpu,
-  Network,
-  Globe,
-} from "lucide-react";
+import { Cpu, Network, Globe } from "lucide-react";
+import styles from "./SkillMatrix.module.css";
 
 const capabilities = [
   {
-    title: "Intelligence_Engineering",
+    num: "01",
+    title: "Intelligence Engineering",
     icon: Cpu,
+    tag: "Machine learning",
     description:
-      "Develops scalable AI and machine learning systems using Python, leveraging NumPy, Pandas, Scikit-Learn, TensorFlow, and PyTorch to engineer predictive models, neural networks, and autonomous LLM/RAG systems.",
+      "Scalable AI & ML systems using Python, NumPy, Pandas, Scikit-Learn, TensorFlow and PyTorch — from predictive models to autonomous LLM/RAG pipelines.",
   },
   {
-    title: "Systems_&_Orchestration",
+    num: "02",
+    title: "Systems & Orchestration",
     icon: Network,
+    tag: "MLOps / DevOps",
     description:
-      "Engineers scalable full-stack and MLOps infrastructures using the PORN Stack, orchestrated through ZenML, Docker, and Kubernetes for efficient deployment and distributed execution.",
+      "Full-stack and MLOps infrastructures orchestrated through ZenML, Docker and Kubernetes — built for efficient deployment and distributed execution at scale.",
   },
   {
-    title: "Adaptability_&_Communication",
+    num: "03",
+    title: "Adaptability & Communication",
     icon: Globe,
+    tag: "Cross-functional",
     description:
-      "Adaptive and execution-driven engineer with strong communication skills in French and English, capable of bridging technical systems with impactful business outcomes.",
+      "Execution-driven engineer bridging technical depth with business impact — fluent in French and English, comfortable across contexts from startup to enterprise.",
   },
 ];
 
 export default function CapabilityMatrix() {
   return (
-    <section className="border-t border-neutral-200 pt-16">
-      <div className="space-y-20">
-        {/* HEADER */}
-        <div className="flex items-center gap-6">
-          <h2
-            className="
-              flex
-              items-center
-              gap-2
-              font-mono
-              text-xs
-              font-bold
-              uppercase
-              tracking-[0.25em]
-              text-[#050505]
-            "
-          >
-            <Terminal className="h-3.5 w-3.5" />
+    <section className={styles.section}>
+      <p className={styles.eyebrow}>Capabilities</p>
+      <h2 className={styles.title}>
+        Capability &amp; <em>Execution</em>
+      </h2>
 
-            Capability_&_Execution_Architecture
-          </h2>
+      <div className={styles.grid}>
+        {capabilities.map(({ num, title, icon: Icon, tag, description }) => (
+          <article key={num} className={styles.card}>
+            <div className={styles.dot} />
+            <div className={styles.glow} />
 
-          <div className="h-px grow bg-neutral-200" />
-        </div>
+            <div className={styles.num}>{num}</div>
 
-        {/* CAPABILITIES */}
-        <div
-          className="
-            grid
-            grid-cols-1
-            gap-8
-            md:grid-cols-3
-          "
-        >
-          {capabilities.map(
-            ({
-              title,
-              icon: Icon,
-              description,
-            }) => (
-              <article
-                key={title}
-                className="
-                  flex
-                  flex-col
-                  border
-                  border-neutral-300
-                  bg-white
-                  p-6
-                  shadow-sm
-                  transition-colors
-                  duration-300
-                  hover:border-black
-                "
+            <div className={styles.iconWrap}>
+              <Icon className={styles.icon} size={18} strokeWidth={1.5} />
+            </div>
+
+            <h3 className={styles.cardTitle}>{title}</h3>
+            <p className={styles.desc}>{description}</p>
+
+            <div className={styles.footer}>
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 13 13"
+                fill="none"
+                aria-hidden="true"
               >
-                {/* TITLE */}
-                <div
-                  className="
-                    mb-4
-                    flex
-                    items-center
-                    gap-2
-                    border-b
-                    border-neutral-100
-                    pb-2
-                    font-mono
-                    text-[11px]
-                    font-bold
-                    uppercase
-                    tracking-wider
-                    text-neutral-400
-                  "
-                >
-                  <Icon className="h-4 w-4 text-black" />
-
-                  <span>{title}</span>
-                </div>
-
-                {/* DESCRIPTION */}
-                <p
-                  className="
-                    text-[13px]
-                    leading-relaxed
-                    text-neutral-600
-                  "
-                >
-                  {description}
-                </p>
-              </article>
-            ),
-          )}
-        </div>
+                <path
+                  d="M2 6.5h9M7.5 3l3.5 3.5L7.5 10"
+                  stroke="#9b5c3d"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>{tag}</span>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );

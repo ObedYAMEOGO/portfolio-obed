@@ -4,6 +4,15 @@ import "server-only";
 
 import axios from "axios";
 
+import type {
+  DashboardStats,
+  Lead,
+  Material,
+  Post,
+  Project,
+  Subscriber,
+} from "@/types";
+
 /* =========================================================
    ENV
 ========================================================= */
@@ -11,8 +20,8 @@ import axios from "axios";
 const API_BASE_URL =
   process.env.INTERNAL_API_URL;
 
-const ADMIN_KEY =
-  process.env.NEXT_PUBLIC_ADMIN_SECRET;
+const ADMIN_SECRET =
+  process.env.ADMIN_SECRET;
 
 if (!API_BASE_URL) {
   throw new Error(
@@ -20,34 +29,81 @@ if (!API_BASE_URL) {
   );
 }
 
-if (!ADMIN_KEY) {
+if (!ADMIN_SECRET) {
   throw new Error(
-    "NEXT_PUBLIC_ADMIN_SECRET is missing.",
+    "ADMIN_SECRET is missing.",
   );
 }
+
 /* =========================================================
    AXIOS INSTANCE
 ========================================================= */
 
 export const adminApi =
   axios.create({
-    baseURL:
-      API_BASE_URL,
+    baseURL: API_BASE_URL,
+
     headers: {
       "Content-Type":
         "application/json",
-      "x-admin-key":
-        ADMIN_KEY,
+
+      "x-admin-secret":
+        ADMIN_SECRET,
     },
+
+    timeout: 30000,
   });
+
+/* =========================================================
+   ERROR HANDLING
+========================================================= */
+
+adminApi.interceptors.response.use(
+  (response) =>
+    response,
+
+  (error) => {
+    if (error.response) {
+      console.error(
+        "SERVER_ADMIN_API_ERROR:",
+        {
+          status:
+            error.response.status,
+
+          url: error.config
+            ?.url,
+
+          data:
+            error.response.data,
+        },
+      );
+    } else if (
+      error.request
+    ) {
+      console.error(
+        "SERVER_ADMIN_API_NETWORK_ERROR:",
+        error.message,
+      );
+    } else {
+      console.error(
+        "SERVER_ADMIN_API_UNKNOWN_ERROR:",
+        error.message,
+      );
+    }
+
+    return Promise.reject(
+      error,
+    );
+  },
+);
 
 /* =========================================================
    DASHBOARD STATS
 ========================================================= */
 
-export async function getDashboardStats() {
+export async function getDashboardStats(): Promise<DashboardStats> {
   const response =
-    await adminApi.get(
+    await adminApi.get<DashboardStats>(
       "/admin/stats",
     );
 
@@ -58,20 +114,22 @@ export async function getDashboardStats() {
    POSTS
 ========================================================= */
 
-export async function getPosts() {
+export async function getPosts(): Promise<
+  Post[]
+> {
   const response =
-    await adminApi.get(
-      "/admin/posts",
-    );
+    await adminApi.get<
+      Post[]
+    >("/admin/posts");
 
   return response.data;
 }
 
 export async function getPost(
   id: number,
-) {
+): Promise<Post> {
   const response =
-    await adminApi.get(
+    await adminApi.get<Post>(
       `/admin/posts/${id}`,
     );
 
@@ -82,20 +140,22 @@ export async function getPost(
    PROJECTS
 ========================================================= */
 
-export async function getProjects() {
+export async function getProjects(): Promise<
+  Project[]
+> {
   const response =
-    await adminApi.get(
-      "/admin/projects",
-    );
+    await adminApi.get<
+      Project[]
+    >("/admin/projects");
 
   return response.data;
 }
 
 export async function getProject(
   id: number,
-) {
+): Promise<Project> {
   const response =
-    await adminApi.get(
+    await adminApi.get<Project>(
       `/admin/projects/${id}`,
     );
 
@@ -106,20 +166,22 @@ export async function getProject(
    MATERIALS
 ========================================================= */
 
-export async function getMaterials() {
+export async function getMaterials(): Promise<
+  Material[]
+> {
   const response =
-    await adminApi.get(
-      "/admin/materials",
-    );
+    await adminApi.get<
+      Material[]
+    >("/admin/materials");
 
   return response.data;
 }
 
 export async function getMaterial(
   id: number,
-) {
+): Promise<Material> {
   const response =
-    await adminApi.get(
+    await adminApi.get<Material>(
       `/admin/materials/${id}`,
     );
 
@@ -130,11 +192,13 @@ export async function getMaterial(
    LEADS
 ========================================================= */
 
-export async function getLeads() {
+export async function getLeads(): Promise<
+  Lead[]
+> {
   const response =
-    await adminApi.get(
-      "/admin/leads",
-    );
+    await adminApi.get<
+      Lead[]
+    >("/admin/leads");
 
   return response.data;
 }
@@ -143,9 +207,13 @@ export async function getLeads() {
    SUBSCRIBERS
 ========================================================= */
 
-export async function getSubscribers() {
+export async function getSubscribers(): Promise<
+  Subscriber[]
+> {
   const response =
-    await adminApi.get(
+    await adminApi.get<
+      Subscriber[]
+    >(
       "/admin/subscribers",
     );
 

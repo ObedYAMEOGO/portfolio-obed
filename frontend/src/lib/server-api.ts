@@ -1,13 +1,22 @@
+// src/lib/server-api.ts
+
 import "server-only";
 
-import { Project } from "@/types";
+import {
+  PaginatedPosts,
+  Project,
+  ProjectCreate,
+} from "@/types";
+
+/* =========================================================
+   ENV
+========================================================= */
 
 const API_URL =
-  process.env.INTERNAL_API_URL ||
-  "http://backend:8000/api/v1";
+  process.env.INTERNAL_API_URL;
 
 const ADMIN_SECRET =
-  process.env.NEXT_PUBLIC_ADMIN_SECRET || "";
+  process.env.ADMIN_SECRET;
 
 if (!API_URL) {
   throw new Error(
@@ -17,52 +26,157 @@ if (!API_URL) {
 
 if (!ADMIN_SECRET) {
   throw new Error(
-    "NEXT_PUBLIC_ADMIN_SECRET is missing.",
+    "ADMIN_SECRET is missing.",
   );
 }
 
 /* =========================================================
-   GENERIC FETCHER
+   SAFE CONSTANTS
+========================================================= */
+
+const SAFE_API_URL =
+  API_URL;
+
+const SAFE_ADMIN_SECRET =
+  ADMIN_SECRET;
+
+/* =========================================================
+   BASE FETCH
 ========================================================= */
 
 async function apiFetch<T>(
   endpoint: string,
+
   options?: RequestInit,
 ): Promise<T> {
-  const response = await fetch(
-    `${API_URL}${endpoint}`,
-    {
-      ...options,
+  try {
+    const response =
+      await fetch(
+        `${SAFE_API_URL}${endpoint}`,
+        {
+          ...options,
 
-      headers: {
-        "Content-Type":
-          "application/json",
+          cache:
+            "no-store",
 
-        ...(options?.headers || {}),
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "x-admin-secret":
+              SAFE_ADMIN_SECRET,
+
+            ...options?.headers,
+          },
+        },
+      );
+
+    if (!response.ok) {
+      const errorText =
+        await response.text();
+
+      console.error(
+        "SERVER_API_ERROR:",
+        {
+          endpoint,
+
+          status:
+            response.status,
+
+          error:
+            errorText,
+        },
+      );
+
+      throw new Error(
+        `API Error ${response.status}`,
+      );
+    }
+
+    /* DELETE responses */
+    if (
+      response.status ===
+      204
+    ) {
+      return undefined as T;
+    }
+
+    return (await response.json()) as T;
+  } catch (error) {
+    console.error(
+      "SERVER_FETCH_FAILURE:",
+      {
+        endpoint,
+
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
       },
-
-      cache: "no-store",
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `API Error ${response.status}`,
     );
-  }
 
-  return (await response.json()) as T;
+    throw error;
+  }
 }
 
 /* =========================================================
-   ADMIN HEADERS
+   REST HELPERS
 ========================================================= */
 
-function adminHeaders() {
-  return {
-    "x-admin-key":
-      ADMIN_SECRET,
-  };
+function get<T>(
+  endpoint: string,
+) {
+  return apiFetch<T>(
+    endpoint,
+  );
+}
+
+function post<T>(
+  endpoint: string,
+
+  body: unknown,
+) {
+  return apiFetch<T>(
+    endpoint,
+    {
+      method: "POST",
+
+      body:
+        JSON.stringify(
+          body,
+        ),
+    },
+  );
+}
+
+function put<T>(
+  endpoint: string,
+
+  body: unknown,
+) {
+  return apiFetch<T>(
+    endpoint,
+    {
+      method: "PUT",
+
+      body:
+        JSON.stringify(
+          body,
+        ),
+    },
+  );
+}
+
+function del(
+  endpoint: string,
+) {
+  return apiFetch<void>(
+    endpoint,
+    {
+      method:
+        "DELETE",
+    },
+  );
 }
 
 /* =========================================================
@@ -71,153 +185,203 @@ function adminHeaders() {
 
 export interface DashboardStats {
   total_projects: number;
+
   active_subscribers: number;
+
   total_leads: number;
+
   total_articles: number;
+
   total_materials: number;
+
   system_status: string;
 }
 
 export interface Post {
   id: number;
+
   title: string;
+
   slug: string;
+
   summary: string;
+
   content: string;
+
   feature_image_url?: string;
+
   category?: string;
+
   is_published: boolean;
+
   created_at?: string;
+
   updated_at?: string;
 }
 
 export interface Subscriber {
   id: number;
+
   email: string;
+
   is_active: boolean;
+
   created_at?: string;
 }
 
 export interface Lead {
   id: number;
+
   full_name: string;
+
   email: string;
+
   message: string;
+
   created_at?: string;
 }
 
 export interface Material {
   id: number;
+
   title: string;
+
   slug: string;
+
   description: string;
+
   material_type: string;
+
   video_context: string;
+
   category: string;
+
   resource_url: string;
+
   thumbnail_url?: string;
+
   is_published: boolean;
+
   created_at?: string;
+
   updated_at?: string;
 }
 
 /* =========================================================
-   PUBLIC API
+   PUBLIC PROJECTS
 ========================================================= */
 
-export async function getProjects(): Promise<
-  Project[]
-> {
-  return apiFetch<Project[]>(
+export async function getProjects() {
+  return get<Project[]>(
     "/projects",
   );
 }
 
 /* =========================================================
-   ADMIN API
+   ADMIN PROJECTS
 ========================================================= */
 
-export async function getDashboardStats(): Promise<DashboardStats> {
-  return apiFetch<DashboardStats>(
-    "/admin/stats",
-    {
-      headers: {
-        ...adminHeaders(),
-      },
-    },
+export async function getAdminProjects() {
+  return get<Project[]>(
+    "/admin/projects",
   );
 }
 
-export async function getAdminPosts(): Promise<
-  Post[]
-> {
-  return apiFetch<Post[]>(
-    "/admin/posts",
-    {
-      headers: {
-        ...adminHeaders(),
-      },
-    },
-  );
-}
-
-export async function getSubscribers(): Promise<
-  Subscriber[]
-> {
-  return apiFetch<Subscriber[]>(
-    "/admin/subscribers",
-    {
-      headers: {
-        ...adminHeaders(),
-      },
-    },
-  );
-}
-
-export async function getLeads(): Promise<
-  Lead[]
-> {
-  return apiFetch<Lead[]>(
-    "/admin/leads",
-    {
-      headers: {
-        ...adminHeaders(),
-      },
-    },
+export async function getAdminProjectById(
+  id: number,
+) {
+  return get<Project>(
+    `/admin/projects/${id}`,
   );
 }
 
 export async function createProject(
-  data: unknown,
+  data: ProjectCreate,
 ) {
-  return apiFetch(
+  return post<Project>(
     "/admin/projects",
-    {
-      method: "POST",
+    data,
+  );
+}
 
-      headers: {
-        ...adminHeaders(),
-      },
+export async function updateProject(
+  id: number,
 
-      body: JSON.stringify(data),
-    },
+  data: ProjectCreate,
+) {
+  return put<Project>(
+    `/admin/projects/${id}`,
+    data,
+  );
+}
+
+export async function deleteProject(
+  id: number,
+) {
+  return del(
+    `/admin/projects/${id}`,
+  );
+}
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+export async function getDashboardStats() {
+  return get<DashboardStats>(
+    "/admin/stats",
+  );
+}
+
+/* =========================================================
+   POSTS
+========================================================= */
+
+export async function getAdminPosts(
+  page: number = 1,
+
+  limit: number = 10,
+) {
+  return get<PaginatedPosts>(
+    `/admin/posts?page=${page}&limit=${limit}`,
+  );
+}
+
+/* =========================================================
+   SUBSCRIBERS
+========================================================= */
+
+export async function getSubscribers() {
+  return get<Subscriber[]>(
+    "/admin/subscribers",
+  );
+}
+
+/* =========================================================
+   LEADS
+========================================================= */
+
+export async function getLeads() {
+  return get<Lead[]>(
+    "/admin/leads",
+  );
+}
+
+/* =========================================================
+   MATERIALS
+========================================================= */
+
+export async function getMaterials() {
+  return get<Material[]>(
+    "/admin/materials",
   );
 }
 
 export async function createMaterial(
-  data: unknown,
+  data: Material,
 ) {
-  return apiFetch(
+  return post(
     "/admin/materials",
-    {
-      method: "POST",
-
-      headers: {
-        ...adminHeaders(),
-      },
-
-      body: JSON.stringify(data),
-    },
+    data,
   );
 }
-

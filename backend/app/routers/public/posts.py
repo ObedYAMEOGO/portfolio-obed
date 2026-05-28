@@ -1,20 +1,20 @@
 from typing import List
 
-from fastapi import (
+from fastapi import ( # type: ignore
     APIRouter,
     Depends,
     HTTPException,
 )
 
-from fastapi.responses import (
+from fastapi.responses import ( # type: ignore
     JSONResponse,
 )
 
-from sqlalchemy.ext.asyncio import (
+from sqlalchemy.ext.asyncio import ( # type: ignore
     AsyncSession,
 )
 
-from sqlalchemy.future import select
+from sqlalchemy.future import select # type: ignore
 
 from app.database import get_db
 
@@ -34,16 +34,12 @@ router = APIRouter(
     response_model=List[PostResponse],
 )
 async def list_published_posts(
-    skip: int = 0,
-    limit: int = 10,
     db: AsyncSession = Depends(get_db),
 ):
     query = (
         select(Post)
         .where(Post.is_published.is_(True))
         .order_by(Post.created_at.desc())
-        .offset(skip)
-        .limit(limit)
     )
 
     result = await db.execute(query)

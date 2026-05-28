@@ -13,7 +13,6 @@ import {
   Video,
   FolderOpen,
   Loader2,
-  Database,
   Pencil,
 } from "lucide-react";
 
@@ -25,15 +24,22 @@ interface Material {
   slug?: string;
   description?: string;
 
-  material_type: "DOCUMENT" | "VIDEO";
+  material_type:
+    | "DOCUMENT"
+    | "VIDEO";
 
-  video_context: "SINGLE" | "PLAYLIST" | "NONE";
+  video_context:
+    | "SINGLE"
+    | "PLAYLIST"
+    | "NONE";
 
   category: string;
 
   resource_url: string;
 
-  thumbnail_url?: string | null;
+  thumbnail_url?:
+    | string
+    | null;
 
   is_published?: boolean;
 
@@ -44,101 +50,183 @@ interface MaterialsTableProps {
   onRefresh?: () => void;
 }
 
-export default function MaterialsTable({ onRefresh }: MaterialsTableProps) {
-  const [materials, setMaterials] = useState<Material[]>([]);
+export default function MaterialsTable({
+  onRefresh,
+}: MaterialsTableProps) {
+  const [
+    materials,
+    setMaterials,
+  ] = useState<Material[]>(
+    [],
+  );
 
-  const [loading, setLoading] = useState(true);
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [
+    deletingId,
+    setDeletingId,
+  ] = useState<
+    number | null
+  >(null);
 
   /* =========================================================
      FETCH MATERIALS
   ========================================================= */
 
   useEffect(() => {
-    const fetchMaterials = async () => {
-      try {
-        const data = await materialsApi.getAll();
+    const fetchMaterials =
+      async () => {
+        try {
+          setLoading(true);
 
-        const sortedMaterials = (data ?? []).sort((a, b) => {
-          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const data =
+            await materialsApi.getAll();
 
-          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const sorted = (
+            data ?? []
+          ).sort((a, b) => {
+            const dateA =
+              a.created_at
+                ? new Date(
+                    a.created_at,
+                  ).getTime()
+                : 0;
 
-          return dateB - dateA;
-        });
+            const dateB =
+              b.created_at
+                ? new Date(
+                    b.created_at,
+                  ).getTime()
+                : 0;
 
-        setMaterials(sortedMaterials);
-      } catch (error) {
-        console.error("Failed to fetch materials:", error);
+            return (
+              dateB - dateA
+            );
+          });
 
-        toast.error("Failed to load materials registry.");
-      } finally {
-        setLoading(false);
-      }
-    };
+          setMaterials(
+            sorted,
+          );
+        } catch (error) {
+          console.error(
+            "Failed to fetch materials:",
+            error,
+          );
+
+          toast.error(
+            "Failed to load materials.",
+          );
+        } finally {
+          setLoading(
+            false,
+          );
+        }
+      };
 
     fetchMaterials();
   }, []);
 
   /* =========================================================
-     DELETE
+     DELETE MATERIAL
   ========================================================= */
 
-  const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("Delete this material permanently?");
+  const handleDelete =
+    async (
+      id: number,
+    ) => {
+      const confirmed =
+        window.confirm(
+          "Delete this material permanently?",
+        );
 
-    if (!confirmed) {
-      return;
-    }
+      if (!confirmed)
+        return;
 
-    try {
-      setDeletingId(id);
+      try {
+        setDeletingId(id);
 
-      await materialsApi.delete(id);
+        await materialsApi.delete(
+          id,
+        );
 
-      setMaterials((prev) => prev.filter((material) => material.id !== id));
+        setMaterials(
+          (prev) =>
+            prev.filter(
+              (
+                material,
+              ) =>
+                material.id !==
+                id,
+            ),
+        );
 
-      toast.success("Material deleted successfully.");
+        toast.success(
+          "Material deleted.",
+        );
 
-      onRefresh?.();
-    } catch (error) {
-      console.error("Delete material error:", error);
+        onRefresh?.();
+      } catch (error) {
+        console.error(
+          error,
+        );
 
-      toast.error("Failed to delete material.");
-    } finally {
-      setDeletingId(null);
-    }
-  };
+        toast.error(
+          "Failed to delete material.",
+        );
+      } finally {
+        setDeletingId(
+          null,
+        );
+      }
+    };
 
   /* =========================================================
-     ICONS
+     HELPERS
   ========================================================= */
 
-  const renderMaterialIcon = (material: Material) => {
-    if (material.material_type === "DOCUMENT") {
-      return <FileText className="h-4 w-4 text-neutral-600" />;
+  const renderIcon = (
+    material: Material,
+  ) => {
+    if (
+      material.material_type ===
+      "DOCUMENT"
+    ) {
+      return (
+        <FileText className="h-4 w-4 text-neutral-500" />
+      );
     }
 
-    if (material.video_context === "PLAYLIST") {
-      return <FolderOpen className="h-4 w-4 text-amber-600" />;
+    if (
+      material.video_context ===
+      "PLAYLIST"
+    ) {
+      return (
+        <FolderOpen className="h-4 w-4 text-amber-500" />
+      );
     }
 
-    return <Video className="h-4 w-4 text-blue-600" />;
+    return (
+      <Video className="h-4 w-4 text-blue-500" />
+    );
   };
 
-  /* =========================================================
-     CONTEXT LABEL
-  ========================================================= */
-
-  const renderContext = (material: Material) => {
-    if (material.material_type === "DOCUMENT") {
-      return "DOCUMENT";
+  const renderContext = (
+    material: Material,
+  ) => {
+    if (
+      material.material_type ===
+      "DOCUMENT"
+    ) {
+      return "Document";
     }
 
-    return material.video_context === "PLAYLIST"
-      ? "VIDEO_PLAYLIST"
-      : "VIDEO_SINGLE";
+    return material.video_context ===
+      "PLAYLIST"
+      ? "Playlist"
+      : "Single video";
   };
 
   /* =========================================================
@@ -147,188 +235,210 @@ export default function MaterialsTable({ onRefresh }: MaterialsTableProps) {
 
   if (loading) {
     return (
-      <div className="mt-14 border border-neutral-200 bg-white p-10">
-        <div className="flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+      <div className="rounded-xl border border-neutral-200 bg-white p-10">
+        <div className="flex items-center justify-center gap-3 text-[12px] text-neutral-400">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Syncing_Materials_Registry
+
+          Loading materials…
         </div>
       </div>
     );
   }
 
   /* =========================================================
-     COMPONENT
+     RENDER
   ========================================================= */
 
   return (
-    <section className="mt-14 border border-neutral-200 bg-white">
+    <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
       {/* HEADER */}
 
       <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-5">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
-            Learning Assets Registry
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neutral-400">
+            Learning Assets
           </p>
 
-          <h2 className="mt-1 flex items-center gap-3 font-mono text-xl font-bold uppercase tracking-tight text-[#050505]">
-            <Database className="h-5 w-5" />
-            Indexed_Materials
+          <h2 className="mt-0.5 text-lg font-semibold tracking-tight text-neutral-900">
+            Materials
           </h2>
         </div>
 
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-          {materials.length} Assets
-        </div>
+        <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11px] font-semibold text-neutral-500">
+          {
+            materials.length
+          }{" "}
+          total
+        </span>
       </div>
 
-      {/* EMPTY STATE */}
+      {/* EMPTY */}
 
-      {materials.length === 0 ? (
-        <div className="flex h-40 flex-col items-center justify-center gap-2">
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-neutral-400">
-            No_Materials_Found
-          </p>
-
-          <p className="text-sm text-neutral-500">
-            Uploaded learning assets will appear here.
+      {materials.length ===
+      0 ? (
+        <div className="flex flex-col items-center justify-center gap-2 py-16">
+          <p className="text-sm text-neutral-400">
+            No materials
+            yet.
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-neutral-200 bg-neutral-50">
-                <th className="w-20 px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                  Type
-                </th>
-
-                <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                  Title
-                </th>
-
-                <th className="w-52 px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                  Category
-                </th>
-
-                <th className="w-52 px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                  Context
-                </th>
-
-                <th className="w-52 px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                  Created
-                </th>
-
-                <th className="w-40 px-6 py-4 text-right font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                  Actions
-                </th>
+              <tr className="border-b border-neutral-100 bg-neutral-50">
+                {[
+                  "Type",
+                  "Title",
+                  "Category",
+                  "Context",
+                  "Created",
+                  "",
+                ].map(
+                  (
+                    header,
+                  ) => (
+                    <th
+                      key={
+                        header
+                      }
+                      className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400 last:text-right"
+                    >
+                      {
+                        header
+                      }
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-neutral-100 bg-white">
-              {materials.map((material) => (
-                <tr
-                  key={material.id}
-                  className="transition-colors hover:bg-neutral-50"
-                >
-                  {/* TYPE */}
+            <tbody className="divide-y divide-neutral-100">
+              {materials.map(
+                (
+                  material,
+                ) => (
+                  <tr
+                    key={
+                      material.id
+                    }
+                    className="transition-colors hover:bg-neutral-50"
+                  >
+                    {/* TYPE */}
 
-                  <td className="px-6 py-5">
-                    <div className="flex h-9 w-9 items-center justify-center border border-neutral-200 bg-neutral-100">
-                      {renderMaterialIcon(material)}
-                    </div>
-                  </td>
-
-                  {/* TITLE */}
-
-                  <td className="px-6 py-5">
-                    <div className="space-y-1">
-                      <p className="max-w-md truncate text-sm font-medium text-[#050505]">
-                        {material.title}
-                      </p>
-
-                      <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-400">
-                        Asset_ID_
-                        {material.id}
-                      </p>
-                    </div>
-                  </td>
-
-                  {/* CATEGORY */}
-
-                  <td className="px-6 py-5">
-                    <span className="inline-flex border border-neutral-300 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-600">
-                      {material.category}
-                    </span>
-                  </td>
-
-                  {/* CONTEXT */}
-
-                  <td className="px-6 py-5">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-400">
-                      {renderContext(material)}
-                    </span>
-                  </td>
-
-                  {/* DATE */}
-
-                  <td className="px-6 py-5">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-400">
-                      {material.created_at
-                        ? new Date(material.created_at).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "2-digit",
-                            },
-                          )
-                        : "N/A"}
-                    </span>
-                  </td>
-
-                  {/* ACTIONS */}
-
-                  <td className="px-6 py-5">
-                    <div className="flex items-center justify-end gap-2">
-                      {/* OPEN */}
-
-                      <Link
-                        href={material.resource_url}
-                        target="_blank"
-                        className="inline-flex h-9 w-9 items-center justify-center border border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-[#050505]"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </Link>
-
-                      {/* EDIT */}
-
-                      {/* EDIT */}
-
-                      <Link
-                        href={`/admin/dashboard/materials/${material.id}/edit`}
-                        className="inline-flex h-9 w-9 items-center justify-center border border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-black"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Link>
-
-                      {/* DELETE */}
-
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(material.id)}
-                        disabled={deletingId === material.id}
-                        className="inline-flex h-9 w-9 items-center justify-center border border-red-200 bg-white text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {deletingId === material.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-3.5 w-3.5" />
+                    <td className="px-6 py-4">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50">
+                        {renderIcon(
+                          material,
                         )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </div>
+                    </td>
+
+                    {/* TITLE */}
+
+                    <td className="px-6 py-4">
+                      <div className="space-y-0.5">
+                        <p className="max-w-xs truncate text-[14px] font-medium text-neutral-900">
+                          {
+                            material.title
+                          }
+                        </p>
+
+                        <p className="text-[11px] text-neutral-400">
+                          #
+                          {
+                            material.id
+                          }
+                        </p>
+                      </div>
+                    </td>
+
+                    {/* CATEGORY */}
+
+                    <td className="px-6 py-4">
+                      <span className="rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600">
+                        {
+                          material.category
+                        }
+                      </span>
+                    </td>
+
+                    {/* CONTEXT */}
+
+                    <td className="px-6 py-4">
+                      <span className="text-[12px] text-neutral-500">
+                        {renderContext(
+                          material,
+                        )}
+                      </span>
+                    </td>
+
+                    {/* DATE */}
+
+                    <td className="px-6 py-4">
+                      <span className="text-[12px] text-neutral-400">
+                        {material.created_at
+                          ? new Date(
+                              material.created_at,
+                            ).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month:
+                                  "short",
+                                day: "2-digit",
+                              },
+                            )
+                          : "—"}
+                      </span>
+                    </td>
+
+                    {/* ACTIONS */}
+
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={
+                            material.resource_url
+                          }
+                          target="_blank"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-neutral-400 transition-colors hover:border-neutral-400 hover:text-neutral-900"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </Link>
+
+                        <Link
+                          href={`/admin/dashboard/materials/${material.id}/edit`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-neutral-400 transition-colors hover:border-neutral-400 hover:text-neutral-900"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDelete(
+                              material.id,
+                            )
+                          }
+                          disabled={
+                            deletingId ===
+                            material.id
+                          }
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {deletingId ===
+                          material.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>

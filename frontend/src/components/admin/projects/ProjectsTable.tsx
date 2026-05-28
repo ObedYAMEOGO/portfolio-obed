@@ -2,193 +2,307 @@
 
 import Link from "next/link";
 
-import type {
-  Project,
-} from "@/types";
-
 import {
-  projectsApi,
-} from "@/lib/api/projects";
-
-import {
-  FolderOpen,
-  Calendar,
   ExternalLink,
   Github,
   Pencil,
 } from "lucide-react";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
 import DeleteProjectButton from "./DeleteProjectButton";
+
+import {
+  getAdminProjects,
+} from "@/lib/server-api";
+
+import type {
+  Project,
+} from "@/types";
 
 export default async function ProjectsTable() {
   const projects: Project[] =
-    await projectsApi.getAll();
+    await getAdminProjects();
 
   return (
-    <section className="space-y-6">
-      {/* =========================================================
-          HEADER
-      ========================================================= */}
+    <section
+      className="
+        overflow-hidden
+        rounded-xl
+        border
+        border-neutral-200
+        bg-white
+      "
+    >
 
-      <div>
-        <h2 className="font-mono text-xs uppercase tracking-widest text-neutral-500">
-          Projects
-        </h2>
+      {/* HEADER */}
+
+      <div
+        className="
+          flex
+          items-center
+          justify-between
+          border-b
+          border-neutral-200
+          px-6
+          py-5
+        "
+      >
+        <div>
+          <p
+            className="
+              text-[10px]
+              font-semibold
+              uppercase
+              tracking-[0.25em]
+              text-neutral-400
+            "
+          >
+            Portfolio
+          </p>
+
+          <h2
+            className="
+              mt-0.5
+              text-lg
+              font-semibold
+              tracking-tight
+              text-neutral-900
+            "
+          >
+            Projects
+          </h2>
+        </div>
+
+        <span
+          className="
+            rounded-full
+            border
+            border-neutral-200
+            bg-neutral-50
+            px-3
+            py-1
+            text-[11px]
+            font-semibold
+            text-neutral-500
+          "
+        >
+          {projects.length} total
+        </span>
       </div>
 
-      {/* =========================================================
-          TABLE
-      ========================================================= */}
+      {/* EMPTY */}
 
-      <div className="w-full overflow-x-auto border border-neutral-200 bg-white">
-        <Table>
-          <TableHeader className="bg-neutral-50">
-            <TableRow className="border-b border-neutral-200 hover:bg-transparent">
-              {/* PROJECT */}
+      {projects.length === 0 ? (
+        <div
+          className="
+            flex
+            flex-col
+            items-center
+            justify-center
+            py-16
+          "
+        >
+          <p
+            className="
+              text-sm
+              text-neutral-400
+            "
+          >
+            No projects yet.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table
+            className="
+              w-full
+              border-collapse
+            "
+          >
 
-              <TableHead className="w-[280px] py-4 font-mono text-[10px] uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <FolderOpen className="h-3 w-3" />
-
-                  Project
-                </div>
-              </TableHead>
-
-              {/* DESCRIPTION */}
-
-              <TableHead className="py-4 font-mono text-[10px] uppercase tracking-widest">
-                Description
-              </TableHead>
-
-              {/* STATUS */}
-
-              <TableHead className="w-[140px] py-4 font-mono text-[10px] uppercase tracking-widest">
-                Status
-              </TableHead>
-
-              {/* LINKS */}
-
-              <TableHead className="w-[180px] py-4 font-mono text-[10px] uppercase tracking-widest">
-                Links
-              </TableHead>
-
-              {/* DATE */}
-
-              <TableHead className="w-[180px] py-4 text-right font-mono text-[10px] uppercase tracking-widest">
-                <div className="flex items-center justify-end gap-2">
-                  <Calendar className="h-3 w-3" />
-
-                  Created
-                </div>
-              </TableHead>
-
-              {/* ACTIONS */}
-
-              <TableHead className="w-[140px] py-4 text-right font-mono text-[10px] uppercase tracking-widest">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {projects.length ===
-            0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-32 text-center font-mono text-[10px] uppercase tracking-widest text-neutral-400"
-                >
-                  NO_PROJECTS_FOUND
-                </TableCell>
-              </TableRow>
-            ) : (
-              projects.map(
-                (
-                  project: Project
-                ) => (
-                  <TableRow
-                    key={
-                      project.id
-                    }
-                    className="group border-b border-neutral-100 transition-colors hover:bg-neutral-50"
+            <thead>
+              <tr
+                className="
+                  border-b
+                  border-neutral-100
+                  bg-neutral-50
+                "
+              >
+                {[
+                  "Project",
+                  "Description",
+                  "Status",
+                  "Links",
+                  "Created",
+                  "",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="
+                      px-6
+                      py-3
+                      text-left
+                      text-[10px]
+                      font-semibold
+                      uppercase
+                      tracking-[0.2em]
+                      text-neutral-400
+                      last:text-right
+                    "
                   >
-                    {/* =========================================================
-                        TITLE
-                    ========================================================= */}
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
-                    <TableCell className="py-5">
-                      <div className="space-y-2">
-                        <p className="font-mono text-[12px] text-[#050505]">
-                          {
-                            project.title
-                          }
+            <tbody
+              className="
+                divide-y
+                divide-neutral-100
+              "
+            >
+              {projects.map(
+                (project) => (
+                  <tr
+                    key={project.id}
+                    className="
+                      group
+                      transition-colors
+                      hover:bg-neutral-50
+                    "
+                  >
+
+                    {/* PROJECT */}
+
+                    <td className="px-6 py-4">
+                      <div className="space-y-0.5">
+
+                        <p
+                          className="
+                            max-w-55
+                            truncate
+                            text-[14px]
+                            font-medium
+                            text-neutral-900
+                          "
+                        >
+                          {project.title}
                         </p>
 
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
+                        <p
+                          className="
+                            text-[11px]
+                            text-neutral-400
+                          "
+                        >
                           /projects/
-                          {
-                            project.slug
-                          }
+                          {project.slug}
                         </p>
+
                       </div>
-                    </TableCell>
+                    </td>
 
-                    {/* =========================================================
-                        DESCRIPTION
-                    ========================================================= */}
+                    {/* DESCRIPTION */}
 
-                    <TableCell>
-                      <p className="max-w-md font-sans text-[13px] text-neutral-600 line-clamp-2 transition-all duration-300 group-hover:line-clamp-none">
+                    <td className="px-6 py-4">
+                      <p
+                        className="
+                          max-w-sm
+                          line-clamp-2
+                          text-[13px]
+                          leading-relaxed
+                          text-neutral-500
+                          transition-all
+                          duration-300
+                          group-hover:line-clamp-none
+                        "
+                      >
                         {
                           project.description
                         }
                       </p>
-                    </TableCell>
+                    </td>
 
-                    {/* =========================================================
-                        STATUS
-                    ========================================================= */}
+                    {/* STATUS */}
 
-                    <TableCell>
+                    <td className="px-6 py-4">
+
                       <span
-                        className={`inline-flex items-center border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${
-                          project.is_published
-                            ? "border-green-200 bg-green-50 text-green-700"
-                            : "border-yellow-200 bg-yellow-50 text-yellow-700"
-                        }`}
+                        className={`
+                          inline-flex
+                          items-center
+                          gap-1.5
+                          text-[12px]
+                          font-medium
+                          ${
+                            project.is_published
+                              ? "text-green-600"
+                              : "text-neutral-400"
+                          }
+                        `}
                       >
+
+                        <span
+                          className={`
+                            h-1.5
+                            w-1.5
+                            rounded-full
+                            ${
+                              project.is_published
+                                ? "bg-green-500"
+                                : "bg-neutral-300"
+                            }
+                          `}
+                        />
+
                         {project.is_published
                           ? "Published"
                           : "Draft"}
+
                       </span>
-                    </TableCell>
 
-                    {/* =========================================================
-                        LINKS
-                    ========================================================= */}
+                    </td>
 
-                    <TableCell>
-                      <div className="flex items-center gap-3">
+                    {/* LINKS */}
+
+                    <td className="px-6 py-4">
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                        "
+                      >
+
                         {project.live_url && (
                           <Link
                             href={
                               project.live_url
                             }
                             target="_blank"
-                            className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500 transition-colors hover:text-black"
+                            className="
+                              flex
+                              h-7
+                              w-7
+                              items-center
+                              justify-center
+                              rounded-lg
+                              border
+                              border-neutral-200
+                              text-neutral-400
+                              transition-colors
+                              hover:border-neutral-400
+                              hover:text-neutral-900
+                            "
+                            title="Live"
                           >
-                            <ExternalLink className="h-3 w-3" />
-
-                            Live
+                            <ExternalLink
+                              className="
+                                h-3.5
+                                w-3.5
+                              "
+                            />
                           </Link>
                         )}
 
@@ -198,100 +312,133 @@ export default async function ProjectsTable() {
                               project.github_url
                             }
                             target="_blank"
-                            className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500 transition-colors hover:text-black"
+                            className="
+                              flex
+                              h-7
+                              w-7
+                              items-center
+                              justify-center
+                              rounded-lg
+                              border
+                              border-neutral-200
+                              text-neutral-400
+                              transition-colors
+                              hover:border-neutral-400
+                              hover:text-neutral-900
+                            "
+                            title="GitHub"
                           >
-                            <Github className="h-3 w-3" />
-
-                            Code
+                            <Github
+                              className="
+                                h-3.5
+                                w-3.5
+                              "
+                            />
                           </Link>
                         )}
+
+                        {!project.live_url &&
+                          !project.github_url && (
+                            <span
+                              className="
+                                text-[12px]
+                                text-neutral-300
+                              "
+                            >
+                              —
+                            </span>
+                          )}
+
                       </div>
-                    </TableCell>
 
-                    {/* =========================================================
-                        CREATED DATE
-                    ========================================================= */}
+                    </td>
 
-                    <TableCell className="text-right">
-                      <span className="font-mono text-[10px] text-neutral-400">
+                    {/* DATE */}
+
+                    <td className="px-6 py-4">
+
+                      <span
+                        className="
+                          text-[12px]
+                          text-neutral-400
+                        "
+                      >
                         {project.created_at
                           ? new Date(
-                              project.created_at
+                              project.created_at,
+                            ).toLocaleDateString(
+                              "en-US",
+                              {
+                                year:
+                                  "numeric",
+                                month:
+                                  "short",
+                                day:
+                                  "2-digit",
+                              },
                             )
-                              .toLocaleString(
-                                "en-GB",
-                                {
-                                  year:
-                                    "numeric",
-                                  month:
-                                    "2-digit",
-                                  day:
-                                    "2-digit",
-                                  hour:
-                                    "2-digit",
-                                  minute:
-                                    "2-digit",
-                                  hour12:
-                                    false,
-                                }
-                              )
-                              .replace(
-                                ",",
-                                ""
-                              )
-                              .replace(
-                                /\//g,
-                                "."
-                              )
-                          : "N/A"}
+                          : "—"}
                       </span>
-                    </TableCell>
 
-                    {/* =========================================================
-                        ACTIONS
-                    ========================================================= */}
+                    </td>
 
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        {/* EDIT */}
+                    {/* ACTIONS */}
+
+                    <td className="px-6 py-4">
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          justify-end
+                          gap-2
+                        "
+                      >
 
                         <Link
                           href={`/admin/dashboard/projects/${project.id}/edit`}
                           className="
-                            inline-flex
-                            h-9
-                            w-9
+                            flex
+                            h-8
+                            w-8
                             items-center
                             justify-center
+                            rounded-lg
                             border
                             border-neutral-200
-                            bg-white
-                            text-neutral-600
+                            text-neutral-400
                             transition-colors
-                            hover:border-black
-                            hover:bg-black
-                            hover:text-white
+                            hover:border-neutral-400
+                            hover:text-neutral-900
                           "
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil
+                            className="
+                              h-3.5
+                              w-3.5
+                            "
+                          />
                         </Link>
-
-                        {/* DELETE */}
 
                         <DeleteProjectButton
                           projectId={
                             project.id
                           }
                         />
+
                       </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              )
-            )}
-          </TableBody>
-        </Table>
-      </div>
+
+                    </td>
+
+                  </tr>
+                ),
+              )}
+            </tbody>
+
+          </table>
+        </div>
+      )}
+
     </section>
   );
 }

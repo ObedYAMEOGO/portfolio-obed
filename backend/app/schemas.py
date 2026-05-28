@@ -207,3 +207,80 @@ class MaterialResponse(MaterialBase):
 
     class Config:
         from_attributes = True
+
+
+class PaginatedPosts(BaseModel):
+    items: List[PostResponse]
+
+    total: int
+    page: int
+    page_size: int
+
+    total_pages: int
+
+    has_next: bool
+    has_prev: bool
+    
+    
+  # ---------------------------------------------------
+# USER SCHEMAS
+# ---------------------------------------------------
+
+class UserSync(BaseModel):
+    clerk_id: str
+    email: EmailStr
+    full_name: Optional[str] = None
+
+
+class UserResponse(BaseModel):
+    id: int
+
+    clerk_id: str
+
+    email: EmailStr
+
+    full_name: Optional[str] = None
+
+    receive_notifications: bool
+
+    created_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    @field_validator(
+        "created_at",
+        mode="before",
+    )
+    @classmethod
+    def make_naive(cls, v):
+        return ensure_naive(v)
+    
+class UserNotificationUpdate(BaseModel):
+    email: EmailStr
+    
+class AdminUserResponse(BaseModel):
+    id: int
+
+    email: EmailStr
+
+    full_name: Optional[str] = None
+
+    receive_notifications: bool
+
+    is_newsletter_subscriber: bool
+
+    created_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    @field_validator(
+        "created_at",
+        mode="before",
+    )
+    @classmethod
+    def make_naive(cls, v):
+        return ensure_naive(v)

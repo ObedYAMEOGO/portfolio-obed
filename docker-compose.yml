@@ -1,4 +1,5 @@
 services:
+
   backend:
     build: ./backend
 
@@ -11,6 +12,23 @@ services:
     volumes:
       - ./backend:/app
 
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app/app
+
+    depends_on:
+      - redis
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   frontend:
     build: ./frontend
 
@@ -21,13 +39,46 @@ services:
       - ./frontend/.env.local
 
     environment:
+      # GORDON: NEXT_PUBLIC_API_URL must be localhost for browser requests.
+      # The browser runs on your machine and cannot resolve 'backend' hostname.
+      # Only use 'backend' for server-side requests via INTERNAL_API_URL.
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+
+      # GORDON: INTERNAL_API_URL uses Docker service name for server-to-server communication
       - INTERNAL_API_URL=http://backend:8000/api/v1
-      - ADMIN_SECRET=my_super_secret_admin_key_2026
+
+      - ADMIN_SECRET=7f487bda1315383ded56b0199431a74db9809689d5726698ccd0492c2028ccd0
 
     volumes:
       - ./frontend:/app
       - /app/node_modules
 
     depends_on:
+      backend:
+        condition: service_healthy
+
+
+
+  redis:
+    image: redis:7-alpine
+
+    ports:
+      - "6379:6379"
+
+
+
+  celery:
+    build: ./backend
+
+    command: >
+      celery -A app.tasks worker --loglevel=info
+
+    env_file:
+      - ./backend/.env
+
+    volumes:
+      - ./backend:/app
+
+    depends_on:
+      - redis
       - backend

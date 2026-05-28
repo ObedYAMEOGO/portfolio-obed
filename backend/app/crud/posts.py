@@ -3,6 +3,8 @@ from datetime import (
     timezone,
 )
 
+from sqlalchemy import func
+
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
@@ -24,6 +26,8 @@ class PostRepository:
     async def get_all(
         db: AsyncSession,
         published_only: bool = False,
+        skip: int = 0,
+        limit: int = 10,
     ):
         query = select(Post)
 
@@ -32,13 +36,32 @@ class PostRepository:
                 Post.is_published.is_(True)
             )
 
-        query = query.order_by(
-            Post.created_at.desc()
+        query = (
+            query
+            .order_by(Post.created_at.desc())
+            .offset(skip)
+            .limit(limit)
         )
 
         result = await db.execute(query)
 
         return result.scalars().all()
+
+    @staticmethod
+    async def count(
+        db: AsyncSession,
+        published_only: bool = False,
+    ):
+        query = select(func.count(Post.id))
+
+        if published_only:
+            query = query.where(
+                Post.is_published.is_(True)
+            )
+
+        result = await db.execute(query)
+
+        return result.scalar()
 
     @staticmethod
     async def get_by_id(

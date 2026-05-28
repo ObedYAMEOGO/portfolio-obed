@@ -1,8 +1,9 @@
 // components/sections/ManifestoSection.tsx
 
 import Link from "next/link";
-
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { Spotlight } from "@/components/ui/spotlight";
+import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 
 export default function ManifestoSection() {
   return (
@@ -11,76 +12,95 @@ export default function ManifestoSection() {
         relative
         w-full
         overflow-hidden
-        border-y
-        border-neutral-800
-        bg-[#050505]
-        py-14
-        md:mt-0
-        md:py-18
+        bg-neutral-950
+        py-20
+        md:py-28
       "
     >
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[180px_1fr]">
+      {/* Dotted Glow Background Layer */}
+      <DottedGlowBackground
+        gap={24}
+        radius={2}
+        color="rgba(255,255,255,0.7)"
+        glowColor="rgba(255, 255, 255, 0.6)"
+        opacity={0.4}
+        backgroundOpacity={0}
+        speedMin={0.3}
+        speedMax={0.8}
+        speedScale={0.5}
+        className="z-0"
+      />
+
+      {/* Spotlight Effect Layer */}
+      <Spotlight
+        className="-top-40 left-0 md:-top-20 md:left-60 z-1"
+        fill="white"
+      />
+
+      {/* Optional: Second Spotlight for more depth */}
+      <Spotlight
+        className="bottom-0 right-0 md:bottom-20 md:right-40 z-1"
+        fill="white"
+      />
+
+      {/* Subtle overlay to blend the effects */}
+      <div className="absolute inset-0 bg-linear-to-t from-neutral-950 via-transparent to-neutral-950/50 pointer-events-none z-2" />
+
+      {/* Main Content */}
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[160px_1fr]">
           {/* SIDE LABEL */}
           <aside className="hidden lg:block">
             <p
               className="
                 sticky
                 top-32
-                font-mono
                 text-[10px]
+                font-semibold
                 uppercase
-                tracking-[0.35em]
-                text-neutral-500
+                tracking-[0.3em]
+                text-neutral-400
               "
             >
-              Engineering Philosophy
+              Philosophy
             </p>
           </aside>
 
           {/* CONTENT */}
-          <div className="space-y-8">
-            {/* TOP */}
-            <div className="space-y-5">
-              <div className="flex items-center gap-4">
-                <div className="h-px w-8 bg-neutral-700" />
-
-                <span
-                  className="
-                    font-mono
-                    text-[10px]
-                    uppercase
-                    tracking-[0.28em]
-                    text-neutral-500
-                  "
-                >
-                  Commit_Message
-                </span>
-              </div>
-
-              <h2
-                className="
-                  max-w-5xl
-                  text-2xl
-                  font-semibold
-                  italic
-                  leading-[1.02]
-                  tracking-tighter
-                  text-white
-                  sm:text-4xl
-                  md:text-5xl
-                  lg:text-[3.0rem]
-                "
-              >
-                “I don&apos;t only experiment
-                with AI tools.
-                <span className="font-bold not-italic text-neutral-500">
-                  {" "}
-                  I build the tools.
-                </span>
-                ”
-              </h2>
+          <div className="space-y-10">
+            {/* EYEBROW */}
+            <div className="flex items-center gap-3">
+              <div className="h-px w-6 bg-neutral-700" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neutral-400">
+                Commit_Message
+              </span>
             </div>
+
+            {/* QUOTE */}
+            <h2
+              className="
+                max-w-4xl
+                text-[2rem]
+                font-semibold
+                text-center
+                italic
+                leading-[1.1]
+                tracking-[-0.02em]
+                 text-neutral-500
+                sm:text-[2.5rem]
+                md:text-[3rem]
+              "
+            >
+              {" "}
+              &quot;I don&apos;t only experiment with AI tools.
+              <br />
+              <span
+                className="not-italic text-white">
+                {" "}
+                I build the tools.
+              </span>
+              &quot;
+            </h2>
 
             {/* BODY */}
             <div
@@ -89,93 +109,68 @@ export default function ManifestoSection() {
                 grid-cols-1
                 gap-8
                 border-t
-                border-neutral-800
-                pt-8
+                border-[#9b5c3d]
+                pt-10
                 md:grid-cols-2
+                md:gap-16
               "
             >
               {/* LEFT */}
-              <div>
-                <p
-                  className="
-                    text-[16px]
-                    leading-relaxed
-                    text-neutral-400
-                    md:text-[17px]
-                  "
-                >
-                  I am an engineer focused
-                  on understanding what it
-                  takes to make AI systems
-                  actually deliver results
-                  in the real world. My
-                  skills range from rigorous
-                  problem-solving and
-                  architecting reliable
-                  pipelines to serving
-                  predictive models
-                  efficiently at scale.
-                </p>
-              </div>
+              <p className="text-[16px] font-semibold leading-[1.85] text-neutral-300">
+                I&apos;m an engineer focused on understanding what it takes to
+                make AI systems actually deliver results in the real world. My
+                skills range from rigorous problem-solving and architecting
+                reliable pipelines to serving predictive models efficiently at
+                scale.
+              </p>
 
               {/* RIGHT */}
-              <div className="space-y-6">
-                <p
-                  className="
-                    text-[16px]
-                    leading-relaxed
-                    text-neutral-400
-                    md:text-[17px]
-                  "
-                >
-                  I specialize in Machine
-                  Learning Engineering,
-                  autonomous LLM systems,
-                  retrieval architectures,
-                  and RAG infrastructures —
-                  solving the hard problems
-                  of scaling, latency,
-                  orchestration, and
-                  production reliability.
-                  If you are looking for the
-                  same — I am your man.
+              <div className="flex flex-col justify-between gap-8">
+                <p className="text-[16px] font-semibold leading-[1.85] text-neutral-300">
+                  I specialize in Machine Learning Engineering, autonomous LLM
+                  systems, retrieval architectures, and RAG infrastructures
+                  solving the hard problems of scaling, latency, orchestration,
+                  and production reliability. If you are looking for the same, I
+                  am your man.
                 </p>
 
                 {/* CTA */}
-                <div className="pt-2">
-                  <Link
-                    href="/contact"
+                <Link
+                  href="/contact"
+                  className="
+                    group
+                    inline-flex
+                    w-fit
+                    items-center
+                    gap-2
+                    rounded-full
+                    border
+                    border-neutral-700
+                    px-5
+                    py-2.5
+                    text-[12px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.12em]
+                    text-white
+                    transition-all
+                    duration-200
+                    hover:border-neutral-400
+                    hover:bg-white/5
+                  "
+                >
+                  Let&apos;s connect
+                  <ArrowUpRight
                     className="
-                      group
-                      inline-flex
-                      items-center
-                      gap-3
-                      border-b
-                      border-white/20
-                      pb-2
-                      font-mono
-                      text-[11px]
-                      uppercase
-                      tracking-[0.22em]
-                      text-white
-                      transition-all
-                      duration-300
-                      hover:border-white
+                      h-3.5
+                      w-3.5
+                      transition-transform
+                      duration-200
+                      group-hover:translate-x-0.5
+                      group-hover:-translate-y-0.5
                     "
-                  >
-                    Let&apos;s Connect
-
-                    <ArrowRight
-                      className="
-                        h-3
-                        w-3
-                        transition-transform
-                        duration-300
-                        group-hover:translate-x-1
-                      "
-                    />
-                  </Link>
-                </div>
+                  />
+                </Link>
               </div>
             </div>
           </div>

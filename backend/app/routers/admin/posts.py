@@ -1,18 +1,20 @@
 from typing import List
 
-from fastapi import ( # type: ignore
+from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Depends,
     HTTPException,
+    Query,
     status,
 )
 
-from sqlalchemy.ext.asyncio import ( # type: ignore
+from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from sqlalchemy.future import select # type: ignore
+from sqlalchemy.future import select
+
+from sqlalchemy import func
 
 from app.database import get_db
 
@@ -31,7 +33,7 @@ from app.crud import (
 )
 
 from app.tasks import (
-    broadcast_new_post,
+    broadcast_new_post_task,
 )
 
 from app.core.security import (
@@ -44,19 +46,69 @@ router = APIRouter(
 )
 
 
-@router.get(
-    "",
-    response_model=List[PostResponse],
-)
+# =========================================================
+# LIST POSTS
+# =========================================================
+
+
+@router.get("")
 async def list_posts(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_admin),
 ):
-    query = select(Post).order_by(Post.created_at.desc())
+    """
+    Paginated admin posts list
+    """
+
+    total_query = select(
+        func.count(Post.id)
+    )
+
+    total_result = await db.execute(
+        total_query
+    )
+
+    total = (
+        total_result.scalar() or 0
+    )
+
+    skip = (page - 1) * limit
+
+    query = (
+        select(Post)
+        .order_by(
+            Post.created_at.desc()
+        )
+        .offset(skip)
+        .limit(limit)
+    )
 
     result = await db.execute(query)
 
-    return result.scalars().all()
+    posts = result.scalars().all()
+
+    total_pages = (
+        (total + limit - 1) // limit
+    )
+
+    return {
+        "items": posts,
+        "pagination": {
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "pages": total_pages,
+            "has_prev": page > 1,
+            "has_next": page < total_pages,
+        },
+    }
+
+
+# =========================================================
+# GET SINGLE POST
+# =========================================================
 
 
 @router.get(
@@ -68,7 +120,9 @@ async def get_post(
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_admin),
 ):
-    query = select(Post).where(Post.id == post_id)
+    query = select(Post).where(
+        Post.id == post_id
+    )
 
     result = await db.execute(query)
 
@@ -81,6 +135,11 @@ async def get_post(
         )
 
     return post
+
+
+# =========================================================
+# CREATE POST
+# =========================================================
 
 
 @router.post(
@@ -90,7 +149,6 @@ async def get_post(
 )
 async def create_post(
     post: PostCreate,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_admin),
 ):
@@ -99,22 +157,38 @@ async def create_post(
         post,
     )
 
+    # =====================================================
+    # BLOG EMAILS ONLY GO TO SUBSCRIBERS
+    # =====================================================
+
     if new_post.is_published:
 
-        subscribers = await SubscriberRepository.get_active(db)
+        subscribers = (
+            await SubscriberRepository.get_active(
+                db
+            )
+        )
 
-        emails = [s.email for s in subscribers]
+        emails = [
+            s.email
+            for s in subscribers
+        ]
 
         if emails:
-            background_tasks.add_task(
-                broadcast_new_post,
+
+            broadcast_new_post_task.delay(
                 subscriber_emails=emails,
                 post_title=new_post.title,
-                post_summary=new_post.summary,
+                post_summary=new_post.summary or "",
                 post_slug=new_post.slug,
             )
 
     return new_post
+
+
+# =========================================================
+# UPDATE POST
+# =========================================================
 
 
 @router.put(
@@ -124,11 +198,12 @@ async def create_post(
 async def update_post(
     post_id: int,
     updated_post: PostCreate,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_admin),
 ):
-    query = select(Post).where(Post.id == post_id)
+    query = select(Post).where(
+        Post.id == post_id
+    )
 
     result = await db.execute(query)
 
@@ -140,36 +215,63 @@ async def update_post(
             detail="Post not found.",
         )
 
-    was_published = post.is_published
+    was_published = (
+        post.is_published
+    )
 
-    update_data = updated_post.model_dump()
+    update_data = (
+        updated_post.model_dump()
+    )
 
-    for key, value in update_data.items():
-        setattr(post, key, value)
+    for key, value in (
+        update_data.items()
+    ):
+        setattr(
+            post,
+            key,
+            value,
+        )
 
     await db.commit()
 
     await db.refresh(post)
 
-    # SEND EMAILS ONLY WHEN
+    # =====================================================
+    # SEND ONLY IF:
     # DRAFT -> PUBLISHED
+    # =====================================================
 
-    if not was_published and post.is_published:
+    if (
+        not was_published
+        and post.is_published
+    ):
 
-        subscribers = await SubscriberRepository.get_active(db)
+        subscribers = (
+            await SubscriberRepository.get_active(
+                db
+            )
+        )
 
-        emails = [s.email for s in subscribers]
+        emails = [
+            s.email
+            for s in subscribers
+        ]
 
         if emails:
-            background_tasks.add_task(
-                broadcast_new_post,
+
+            broadcast_new_post_task.delay(
                 subscriber_emails=emails,
                 post_title=post.title,
-                post_summary=post.summary,
+                post_summary=post.summary or "",
                 post_slug=post.slug,
             )
 
     return post
+
+
+# =========================================================
+# DELETE POST
+# =========================================================
 
 
 @router.delete(
@@ -181,7 +283,9 @@ async def delete_post(
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_admin),
 ):
-    query = select(Post).where(Post.id == post_id)
+    query = select(Post).where(
+        Post.id == post_id
+    )
 
     result = await db.execute(query)
 

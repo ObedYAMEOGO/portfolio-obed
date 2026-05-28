@@ -1,32 +1,20 @@
-// middleware.ts
+/* GORDON: Clerk middleware for Next.js.
+   This file sets up authentication context for all routes.
+   Required for currentUser() to work in server components. */
 
-import {
-  clerkMiddleware,
-  createRouteMatcher,
-} from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-const isProtectedRoute =
-  createRouteMatcher([
-    "/admin(.*)",
-  ]);
-
-export default clerkMiddleware(
-  async (auth, req) => {
-    if (isProtectedRoute(req)) {
-      await auth.protect();
-    }
-  },
-);
+export default clerkMiddleware();
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except:
-     * - _next
-     * - static files
-     * - favicon
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
      */
-
-    "/((?!_next|.*\\..*).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public).*)",
   ],
 };
