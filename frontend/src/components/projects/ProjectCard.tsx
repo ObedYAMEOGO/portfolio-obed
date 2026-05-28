@@ -374,7 +374,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                   ))}
 
                   {/* INLINE SHOW MORE */}
-                  {project.tech_stack.length > 4 && (
+                  {project.tech_stack.length > 5 && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -402,7 +402,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                     >
                       {isTechExpanded
                         ? "Show less"
-                        : `+${project.tech_stack.length - 4} more`}
+                        : `+${project.tech_stack.length - 5} more`}
                     </button>
                   )}
                 </div>

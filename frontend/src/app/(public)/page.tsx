@@ -11,7 +11,7 @@ import {
   Download,
 } from "lucide-react";
 
-import ProjectCard from "@/components/ProjectCard";
+import ProjectCard from "@/components/projects/ProjectCard";
 import CapabilityMatrix from "@/components/sections/SkillMatrix";
 import ManifestoSection from "@/components/sections/ManifestoSection";
 

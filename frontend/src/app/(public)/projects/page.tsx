@@ -1,334 +1,246 @@
-// app/projects/page.tsx
-
-/* eslint-disable react/jsx-no-comment-textnodes */
+/* app/page.tsx
+   GORDON: Updated to use server-only settings API for SSR */
 
 import Link from "next/link";
+import Image from "next/image";
+import { Suspense } from "react";
 
 import {
-  ChevronLeft,
-  ChevronRight,
+  ArrowRight,
+  GraduationCap,
+  Download,
 } from "lucide-react";
 
-import { Project } from "@/types";
+import CapabilityMatrix from "@/components/sections/SkillMatrix";
+import ManifestoSection from "@/components/sections/ManifestoSection";
+import ProjectsGrid from "@/components/projects/ProjectsGrid";
 
-import ProjectCard from "@/components/ProjectCard";
+import { Project } from "@/types";
+import { getProjects } from "@/lib/server-api";
+import { getSettingsServer } from "@/lib/api/settings-server";
 
 export const revalidate = 3600;
 
 /* =========================================================
-   CONFIG
+   PROJECTS
 ========================================================= */
 
-const API_URL =
-  process.env.INTERNAL_API_URL ||
-  "http://backend:8000/api/v1";
+async function ProjectsSection() {
+  let projects: Project[] = [];
 
-const PROJECTS_PER_PAGE = 6;
+  try {
+    const data = await getProjects();
+    projects = data.slice(0, 4);
+  } catch (error) {
+    console.error("PROJECT_FETCH_ERROR:", error);
+  }
 
-/* =========================================================
-   FETCH
-========================================================= */
-
-async function getProjects(): Promise<Project[]> {
-  const res = await fetch(
-    `${API_URL}/projects`,
-    {
-      next: {
-        revalidate: 3600,
-      },
-    },
-  );
-
-  if (!res.ok) {
-    throw new Error(
-      "Failed to fetch projects",
+  if (projects.length === 0) {
+    return (
+      <div className="col-span-2 py-20 text-center">
+        <p className="text-sm text-neutral-400">No projects available</p>
+      </div>
     );
   }
 
-  return res.json();
+  return <ProjectsGrid projects={projects} />;
+}
+
+/* =========================================================
+   SKELETON
+========================================================= */
+
+function ProjectsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      {[1, 2, 3, 4].map((item) => (
+        <div key={item} className="space-y-4">
+          <div className="aspect-16/10 w-full animate-pulse rounded-xl bg-neutral-100" />
+          <div className="h-4 w-2/3 animate-pulse rounded-full bg-neutral-100" />
+          <div className="h-3 w-full animate-pulse rounded-full bg-neutral-100" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 /* =========================================================
    PAGE
 ========================================================= */
 
-interface ProjectsPageProps {
-  searchParams: Promise<{
-    page?: string;
-  }>;
-}
+export default async function HomePage() {
+  let resumeUrl = "";
 
-export default async function ProjectsPage({
-  searchParams,
-}: ProjectsPageProps) {
-  const params =
-    await searchParams;
-
-  const currentPage =
-    Number(params.page) || 1;
-
-  let projects: Project[] = [];
-
-  try {
-    projects = await getProjects();
-  } catch (err) {
-    console.error(err);
-  }
-
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
-
-  const totalProjects =
-    projects.length;
-
-  const totalPages =
-    Math.ceil(
-      totalProjects /
-        PROJECTS_PER_PAGE,
-    ) || 1;
-
-  const safePage = Math.min(
-    Math.max(currentPage, 1),
-    totalPages,
-  );
-
-  const startIndex =
-    (safePage - 1) *
-    PROJECTS_PER_PAGE;
-
-  const paginatedProjects =
-    projects.slice(
-      startIndex,
-      startIndex +
-        PROJECTS_PER_PAGE,
-    );
+  const settings = await getSettingsServer();
+  resumeUrl = settings?.resume_url || "";
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#f5f5f5] via-[#e8e8e8] to-[#dcdcdc]">
-      
-      {/* Subtle Background Texture - very light */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-20">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
-        <div className="absolute top-0 -left-1/4 w-1/2 h-96 bg-linear-to-r from-gray-200/40 to-gray-300/40 blur-3xl rounded-full" />
-        <div className="absolute bottom-0 -right-1/4 w-1/2 h-96 bg-linear-to-l from-gray-200/40 to-gray-300/40 blur-3xl rounded-full" />
-      </div>
+    <div className="flex min-h-screen flex-col bg-[#f5f5f5] text-[#050505] selection:bg-neutral-200">
+      <main className="relative flex flex-col items-center overflow-hidden px-4 pb-14 pt-16 sm:px-6 md:pt-20">
 
-      <main className="relative z-10 mx-auto max-w-6xl px-6 pb-32 pt-36">
+        {/* GRID BACKGROUND */}
+        <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-size-[40px_40px]" />
 
         {/* =========================================================
-            HEADER - Updated with elegant grey tones
+            HERO
         ========================================================= */}
 
-        <header className="mb-24">
+        <section className="flex min-h-[58vh] w-full max-w-7xl items-center">
+          <div className="grid w-full grid-cols-1 items-center gap-14 lg:grid-cols-[60%_40%]">
 
-          <div className="space-y-6 text-center md:text-left">
+            {/* LEFT */}
+            <div className="flex flex-col items-center space-y-6 text-center lg:items-start lg:text-left">
 
-            <span
-              className="
-                inline-block
-                font-mono
-                text-[10px]
-                uppercase
-                tracking-[0.35em]
-                text-gray-600
-                bg-gray-200/60
-                px-3
-                py-1
-                rounded-full
-                backdrop-blur-sm
-              "
-            >
-              Selected Work
-            </span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500 shadow-sm">
+                A Machine Learning Engineer
+              </div>
 
-            <h1
-              className="
-                text-4xl
-                font-bold
-                tracking-[-0.02em]
-                bg-linear-to-r
-                from-gray-900
-                via-gray-800
-                to-gray-700
-                bg-clip-text
-                text-transparent
-                md:text-6xl
-              "
-            >
-              AI Systems &<br />
-              Infrastructure
-            </h1>
+              <h1 className="max-w-3xl text-[2rem] font-semibold leading-[1.05] tracking-[-0.02em] text-neutral-900 sm:text-[2.8rem] md:text-[3.7rem]">
+                Focused on building production grade ML &amp; intelligent systems.
+              </h1>
 
-            <p
-              className="
-                max-w-2xl
-                text-[17px]
-                leading-relaxed
-                text-gray-600
-                mx-auto
-                md:mx-0
-              "
-            >
-              Production-grade machine
-              learning systems,
-              intelligent infrastructure,
-              applied AI tooling,
-              and engineering research.
-            </p>
+              <span className="block text-sm font-medium uppercase tracking-[0.3em] text-neutral-400">
+                Research · Engineering · Deployment
+              </span>
 
-          </div>
+              <div className="flex flex-col items-center gap-3 pt-1 sm:flex-row lg:items-start">
 
-        </header>
-
-        {/* =========================================================
-            EMPTY STATE - Light theme
-        ========================================================= */}
-
-        {paginatedProjects.length ===
-        0 ? (
-
-          <div className="py-32 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-200/60 backdrop-blur-sm mb-4">
-              <svg className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-500">No projects yet</p>
-            <p className="text-xs text-gray-400 mt-1">Check back soon for new work</p>
-          </div>
-
-        ) : (
-
-          <>
-            {/* =========================================================
-                GRID
-            ========================================================= */}
-
-            <div
-              className="
-                grid
-                grid-cols-1
-                gap-x-8
-                gap-y-12
-                md:grid-cols-2
-                lg:gap-x-10
-                lg:gap-y-16
-              "
-            >
-
-              {paginatedProjects.map(
-                (project, index) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    index={index}
-                  />
-                ),
-              )}
-
-            </div>
-
-            {/* =========================================================
-                PAGINATION - Light theme styling
-            ========================================================= */}
-
-            {totalPages > 1 && (
-
-              <nav
-                className="
-                  mt-24
-                  flex
-                  items-center
-                  justify-center
-                  gap-2
-                "
-              >
-
-                {/* PREVIOUS */}
                 <Link
-                  href={
-                    safePage > 1
-                      ? `/projects?page=${
-                          safePage -
-                          1
-                        }`
-                      : "#"
-                  }
-                  aria-disabled={
-                    safePage === 1
-                  }
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
-                    safePage === 1
-                      ? "pointer-events-none text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-gray-200 hover:text-gray-900"
-                  }`}
+                  href="/projects"
+                  prefetch
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-neutral-900 px-8 text-[12px] font-semibold uppercase tracking-widest text-white transition-colors duration-200 hover:bg-neutral-700 sm:w-auto"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  View My Projects
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
 
-                {/* PAGE NUMBERS */}
-                <div className="flex items-center gap-1">
-                  {Array.from({
-                    length: totalPages,
-                  }).map(
-                    (_, index) => {
-                      const page =
-                        index + 1;
+                {resumeUrl && (
+                  <a
+                    href={resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-neutral-300 bg-white px-8 text-[12px] font-semibold uppercase tracking-widest text-neutral-700 transition-colors duration-200 hover:border-neutral-400 hover:bg-neutral-50 sm:w-auto"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download My CV
+                  </a>
+                )}
 
-                      const active =
-                        safePage ===
-                        page;
+              </div>
+            </div>
 
-                      return (
-                        <Link
-                          key={page}
-                          href={`/projects?page=${page}`}
-                          className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-all ${
-                            active
-                              ? "bg-linear-to-r from-gray-700 to-gray-900 text-white shadow-md"
-                              : "text-gray-600 hover:bg-gray-200 hover:text-gray-900"
-                          }`}
-                        >
-                          {page}
-                        </Link>
-                      );
-                    },
-                  )}
+            {/* RIGHT — IMAGE */}
+            <div className="relative flex justify-center">
+              <div className="relative flex aspect-square w-70 items-center justify-center sm:w-[320px] md:w-[107.5] lg:h-125 lg:w-125">
+
+                <div className="absolute inset-0 rounded-full bg-linear-to-br from-neutral-200/90 via-white to-neutral-300/80 blur-3xl" />
+
+                <div className="relative z-10 h-full w-full overflow-hidden rounded-none">
+                  <Image
+                    src="/profile-obed.png"
+                    alt="Obed Yameogo"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 500px"
+                    className="pointer-events-none select-none object-cover"
+                  />
+
+                  <div className="absolute bottom-0 left-0 right-0 z-20 bg-white/95 px-4 py-4 backdrop-blur-md md:hidden">
+                    <div className="text-center">
+                      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-neutral-900">
+                        Obed Yameogo
+                      </p>
+                      <p className="mt-1 text-[11px] leading-relaxed text-neutral-600">
+                        A PhD Scholar in AI and Machine Learning Engineer.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* NEXT */}
-                <Link
-                  href={
-                    safePage <
-                    totalPages
-                      ? `/projects?page=${
-                          safePage +
-                          1
-                        }`
-                      : "#"
-                  }
-                  aria-disabled={
-                    safePage ===
-                    totalPages
-                  }
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
-                    safePage ===
-                    totalPages
-                      ? "pointer-events-none text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-gray-200 hover:text-gray-900"
-                  }`}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
+                <div className="absolute -left-6 top-3 z-20 hidden max-w-55 flex-col gap-2 rounded-xl border border-white/40 bg-white/80 p-5 backdrop-blur-md md:flex lg:-left-14">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                    Profile
+                  </p>
 
-              </nav>
+                  <h3 className="text-xl font-semibold leading-snug tracking-tight text-neutral-900">
+                    Obed Yameogo
+                  </h3>
 
-            )}
+                  <div className="mb-2 flex flex-col gap-2 border-t border-neutral-200 pt-3">
+                    <p className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
+                      <GraduationCap className="h-4 w-4 text-neutral-400" />
+                      PhD Scholar in AI · MLE
+                    </p>
+                  </div>
+                </div>
 
-          </>
+              </div>
+            </div>
 
-        )}
+          </div>
+        </section>
+
+        {/* MANIFESTO */}
+        <ManifestoSection />
+
+        {/* CAPABILITIES */}
+        <section className="w-full max-w-7xl">
+          <CapabilityMatrix />
+        </section>
+
+        {/* QUOTE TICKER */}
+        <section className="relative w-full overflow-hidden border-y border-neutral-200 bg-white/60 py-4 backdrop-blur-sm">
+          <div className="flex whitespace-nowrap animate-[ticker_22s_linear_infinite]">
+            <div className="mx-10 flex items-center gap-4 text-neutral-700">
+              <span className="text-sm tracking-[0.25em] text-neutral-400">— CAL NEWPORT</span>
+              <p className="text-sm font-medium sm:text-base">
+                &quot;Clarity about what matters provides clarity about what does not.&quot;
+              </p>
+            </div>
+            <div className="mx-10 flex items-center gap-4 text-neutral-700">
+              <span className="text-sm tracking-[0.25em] text-neutral-400">— CAL NEWPORT</span>
+              <p className="text-sm font-medium sm:text-base">
+                &quot;Clarity about what matters provides clarity about what does not.&quot;
+              </p>
+            </div>
+            <div className="mx-10 flex items-center gap-4 text-neutral-700">
+              <span className="text-sm tracking-[0.25em] text-neutral-400">— CAL NEWPORT</span>
+              <p className="text-sm font-medium sm:text-base">
+                &quot;Clarity about what matters provides clarity about what does not.&quot;
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* PROJECTS */}
+        <section className="mt-16 w-full max-w-7xl space-y-10">
+
+          <div className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-6 md:flex-row md:items-end">
+            <div className="space-y-2">
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.3em] text-neutral-400">
+                Selected Works
+              </span>
+              <h2 className="text-4xl font-semibold tracking-[-0.02em] text-neutral-900 md:text-5xl">
+                Projects
+              </h2>
+            </div>
+
+            <Link
+              href="/projects"
+              prefetch
+              className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-widest text-neutral-500 transition-colors duration-150 hover:text-neutral-900"
+            >
+              All Projects
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+            </Link>
+          </div>
+
+          <Suspense fallback={<ProjectsSkeleton />}>
+            <ProjectsSection />
+          </Suspense>
+
+        </section>
 
       </main>
     </div>
