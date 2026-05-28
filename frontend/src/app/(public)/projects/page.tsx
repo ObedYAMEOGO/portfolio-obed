@@ -37,7 +37,7 @@ async function ProjectsSection() {
 
   if (projects.length === 0) {
     return (
-      <div className="col-span-2 py-20 text-center">
+      <div className="col-span-2 py-10 md:py-20 text-center">
         <p className="text-sm text-neutral-400">No projects available</p>
       </div>
     );
@@ -52,7 +52,7 @@ async function ProjectsSection() {
 
 function ProjectsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 md:gap-8 md:grid-cols-2">
       {[1, 2, 3, 4].map((item) => (
         <div key={item} className="space-y-4">
           <div className="aspect-16/10 w-full animate-pulse rounded-xl bg-neutral-100" />
@@ -76,7 +76,8 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f5f5] text-[#050505] selection:bg-neutral-200">
-      <main className="relative flex flex-col items-center overflow-hidden px-4 pb-14 pt-16 sm:px-6 md:pt-20">
+      {/* Adjusted padding: pt-6 on mobile, pt-20 on md+ | pb-10 on mobile, pb-14 on md+ */}
+      <main className="relative flex flex-col items-center overflow-hidden px-4 pb-10 pt-6 sm:px-6 md:pb-14 md:pt-20">
 
         {/* GRID BACKGROUND */}
         <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-size-[40px_40px]" />
@@ -85,11 +86,14 @@ export default async function HomePage() {
             HERO
         ========================================================= */}
 
-        <section className="flex min-h-[58vh] w-full max-w-7xl items-center">
-          <div className="grid w-full grid-cols-1 items-center gap-14 lg:grid-cols-[60%_40%]">
+        {/* Adjusted min-height for mobile to prevent excess empty space */}
+        <section className="flex min-h-[40vh] py-6 md:py-0 md:min-h-[58vh] w-full max-w-7xl items-center">
+          {/* Reduced grid gap on mobile: gap-8 instead of gap-14 */}
+          <div className="grid w-full grid-cols-1 items-center gap-8 lg:grid-cols-[60%_40%] lg:gap-14">
 
             {/* LEFT */}
-            <div className="flex flex-col items-center space-y-6 text-center lg:items-start lg:text-left">
+            {/* Reduced vertical space between elements on mobile: space-y-4 instead of space-y-6 */}
+            <div className="flex flex-col items-center space-y-4 text-center lg:items-start lg:text-left md:space-y-6">
 
               <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500 shadow-sm">
                 A Machine Learning Engineer
@@ -214,7 +218,8 @@ export default async function HomePage() {
         </section>
 
         {/* PROJECTS */}
-        <section className="mt-16 w-full max-w-7xl space-y-10">
+        {/* Adjusted top margin and spacing: mt-10 space-y-6 on mobile, mt-16 space-y-10 on md+ */}
+        <section className="mt-10 md:mt-16 w-full max-w-7xl space-y-6 md:space-y-10">
 
           <div className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-6 md:flex-row md:items-end">
             <div className="space-y-2">
