@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Obed Yameogo" }],
   creator: "Obed Yameogo",
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL("https://portfolio-obed-pi.vercel.app"),
 };
 
 export default function RootLayout({
