@@ -38,7 +38,7 @@ export default function UserSync() {
           // in main.py. The old URL was hitting a non-existent endpoint,
           // causing the sync to fail silently.
           await fetch(
-            "http://localhost:8000/api/v1/users/sync",
+            "${process.env.NEXT_PUBLIC_API_URL}/users/sync",
             {
               method: "POST",
 
@@ -83,3 +83,6 @@ export default function UserSync() {
   // it only handles side effects (database sync).
   return null;
 }
+
+
+
