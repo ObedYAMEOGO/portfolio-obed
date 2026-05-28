@@ -1,11 +1,8 @@
-/* GORDON: Server-only settings API.
-   Uses INTERNAL_API_URL + server secrets.
-   ONLY imported inside server components.
-*/
+// src/lib/api/settings-server.ts
 
 import "server-only";
 
-import serverApi from "./server";
+import { apiFetch } from "@/lib/server-api";
 
 /* =========================================================
    TYPES
@@ -13,11 +10,7 @@ import serverApi from "./server";
 
 export interface AdminSettings {
   id?: number;
-
-  resume_url:
-    | string
-    | null;
-
+  resume_url: string | null;
   updated_at?: string;
 }
 
@@ -25,27 +18,15 @@ export interface AdminSettings {
    GET SETTINGS (SERVER)
 ========================================================= */
 
-export async function getSettingsServer():
-  Promise<AdminSettings> {
+export async function getSettingsServer(): Promise<AdminSettings> {
   try {
-    const response =
-      await serverApi.get<AdminSettings>(
-        "/admin/settings",
-      );
-
-    return response.data;
+    return await apiFetch<AdminSettings>("/admin/settings", { revalidate: 3600 });
   } catch (error) {
-    /* Prevent app crash */
     console.error(
       "SETTINGS_SERVER_ERROR:",
-      error instanceof Error
-        ? error.message
-        : "Unknown error",
+      error instanceof Error ? error.message : "Unknown error",
     );
 
-    /* Safe fallback */
-    return {
-      resume_url: null,
-    };
+    return { resume_url: null };
   }
 }
