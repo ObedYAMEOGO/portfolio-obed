@@ -20,26 +20,12 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
   const hasDescription = description.length > 0;
   const isLongDescription = description.length > 120;
 
-  // On mobile show 3, on desktop show 5 before the "more" button
-  const MOBILE_TECH_LIMIT = 3;
   const DESKTOP_TECH_LIMIT = 5;
 
   const techStack = project.tech_stack || [];
   const visibleTech = isTechExpanded
     ? techStack
     : techStack.slice(0, DESKTOP_TECH_LIMIT);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const hiddenOnMobileCount = isTechExpanded
-    ? 0
-    : Math.max(
-        0,
-        Math.min(techStack.length, DESKTOP_TECH_LIMIT) - MOBILE_TECH_LIMIT,
-      );
-
-  const mobileRemainingCount = isTechExpanded
-    ? 0
-    : techStack.length - MOBILE_TECH_LIMIT;
 
   const desktopRemainingCount = isTechExpanded
     ? 0
@@ -55,6 +41,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
       ========================================================= */}
 
       <div className="relative aspect-16/10 w-full overflow-hidden rounded-xl bg-linear-to-br from-neutral-900 to-neutral-800 shadow-lg transition-shadow duration-500 group-hover:shadow-2xl">
+
         {/* BACKGROUND IMAGE */}
         {project.image_url ? (
           <>
@@ -84,7 +71,8 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
         ========================================================= */}
 
         <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-7 lg:p-8 pb-6 md:pb-8 lg:pb-10">
-          {/* TOP ROW: category + github */}
+
+          {/* TOP ROW: category + github (github icon always visible) */}
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all duration-300 group-hover:bg-black/60 group-hover:border-white/30 group-hover:scale-105">
               Featured Project
@@ -107,20 +95,35 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
 
           {/* BOTTOM CONTENT */}
           <div className="space-y-3 transform translate-y-2 transition-all duration-500 ease-out group-hover:translate-y-0">
-            {/* TITLE */}
-            <div className="relative inline-block">
-              <h3 className="text-[20px] sm:text-[22px] md:text-[24px] lg:text-[26px] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-lg transition-all duration-300">
-                {project.title}
-              </h3>
-              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-white to-white/50 transition-all duration-500 group-hover:w-full" />
+
+            {/* TITLE + MOBILE LIVE BUTTON ROW */}
+            <div className="flex items-end justify-between gap-2">
+              <div className="relative inline-block">
+                <h3 className="text-[20px] sm:text-[22px] md:text-[24px] lg:text-[26px] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-lg transition-all duration-300">
+                  {project.title}
+                </h3>
+                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-white to-white/50 transition-all duration-500 group-hover:w-full" />
+              </div>
+
+              {/* MOBILE LIVE BUTTON — always visible, bottom-right of title row */}
+              {project.live_url && (
+                <a
+                  href={project.live_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="md:hidden shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-900 shadow-lg transition-all duration-200 active:scale-95"
+                >
+                  View Live
+                  <ArrowUpRight className="h-3 w-3" />
+                </a>
+              )}
             </div>
 
             {/* DESCRIPTION */}
             {hasDescription && (
               <>
-                <p
-                  className={`text-[12px] sm:text-[13px] md:text-[14px] leading-relaxed text-white/85 drop-shadow-md transition-all duration-300 ${isDescriptionExpanded ? "line-clamp-none" : "line-clamp-2"}`}
-                >
+                <p className={`text-[12px] sm:text-[13px] md:text-[14px] leading-relaxed text-white/85 drop-shadow-md transition-all duration-300 ${isDescriptionExpanded ? "line-clamp-none" : "line-clamp-2"}`}>
                   {description}
                 </p>
 
@@ -133,19 +136,17 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                     className="text-[11px] font-medium text-white/70 hover:text-white transition-all duration-300 flex items-center gap-1 group/readmore"
                   >
                     {isDescriptionExpanded ? "Show less" : "Read more"}
-                    <ArrowUpRight
-                      className={`h-3 w-3 transition-all duration-300 ${isDescriptionExpanded ? "rotate-90" : "group-hover/readmore:translate-x-0.5 group-hover/readmore:-translate-y-0.5"}`}
-                    />
+                    <ArrowUpRight className={`h-3 w-3 transition-all duration-300 ${isDescriptionExpanded ? "rotate-90" : "group-hover/readmore:translate-x-0.5 group-hover/readmore:-translate-y-0.5"}`} />
                   </button>
                 )}
               </>
             )}
 
-            {/* TECH STACK */}
-            {/* TECH STACK */}
+            {/* TECH STACK — desktop only */}
             {techStack.length > 0 && (
               <div className="hidden md:block pt-2">
                 <div className="flex flex-wrap items-center gap-1.5">
+
                   {visibleTech.map((tech, techIndex) => (
                     <span
                       key={tech}
@@ -179,12 +180,13 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                       Show less
                     </button>
                   )}
+
                 </div>
               </div>
             )}
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-3 pb-1 opacity-0 transform translate-y-2 transition-all duration-500 delay-100 group-hover:opacity-100 group-hover:translate-y-0">
+            {/* CTA Buttons — desktop only (hover reveal) */}
+            <div className="hidden md:flex flex-wrap items-center gap-3 pt-3 pb-1 opacity-0 transform translate-y-2 transition-all duration-500 delay-100 group-hover:opacity-100 group-hover:translate-y-0">
               {project.live_url && (
                 <a
                   href={project.live_url}
@@ -209,6 +211,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                 </a>
               )}
             </div>
+
           </div>
         </div>
 
@@ -219,6 +222,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none overflow-hidden rounded-xl">
           <div className="absolute -inset-full top-0 h-full w-1/2 z-5 block transform -skew-x-12 bg-linear-to-r from-transparent via-white/10 to-transparent group-hover:animate-shine" />
         </div>
+
       </div>
 
       {/* Optional Loading State */}
@@ -227,6 +231,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
           Image coming soon
         </div>
       )}
+
     </article>
   );
 }
