@@ -4,7 +4,11 @@ import ReactMarkdown from "react-markdown";
 import { notFound } from "next/navigation";
 import type { Components } from "react-markdown";
 
-import { ArrowLeft, Clock, CalendarDays } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  CalendarDays,
+} from "lucide-react";
 
 import { Post } from "@/types";
 
@@ -68,51 +72,17 @@ export default async function PostPage({ params }: PostPageProps) {
   const readingTime = calculateReadingTime(post.content || "");
 
   const markdownComponents: Components = {
-    h1: ({ children }) => (
-      <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mt-12 mb-6">
-        {children}
-      </h1>
-    ),
+    h1: ({ children }) => <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mt-12 mb-6">{children}</h1>,
     h2: ({ children }) => {
-      const id =
-        children
-          ?.toString()
-          .toLowerCase()
-          .replace(/[^\w]+/g, "-") || "";
-      return (
-        <h2
-          id={id}
-          className="text-3xl font-semibold text-neutral-800 mt-12 mb-4 pb-2 border-b border-neutral-200"
-        >
-          {children}
-        </h2>
-      );
+      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
+      return <h2 id={id} className="text-3xl font-semibold text-neutral-800 mt-12 mb-4 pb-2 border-b border-neutral-200">{children}</h2>;
     },
     h3: ({ children }) => {
-      const id =
-        children
-          ?.toString()
-          .toLowerCase()
-          .replace(/[^\w]+/g, "-") || "";
-      return (
-        <h3
-          id={id}
-          className="text-2xl font-semibold text-neutral-800 mt-8 mb-3"
-        >
-          {children}
-        </h3>
-      );
+      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
+      return <h3 id={id} className="text-2xl font-semibold text-neutral-800 mt-8 mb-3">{children}</h3>;
     },
-    h4: ({ children }) => (
-      <h4 className="text-xl font-semibold text-neutral-800 mt-6 mb-3">
-        {children}
-      </h4>
-    ),
-    p: ({ children }) => (
-      <p className="text-[16px] leading-[1.8] text-neutral-700 mb-6">
-        {children}
-      </p>
-    ),
+    h4: ({ children }) => <h4 className="text-xl font-semibold text-neutral-800 mt-6 mb-3">{children}</h4>,
+    p: ({ children }) => <p className="text-[16px] leading-[1.8] text-neutral-700 mb-6">{children}</p>,
 
     pre: ({ children }) => (
       <div className="overflow-hidden rounded-xl border border-neutral-200 bg-[#0a0a0a] shadow-lg my-8">
@@ -131,9 +101,7 @@ export default async function PostPage({ params }: PostPageProps) {
     ),
 
     code: ({ node, className, children, ...props }) => {
-      const isInline =
-        !className ||
-        (!className.includes("language-") && String(children).length < 100);
+      const isInline = !className || (!className.includes('language-') && String(children).length < 100);
 
       if (isInline) {
         return (
@@ -159,19 +127,17 @@ export default async function PostPage({ params }: PostPageProps) {
     img: ({ src, alt }) => {
       const imageSrc = src ? String(src) : "";
       return (
-        <div className="relative my-10 w-full">
+        <div className="relative my-10 -mx-8 md:-mx-16">
           <Image
             src={imageSrc}
             alt={alt || ""}
-            width={850}
-            height={400}
+            width={1200}
+            height={600}
             className="w-full h-auto shadow-md"
-            unoptimized={
-              !imageSrc.startsWith("/") && !imageSrc.startsWith("http")
-            }
+            unoptimized={!imageSrc.startsWith('/') && !imageSrc.startsWith('http')}
           />
           {alt && (
-            <p className="text-center text-sm text-neutral-500 mt-3 italic">
+            <p className="text-center text-sm text-neutral-500 mt-3 italic px-8 md:px-16">
               {alt}
             </p>
           )}
@@ -190,19 +156,9 @@ export default async function PostPage({ params }: PostPageProps) {
       </a>
     ),
 
-    ul: ({ children }) => (
-      <ul className="list-disc pl-6 mb-6 space-y-2 text-neutral-700">
-        {children}
-      </ul>
-    ),
-    ol: ({ children }) => (
-      <ol className="list-decimal pl-6 mb-6 space-y-2 text-neutral-700">
-        {children}
-      </ol>
-    ),
-    li: ({ children }) => (
-      <li className="text-[16px] leading-[1.8]">{children}</li>
-    ),
+    ul: ({ children }) => <ul className="list-disc pl-6 mb-6 space-y-2 text-neutral-700">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal pl-6 mb-6 space-y-2 text-neutral-700">{children}</ol>,
+    li: ({ children }) => <li className="text-[16px] leading-[1.8]">{children}</li>,
 
     blockquote: ({ children }) => (
       <blockquote className="border-l-4 border-neutral-300 pl-6 my-8 py-2 bg-neutral-50 rounded-r-xl italic text-neutral-600">
@@ -219,21 +175,15 @@ export default async function PostPage({ params }: PostPageProps) {
         </table>
       </div>
     ),
-    th: ({ children }) => (
-      <th className="border border-neutral-200 bg-neutral-50 px-4 py-3 text-left font-semibold text-neutral-800">
-        {children}
-      </th>
-    ),
-    td: ({ children }) => (
-      <td className="border border-neutral-200 px-4 py-3 text-neutral-700">
-        {children}
-      </td>
-    ),
+    th: ({ children }) => <th className="border border-neutral-200 bg-neutral-50 px-4 py-3 text-left font-semibold text-neutral-800">{children}</th>,
+    td: ({ children }) => <td className="border border-neutral-200 px-4 py-3 text-neutral-700">{children}</td>,
   };
 
   return (
     <div className="min-h-screen bg-white">
+
       <main className="mx-auto max-w-4xl px-6 pb-32 pt-28">
+
         {/* =========================================================
             BACK BUTTON
         ========================================================= */}
@@ -350,18 +300,8 @@ export default async function PostPage({ params }: PostPageProps) {
         ========================================================= */}
 
         {post.feature_image_url && (
-          <div className="mb-16">
-            <div
-              className="
-                relative
-                mx-auto
-                max-w-3xl
-                overflow-hidden
-                rounded-xl
-                bg-neutral-100
-                shadow-md
-              "
-            >
+          <div className="mb-16 -mx-6">
+            <div className="relative w-full">
               <div className="relative aspect-video">
                 <Image
                   src={post.feature_image_url}
@@ -379,7 +319,7 @@ export default async function PostPage({ params }: PostPageProps) {
             ARTICLE CONTENT
         ========================================================= */}
 
-        <article className="prose prose-lg max-w-none px-8 md:px-16 [&_img]:-mx-8! [&_img]:md:-mx-16! [&_img]:w-[calc(100%+4rem)]! [&_img]:md:w-[calc(100%+8rem)]!">
+        <article className="prose prose-lg max-w-none px-8 md:px-16 [&_img]:!-mx-8 [&_img]:md:!-mx-16 [&_img]:!w-[calc(100%+4rem)] [&_img]:md:!w-[calc(100%+8rem)]">
           <ReactMarkdown components={markdownComponents}>
             {post.content}
           </ReactMarkdown>
@@ -390,6 +330,7 @@ export default async function PostPage({ params }: PostPageProps) {
         ========================================================= */}
 
         <div className="mt-20 space-y-8">
+
           {/* Divider */}
           <div className="border-t border-neutral-200" />
 
@@ -401,7 +342,7 @@ export default async function PostPage({ params }: PostPageProps) {
               </p>
 
               <div className="flex items-center gap-4">
-                {/* Profile Image - Simple circle with your image */}
+                {/* Profile Image */}
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
                   <Image
                     src="/profile-obed.png"
@@ -421,9 +362,8 @@ export default async function PostPage({ params }: PostPageProps) {
               </div>
 
               <p className="max-w-2xl text-[14px] leading-relaxed text-neutral-600">
-                Building scalable intelligent systems, machine learning
-                infrastructure, and production AI architectures. Passionate
-                about bridging research and engineering.
+                Building scalable intelligent systems, machine learning infrastructure,
+                and production AI architectures. Passionate about bridging research and engineering.
               </p>
             </div>
 
@@ -443,6 +383,7 @@ export default async function PostPage({ params }: PostPageProps) {
             </div>
           </div>
         </div>
+
       </main>
     </div>
   );
