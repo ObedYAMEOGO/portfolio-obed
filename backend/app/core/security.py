@@ -23,9 +23,7 @@ from app.core.config import settings
 # CLERK CLIENT
 # =========================================================
 
-clerk = Clerk(
-    bearer_auth=settings.CLERK_SECRET_KEY
-)
+clerk = Clerk(bearer_auth=settings.CLERK_SECRET_KEY)
 
 # =========================================================
 # CLERK JWKS
@@ -34,32 +32,17 @@ clerk = Clerk(
 JWKS_URL = settings.CLERK_JWKS_URL
 
 try:
-    jwks = requests.get(
-        JWKS_URL,
-        timeout=10,
-    ).json()
-
+    jwks = requests.get(JWKS_URL, timeout=10).json()
 except Exception as e:
-    raise RuntimeError(
-        f"Failed to load Clerk JWKS: {e}"
-    )
+    raise RuntimeError(f"Failed to load Clerk JWKS: {e}")
 
 # =========================================================
 # VERIFY JWT
 # =========================================================
 
-def verify_clerk_token(
-    token: str,
-):
+def verify_clerk_token(token: str):
     try:
-        # -------------------------------------------------
-        # READ JWT HEADER
-        # -------------------------------------------------
-
-        header = jwt.get_unverified_header(
-            token
-        )
-
+        header = jwt.get_unverified_header(token)
         kid = header.get("kid")
 
         if not kid:
@@ -68,12 +51,7 @@ def verify_clerk_token(
                 detail="Missing token kid.",
             )
 
-        # -------------------------------------------------
-        # FIND MATCHING JWK
-        # -------------------------------------------------
-
         key = None
-
         for jwk in jwks["keys"]:
             if jwk["kid"] == kid:
                 key = jwk
@@ -85,16 +63,16 @@ def verify_clerk_token(
                 detail="No matching JWK found.",
             )
 
-        # -------------------------------------------------
-        # VERIFY TOKEN
-        # -------------------------------------------------
+        decode_options = {}
+        if settings.CLERK_JWT_AUDIENCE:
+            decode_options["audience"] = settings.CLERK_JWT_AUDIENCE
 
         payload = jwt.decode(
             token,
             key,
             algorithms=["RS256"],
-            audience=settings.CLERK_JWT_AUDIENCE,
             issuer=settings.CLERK_ISSUER,
+            **decode_options,
         )
 
         return payload
@@ -110,15 +88,9 @@ def verify_clerk_token(
 # =========================================================
 
 async def get_current_user(
-    authorization: str | None = Header(
-        default=None
-    ),
-    x_admin_secret: str | None = Header(
-        default=None
-    ),
-    db: AsyncSession = Depends(
-        get_db
-    ),
+    authorization: str | None = Header(default=None),
+    x_admin_secret: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
 ):
 
     # =====================================================
@@ -126,25 +98,14 @@ async def get_current_user(
     # =====================================================
 
     if x_admin_secret:
-
-        if (
-            x_admin_secret
-            != settings.ADMIN_SECRET
-        ):
+        if x_admin_secret != settings.ADMIN_SECRET:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid admin secret.",
             )
 
-        query = select(User).where(
-            User.email
-            == settings.ADMIN_EMAIL
-        )
-
-        result = await db.execute(
-            query
-        )
-
+        query = select(User).where(User.email == settings.ADMIN_EMAIL)
+        result = await db.execute(query)
         user = result.scalars().first()
 
         if not user:
@@ -165,26 +126,16 @@ async def get_current_user(
             detail="Missing authorization header.",
         )
 
-    if not authorization.startswith(
-        "Bearer "
-    ):
+    if not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authorization format.",
         )
 
-    token = authorization.replace(
-        "Bearer ",
-        ""
-    )
+    token = authorization.replace("Bearer ", "")
+    payload = verify_clerk_token(token)
 
-    payload = verify_clerk_token(
-        token
-    )
-
-    clerk_user_id = payload.get(
-        "sub"
-    )
+    clerk_user_id = payload.get("sub")
 
     if not clerk_user_id:
         raise HTTPException(
@@ -193,60 +144,56 @@ async def get_current_user(
         )
 
     # =====================================================
-    # DATABASE USER
+    # DATABASE USER — lookup by clerk_id
     # =====================================================
 
-    query = select(User).where(
-        User.clerk_id
-        == clerk_user_id
-    )
-
-    result = await db.execute(
-        query
-    )
-
+    query = select(User).where(User.clerk_id == clerk_user_id)
+    result = await db.execute(query)
     user = result.scalars().first()
 
     # =====================================================
-    # AUTO CREATE USER
+    # AUTO CREATE / LINK USER
     # =====================================================
 
     if not user:
-
         try:
-            clerk_user = clerk.users.get(
-                user_id=clerk_user_id
-            )
-
+            clerk_user = clerk.users.get(user_id=clerk_user_id)
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Failed to fetch Clerk user.",
             )
 
-        if (
-            not clerk_user.email_addresses
-        ):
+        if not clerk_user.email_addresses:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User has no email.",
             )
 
         primary_email = (
-            clerk_user.email_addresses[0]
-            .email_address
+            clerk_user.email_addresses[0].email_address
         )
 
         full_name = (
-            f"{clerk_user.first_name or ''} "
-            f"{clerk_user.last_name or ''}"
+            f"{clerk_user.first_name or ''} {clerk_user.last_name or ''}"
         ).strip()
 
-        is_admin = (
-            primary_email
-            == settings.ADMIN_EMAIL
-        )
+        is_admin = primary_email == settings.ADMIN_EMAIL
 
+        # User may already exist by email (created via UserSync
+        # before Clerk linked the clerk_id)
+        email_query = select(User).where(User.email == primary_email)
+        email_result = await db.execute(email_query)
+        existing_by_email = email_result.scalars().first()
+
+        if existing_by_email:
+            existing_by_email.clerk_id = clerk_user_id
+            existing_by_email.is_admin = is_admin
+            await db.commit()
+            await db.refresh(existing_by_email)
+            return existing_by_email
+
+        # Genuinely new user
         user = User(
             clerk_id=clerk_user_id,
             email=primary_email,
@@ -255,9 +202,7 @@ async def get_current_user(
         )
 
         db.add(user)
-
         await db.commit()
-
         await db.refresh(user)
 
     return user
@@ -267,11 +212,8 @@ async def get_current_user(
 # =========================================================
 
 async def verify_admin(
-    current_user: User = Depends(
-        get_current_user
-    ),
+    current_user: User = Depends(get_current_user),
 ):
-
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
