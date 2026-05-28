@@ -1,17 +1,12 @@
 "use client";
 
 import Link from "next/link";
-
 import { usePathname } from "next/navigation";
-
 import { useEffect, useState } from "react";
-
 import { Menu, X } from "lucide-react";
-
 import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
-
 import {
   Sheet,
   SheetContent,
@@ -19,7 +14,6 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -31,15 +25,10 @@ interface MobileMenuProps {
   items: NavItem[];
 }
 
-export default function MobileMenu({
-  items,
-}: MobileMenuProps) {
+export default function MobileMenu({ items }: MobileMenuProps) {
   const pathname = usePathname();
-
   const { isSignedIn, isLoaded } = useUser();
-
   const [mounted, setMounted] = useState(false);
-
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -77,10 +66,7 @@ export default function MobileMenu({
             "
           >
             <Menu className="h-5 w-5 text-neutral-700" />
-
-            <span className="sr-only">
-              Open menu
-            </span>
+            <span className="sr-only">Open menu</span>
           </Button>
         </SheetTrigger>
 
@@ -98,12 +84,9 @@ export default function MobileMenu({
             [&>button]:hidden
           "
         >
-          <SheetTitle className="sr-only">
-            Mobile Navigation Menu
-          </SheetTitle>
+          <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
 
           {/* HEADER */}
-
           <div
             className="
               flex
@@ -145,16 +128,12 @@ export default function MobileMenu({
                 "
               >
                 <X className="h-4 w-4 text-neutral-700" />
-
-                <span className="sr-only">
-                  Close menu
-                </span>
+                <span className="sr-only">Close menu</span>
               </Button>
             </SheetClose>
           </div>
 
           {/* NAVIGATION */}
-
           <div
             className="
               flex
@@ -165,13 +144,13 @@ export default function MobileMenu({
             "
           >
             {items.map((item) => {
-              const isActive =
-                pathname === item.path;
+              const isActive = pathname === item.path;
 
               return (
                 <Link
                   key={item.path}
                   href={item.path}
+                  onClick={() => setOpen(false)}
                   className={cn(
                     `
                       relative
@@ -202,16 +181,14 @@ export default function MobileMenu({
           </div>
 
           {/* DIVIDER */}
-
           <div className="mx-6 h-px bg-neutral-200" />
 
           {/* CTA + AUTH */}
-
           <div className="space-y-4 px-6 py-8">
             {/* CONTACT */}
-
             <Link
               href="/contact"
+              onClick={() => setOpen(false)}
               className="
                 flex
                 w-full
@@ -236,7 +213,6 @@ export default function MobileMenu({
             </Link>
 
             {/* AUTH */}
-
             {isLoaded &&
               (!isSignedIn ? (
                 <SignInButton mode="modal">
@@ -277,8 +253,7 @@ export default function MobileMenu({
                   <UserButton
                     appearance={{
                       elements: {
-                        avatarBox:
-                          "h-10 w-10",
+                        avatarBox: "h-10 w-10",
                       },
                     }}
                   />
@@ -287,7 +262,6 @@ export default function MobileMenu({
           </div>
 
           {/* SOCIALS */}
-
           <div
             className="
               border-t

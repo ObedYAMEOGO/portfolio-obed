@@ -118,16 +118,14 @@ export default async function BlogPage({
         <div className="absolute bottom-0 -right-1/4 w-1/2 h-96 bg-linear-to-l from-gray-200/40 to-gray-300/40 blur-3xl rounded-full" />
       </div>
 
-      <main className="relative z-10 mx-auto max-w-6xl px-6 pb-32 pt-36">
+      <main className="relative z-10 mx-auto max-w-6xl px-4 md:px-6 pt-20 md:pt-36 pb-16 md:pb-32">
 
         {/* =========================================================
             HEADER - Updated with elegant grey tones
         ========================================================= */}
 
-        <header className="mb-24">
-
+        <header className="mb-10 md:mb-24">
           <div className="space-y-6 text-center md:text-left">
-
             <span className="inline-block font-mono text-[10px] uppercase tracking-[0.35em] text-gray-600 bg-gray-200/60 px-3 py-1 rounded-full backdrop-blur-sm">
               Writing
             </span>
@@ -142,19 +140,16 @@ export default async function BlogPage({
               distributed infrastructure,
               and technical architecture.
             </p>
-
           </div>
-
         </header>
 
         {/* =========================================================
             POSTS GRID - Card design with light theme
         ========================================================= */}
 
-        {paginatedPosts.length >
-        0 ? (
+        {paginatedPosts.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:gap-x-10 lg:gap-y-16">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2 md:gap-y-12 lg:gap-x-10 lg:gap-y-16">
 
               {paginatedPosts.map(
                 (
@@ -449,8 +444,6 @@ export default async function BlogPage({
                         </div>
 
                       </Link>
-
-                      {/* Removed the separate content section - everything is now on the image */}
                       
                     </article>
                   );
@@ -464,8 +457,7 @@ export default async function BlogPage({
             ========================================================= */}
 
             {totalPages > 1 && (
-              <nav className="mt-24 flex items-center justify-center gap-2">
-
+              <nav className="mt-12 md:mt-24 flex items-center justify-center gap-2">
                 {/* PREVIOUS */}
                 <Link
                   href={
@@ -545,7 +537,7 @@ export default async function BlogPage({
             )}
           </>
         ) : (
-          <div className="py-32 text-center">
+          <div className="py-16 md:py-32 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-200/60 backdrop-blur-sm mb-4">
               <svg className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
