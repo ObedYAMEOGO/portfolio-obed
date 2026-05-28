@@ -319,12 +319,11 @@ export default async function PostPage({ params }: PostPageProps) {
             ARTICLE CONTENT
         ========================================================= */}
 
-        <article className="prose prose-lg max-w-none px-8 md:px-16 [&_img]:!-mx-8 [&_img]:md:!-mx-16 [&_img]:!w-[calc(100%+4rem)] [&_img]:md:!w-[calc(100%+8rem)]">
+         <article className="prose prose-lg max-w-none">
           <ReactMarkdown components={markdownComponents}>
             {post.content}
           </ReactMarkdown>
         </article>
-
         {/* =========================================================
             FOOTER - Author & Actions
         ========================================================= */}
