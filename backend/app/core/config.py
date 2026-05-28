@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Optional
 
-from pydantic_settings import (  # type: ignore
+from pydantic_settings import ( # type: ignore
     BaseSettings,
     SettingsConfigDict,
 )
@@ -84,7 +84,7 @@ class Settings(BaseSettings):
 
     def model_post_init(self, __context) -> None:
         """
-        Fallback Celery values to REDIS_URL
+        Automatically fallback Celery URLs to REDIS_URL
         """
 
         if not self.CELERY_BROKER_URL:
@@ -92,6 +92,30 @@ class Settings(BaseSettings):
 
         if not self.CELERY_RESULT_BACKEND:
             self.CELERY_RESULT_BACKEND = self.REDIS_URL
+
+        # =====================================================
+        # PRODUCTION VALIDATION
+        # =====================================================
+
+        if self.ENVIRONMENT == "production":
+            required_in_production = {
+                "CLERK_SECRET_KEY": self.CLERK_SECRET_KEY,
+                "CLERK_PUBLISHABLE_KEY": self.CLERK_PUBLISHABLE_KEY,
+                "CLERK_JWKS_URL": self.CLERK_JWKS_URL,
+                "CLERK_ISSUER": self.CLERK_ISSUER,
+                "ADMIN_SECRET": self.ADMIN_SECRET,
+            }
+
+            missing = [
+                key
+                for key, value in required_in_production.items()
+                if not value
+            ]
+
+            if missing:
+                raise ValueError(
+                    f"Missing production environment variables: {', '.join(missing)}"
+                )
 
 
 @lru_cache
