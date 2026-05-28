@@ -16,4 +16,5 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Run database initialization on startup
+CMD python init_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8000
