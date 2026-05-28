@@ -71,7 +71,7 @@ export default function ManifestoSection() {
                 italic
                 leading-[1.1]
                 tracking-[-0.02em]
-                text-[#c17650]
+                text-neutral-400
                 sm:text-[2.5rem]
                 md:text-[3rem]
               "
