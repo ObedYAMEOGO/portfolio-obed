@@ -57,21 +57,18 @@ services:
       backend:
         condition: service_healthy
 
-
-
   redis:
     image: redis:7-alpine
 
     ports:
       - "6379:6379"
 
-
-
   celery:
     build: ./backend
 
+    # Appended --uid=nobody to drop root privileges and fix the security crash
     command: >
-      celery -A app.tasks worker --loglevel=info
+      celery -A app.tasks worker --loglevel=info --uid=nobody
 
     env_file:
       - ./backend/.env
