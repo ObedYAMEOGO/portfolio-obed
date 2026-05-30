@@ -1,45 +1,55 @@
 from datetime import datetime
-from typing import List, Optional
 from enum import Enum
-from pydantic import (  # type: ignore
+from typing import List, Optional
+
+from pydantic import (
     BaseModel,
     ConfigDict,
     EmailStr,
     Field,
-    model_validator,
     field_validator,
+    model_validator,
 )
 
 # ---------------------------------------------------
 # DATETIME NORMALIZATION
 # ---------------------------------------------------
 
-
 def ensure_naive(v):
     if isinstance(v, datetime) and v.tzinfo is not None:
         return v.replace(tzinfo=None)
-
     return v
+
+
+# ---------------------------------------------------
+# BLOG CATEGORY
+# ---------------------------------------------------
+
+class BlogCategory(str, Enum):
+    AI_ENGINEERING = "AI Engineering"
+    LLMS = "LLMs"
+    MACHINE_LEARNING = "Machine Learning"
+    MLOPS = "MLOps"
+    RAG = "RAG"
+    AI_AGENTS = "AI Agents"
+    INFERENCE = "Inference"
+    INFRASTRUCTURE = "Infrastructure"
+    RESEARCH = "Research"
 
 
 # ---------------------------------------------------
 # PROJECT SCHEMAS
 # ---------------------------------------------------
 
-
 class ProjectBase(BaseModel):
     title: str
     slug: str
-
     description: Optional[str] = None
     content: Optional[str] = None
-
     tech_stack: List[str] = Field(default_factory=list)
-
     github_url: Optional[str] = None
     live_url: Optional[str] = None
     image_url: Optional[str] = None
-
     is_published: bool = False
 
 
@@ -53,10 +63,7 @@ class ProjectResponse(ProjectBase):
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator(
-        "created_at",
-        mode="before",
-    )
+    @field_validator("created_at", mode="before")
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)
@@ -65,7 +72,6 @@ class ProjectResponse(ProjectBase):
 # ---------------------------------------------------
 # LEAD SCHEMAS
 # ---------------------------------------------------
-
 
 class LeadCreate(BaseModel):
     full_name: str
@@ -79,10 +85,7 @@ class LeadResponse(LeadCreate):
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator(
-        "created_at",
-        mode="before",
-    )
+    @field_validator("created_at", mode="before")
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)
@@ -91,7 +94,6 @@ class LeadResponse(LeadCreate):
 # ---------------------------------------------------
 # SUBSCRIBER SCHEMAS
 # ---------------------------------------------------
-
 
 class SubscriberBase(BaseModel):
     email: EmailStr
@@ -108,57 +110,79 @@ class SubscriberResponse(SubscriberBase):
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator(
-        "created_at",
-        mode="before",
-    )
+    @field_validator("created_at", mode="before")
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)
 
 
 # ---------------------------------------------------
-# BLOG / POST SCHEMAS
+# BLOG SCHEMAS
 # ---------------------------------------------------
-
 
 class PostBase(BaseModel):
     title: str
     slug: str
-
     summary: Optional[str] = None
-
     content: str
-
-    feature_image_url: Optional[str] = None
-
-    category: str = "Research"
-
+    category: BlogCategory = BlogCategory.AI_ENGINEERING
+    tags: List[str] = Field(default_factory=list)
+    cover_image_url: Optional[str] = None
+    seo_title: Optional[str] = None
+    seo_description: Optional[str] = None
+    featured: bool = False
     is_published: bool = False
+    published_at: Optional[datetime] = None
 
 
 class PostCreate(PostBase):
     pass
 
 
+class PostUpdate(BaseModel):
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    summary: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[BlogCategory] = None
+    tags: Optional[List[str]] = None
+    cover_image_url: Optional[str] = None
+    seo_title: Optional[str] = None
+    seo_description: Optional[str] = None
+    featured: Optional[bool] = None
+    is_published: Optional[bool] = None
+    published_at: Optional[datetime] = None
+
+
 class PostResponse(PostBase):
     id: int
-
+    reading_time: int
+    author_name: str = "Obed Yameogo"
+    author_initials: str = "OY"
     created_at: datetime
-
     updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator(
-        "created_at",
-        "updated_at",
-        mode="before",
-    )
+    @field_validator("created_at", "updated_at", "published_at", mode="before")
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)
 
+
+class PaginatedPosts(BaseModel):
+    items: List[PostResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+    has_next: bool
+    has_prev: bool
+
+
+# ---------------------------------------------------
+# MATERIAL SCHEMAS
+# ---------------------------------------------------
 
 class MaterialTypeEnum(str, Enum):
     DOCUMENT = "DOCUMENT"
@@ -182,7 +206,6 @@ class MaterialBase(BaseModel):
     thumbnail_url: Optional[str] = None
     is_published: Optional[bool] = True
 
-    # Data Quality Guardrail: Ensures Video Context is supplied if the material is a video asset
     @model_validator(mode="after")
     def validate_video_parameters(self):
         if (
@@ -205,24 +228,15 @@ class MaterialResponse(MaterialBase):
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def make_naive(cls, v):
+        return ensure_naive(v)
 
 
-class PaginatedPosts(BaseModel):
-    items: List[PostResponse]
-
-    total: int
-    page: int
-    page_size: int
-
-    total_pages: int
-
-    has_next: bool
-    has_prev: bool
-    
-    
-  # ---------------------------------------------------
+# ---------------------------------------------------
 # USER SCHEMAS
 # ---------------------------------------------------
 
@@ -234,53 +248,35 @@ class UserSync(BaseModel):
 
 class UserResponse(BaseModel):
     id: int
-
     clerk_id: str
-
     email: EmailStr
-
     full_name: Optional[str] = None
-
     receive_notifications: bool
-
     created_at: datetime
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
-    @field_validator(
-        "created_at",
-        mode="before",
-    )
+    @field_validator("created_at", mode="before")
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)
-    
+
+
 class UserNotificationUpdate(BaseModel):
     email: EmailStr
-    
+
+
 class AdminUserResponse(BaseModel):
     id: int
-
     email: EmailStr
-
     full_name: Optional[str] = None
-
     receive_notifications: bool
-
     is_newsletter_subscriber: bool
-
     created_at: datetime
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
-    @field_validator(
-        "created_at",
-        mode="before",
-    )
+    @field_validator("created_at", mode="before")
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)

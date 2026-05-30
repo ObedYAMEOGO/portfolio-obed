@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["localhost:3000"],
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -8,11 +13,11 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "img.youtube.com", // Allows auto-fetched course previews
+        hostname: "img.youtube.com",
       },
       {
         protocol: "https",
-        hostname: "images.unsplash.com", // Allows fallback playlist graphic assets
+        hostname: "images.unsplash.com",
       },
     ],
   },

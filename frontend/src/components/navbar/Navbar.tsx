@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 
-import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
+import {
+  useUser,
+  SignInButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 import DesktopNav from "./DesktopNav";
 import MobileMenu from "./MobileMenu";
@@ -14,7 +18,10 @@ const navItems = [
 ];
 
 export default function Navbar() {
-  const { isSignedIn, isLoaded } = useUser();
+  const {
+    isSignedIn,
+    isLoaded,
+  } = useUser();
 
   return (
     <header
@@ -31,29 +38,29 @@ export default function Navbar() {
     >
       <div
         className="
+          relative
           mx-auto
           flex
           h-16
           max-w-7xl
           items-center
-          justify-between
           px-6
         "
       >
+
         {/* LEFT — LOGO */}
 
-        <div className="flex items-center">
+        <div className="flex flex-1 items-center">
           <Link
             href="/"
             className="
-             text-[25px]
+              text-[30px]
               font-semibold
-              tracking-widest
+              tracking-[-0.02em]
               text-neutral-900
               transition-colors
               duration-150
               hover:text-neutral-600
-              whitespace-nowrap
             "
           >
             obed.ai
@@ -62,73 +69,73 @@ export default function Navbar() {
 
         {/* CENTER — NAV */}
 
-        <div className="hidden flex-1 justify-center md:flex">
+        <div
+          className="
+            absolute
+            left-1/2
+            hidden
+            -translate-x-1/2
+            md:block
+          "
+        >
           <DesktopNav items={navItems} />
         </div>
 
         {/* RIGHT */}
 
-        <div className="flex items-center gap-5">
+        <div className="ml-auto flex items-center gap-3">
+
           {/* CONTACT */}
 
           <Link
             href="/contact"
             className="
-            hidden
-            items-center
-            justify-center
-            rounded-full
-            bg-[#c17650]
-            px-6
-            py-3
-            text-[12px]
-            font-semibold
-            uppercase
-            tracking-widest
-            text-white
-            shadow-xs
-            transition-all
-            duration-300
-            hover:bg-[#7f4b31]
-            hover:scale-[1.02]
-            hover:shadow-lg
-            active:scale-[0.98]
-            md:inline-flex
-          "
+              hidden
+              items-center
+              justify-center
+              rounded-full
+              bg-[#c17650]
+              px-5
+              py-2
+              text-[12px]
+              font-semibold
+              uppercase
+              tracking-widest
+              text-white
+              transition-colors
+              duration-200
+              hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
+              md:inline-flex
+            "
           >
-            Contact_Me
+            Contact
           </Link>
 
           {/* AUTH */}
 
-          {isLoaded &&
-            (!isSignedIn ? (
+          {isLoaded && (
+            !isSignedIn ? (
               <SignInButton mode="modal">
                 <button
                   className="
-                  hidden
-                  items-center
-                  justify-center
-                  rounded-full
-                  border
-                  border-neutral-900
-                  bg-white
-                  px-6
-                  py-3
-                  text-[12px]
-                  font-semibold
-                  uppercase
-                  tracking-widest
-                  text-black
-                  transition-all
-                  duration-300
-                  hover:bg-black
-                  hover:border-white
-                  hover:text-white
-                  hover:shadow-lg
-                  active:scale-[0.98]
-                  md:inline-flex
-                "
+                    hidden
+                    items-center
+                    justify-center
+                    rounded-full
+                    border
+                    border-neutral-300
+                    px-5
+                    py-2
+                    text-[12px]
+                    font-semibold
+                    uppercase
+                    tracking-widest
+                    text-neutral-900
+                    transition-colors
+                    duration-200
+                    hover:bg-neutral-100
+                    md:inline-flex
+                  "
                 >
                   Login
                 </button>
@@ -137,15 +144,18 @@ export default function Navbar() {
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: "h-9 w-9",
+                    avatarBox:
+                      "h-9 w-9",
                   },
                 }}
               />
-            ))}
+            )
+          )}
 
           {/* MOBILE */}
 
           <MobileMenu items={navItems} />
+
         </div>
       </div>
     </header>

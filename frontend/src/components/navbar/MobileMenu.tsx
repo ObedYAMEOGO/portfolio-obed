@@ -1,12 +1,27 @@
 "use client";
 
 import Link from "next/link";
+
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
-import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  Menu,
+  X,
+} from "lucide-react";
+
+import {
+  useUser,
+  SignInButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
+
 import {
   Sheet,
   SheetContent,
@@ -14,6 +29,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -25,27 +41,42 @@ interface MobileMenuProps {
   items: NavItem[];
 }
 
-export default function MobileMenu({ items }: MobileMenuProps) {
+export default function MobileMenu({
+  items,
+}: MobileMenuProps) {
   const pathname = usePathname();
-  const { isSignedIn, isLoaded } = useUser();
-  const [mounted, setMounted] = useState(false);
-  const [open, setOpen] = useState(false);
+
+  const {
+    isSignedIn,
+    isLoaded,
+  } = useUser();
+
+  const [mounted, setMounted] =
+    useState(false);
+
+  const [open, setOpen] =
+    useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // CLOSE MENU ON ROUTE CHANGE
+
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  if (!mounted) return null;
-
-  const closeMenu = () => setTimeout(() => setOpen(false), 100);
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="md:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet
+        open={open}
+        onOpenChange={setOpen}
+      >
         <SheetTrigger asChild>
           <Button
             variant="ghost"
@@ -66,14 +97,17 @@ export default function MobileMenu({ items }: MobileMenuProps) {
             "
           >
             <Menu className="h-5 w-5 text-neutral-700" />
-            <span className="sr-only">Open menu</span>
+
+            <span className="sr-only">
+              Open menu
+            </span>
           </Button>
         </SheetTrigger>
 
         <SheetContent
           side="right"
           className="
-            w-75
+            w-[300px]
             border-l
             border-neutral-200
             bg-white/95
@@ -81,12 +115,14 @@ export default function MobileMenu({ items }: MobileMenuProps) {
             px-0
             py-0
             sm:w-87.5
-            [&>button]:hidden
           "
         >
-          <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
+          <SheetTitle className="sr-only">
+            Mobile Navigation Menu
+          </SheetTitle>
 
           {/* HEADER */}
+
           <div
             className="
               flex
@@ -128,21 +164,34 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                 "
               >
                 <X className="h-4 w-4 text-neutral-700" />
-                <span className="sr-only">Close menu</span>
+
+                <span className="sr-only">
+                  Close menu
+                </span>
               </Button>
             </SheetClose>
           </div>
 
           {/* NAVIGATION */}
-          <div className="flex flex-col gap-1 px-6 py-8">
+
+          <div
+            className="
+              flex
+              flex-col
+              gap-1
+              px-6
+              py-8
+            "
+          >
             {items.map((item) => {
-              const isActive = pathname === item.path;
+              const isActive =
+                pathname ===
+                item.path;
 
               return (
                 <Link
                   key={item.path}
                   href={item.path}
-                  onClick={closeMenu}
                   className={cn(
                     `
                       relative
@@ -155,8 +204,15 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                       duration-200
                     `,
                     isActive
-                      ? "bg-neutral-100 text-neutral-900"
-                      : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900",
+                      ? `
+                        bg-neutral-100
+                        text-neutral-900
+                      `
+                      : `
+                        text-neutral-500
+                        hover:bg-neutral-50
+                        hover:text-neutral-900
+                      `,
                   )}
                 >
                   {item.name}
@@ -166,14 +222,17 @@ export default function MobileMenu({ items }: MobileMenuProps) {
           </div>
 
           {/* DIVIDER */}
+
           <div className="mx-6 h-px bg-neutral-200" />
 
           {/* CTA + AUTH */}
+
           <div className="space-y-4 px-6 py-8">
+
             {/* CONTACT */}
+
             <Link
               href="/contact"
-              onClick={closeMenu}
               className="
                 flex
                 w-full
@@ -198,8 +257,9 @@ export default function MobileMenu({ items }: MobileMenuProps) {
             </Link>
 
             {/* AUTH */}
-            {isLoaded &&
-              (!isSignedIn ? (
+
+            {isLoaded && (
+              !isSignedIn ? (
                 <SignInButton mode="modal">
                   <button
                     className="
@@ -228,18 +288,37 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                   </button>
                 </SignInButton>
               ) : (
-                <div className="flex items-center justify-center">
+                <div
+                  className="
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
                   <UserButton
                     appearance={{
-                      elements: { avatarBox: "h-10 w-10" },
+                      elements: {
+                        avatarBox:
+                          "h-10 w-10",
+                      },
                     }}
                   />
                 </div>
-              ))}
+              )
+            )}
+
           </div>
 
           {/* SOCIALS */}
-          <div className="border-t border-neutral-200 px-6 py-6">
+
+          <div
+            className="
+              border-t
+              border-neutral-200
+              px-6
+              py-6
+            "
+          >
             <p
               className="
                 mb-4
@@ -254,6 +333,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
             </p>
 
             <div className="flex gap-3">
+
               <a
                 href="https://www.linkedin.com/in/obedyameogo/"
                 target="_blank"
@@ -298,6 +378,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
               >
                 Facebook
               </a>
+
             </div>
           </div>
         </SheetContent>

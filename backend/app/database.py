@@ -6,6 +6,10 @@ from sqlalchemy.ext.asyncio import (  # type: ignore
 
 from app.core.config import settings
 
+# =========================================================
+# DATABASE URL
+# =========================================================
+
 DATABASE_URL = (
     settings.DATABASE_URL.replace(
         "postgresql://",
@@ -21,20 +25,30 @@ DATABASE_URL = (
     )
 )
 
+# =========================================================
+# ASYNC ENGINE
+# =========================================================
+
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     pool_pre_ping=True,
     pool_recycle=300,
-    pool_size=5,
-    max_overflow=10,
 )
+
+# =========================================================
+# SESSION FACTORY
+# =========================================================
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
 )
+
+# =========================================================
+# DATABASE DEPENDENCY
+# =========================================================
 
 
 async def get_db():

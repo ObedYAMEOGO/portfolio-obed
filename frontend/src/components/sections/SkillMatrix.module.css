@@ -12,37 +12,56 @@
   border-top: 1px solid #e5e5e5;
 }
 
-/* ─── Header ─────────────────────────────────────────────────────────────── */
+/* ─── Container ─────────────────────────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ─── Header Section (UPDATED to match Projects section) ────────────────── */
 .eyebrow {
   font-family: "DM Mono", monospace;
   font-size: 10px;
-  letter-spacing: 0.3em;
-  font-weight: bold;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #a3a3a3;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
+  text-align: center;
 }
 
 .title {
-  font-size: 2.25rem;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: #171717;
-  margin: 0 0 2.5rem;
-  line-height: 1.1;
+  margin: 0;
+  line-height: 1.2;
+  text-align: center;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .title {
-    font-size: 3rem;
+    font-size: 2.25rem;
   }
 }
 
 .title em {
-  font-style:  normal;
-  font-weight: 600;
+  font-style: normal;
+  font-weight: 700;
 }
-/* ─── Grid ───────────────────────────────────────────────────────────────── */
+
+.description {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #737373;
+  margin: 0.75rem auto 2.5rem;
+  max-width: 28rem;
+  text-align: center;
+}
+
+/* ─── Grid (UNCHANGED) ──────────────────────────────────────────────────── */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -59,7 +78,7 @@
   }
 }
 
-/* ─── Card ───────────────────────────────────────────────────────────────── */
+/* ─── Card (UNCHANGED) ──────────────────────────────────────────────────── */
 .card {
   background: #ffffff;
   padding: 2rem 1.75rem;

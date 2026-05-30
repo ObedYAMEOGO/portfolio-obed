@@ -8,7 +8,7 @@ import {
 
 import type {
   Post,
-} from "@/types/post";
+} from "@/types";
 
 /* =========================================================
    GET ADMIN POST

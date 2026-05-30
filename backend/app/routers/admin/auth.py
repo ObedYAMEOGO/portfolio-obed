@@ -1,6 +1,6 @@
 # app/routers/admin/auth.py
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends # type: ignore
 
 from app.core.security import verify_admin
 

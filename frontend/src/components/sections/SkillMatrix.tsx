@@ -31,46 +31,51 @@ const capabilities = [
 export default function CapabilityMatrix() {
   return (
     <section className={styles.section}>
-      <p className={styles.eyebrow}>Capabilities</p>
-      <h2 className={styles.title}>
-        Capability &amp; <em>Execution</em>
-      </h2>
+      <div className={styles.container}>
+        <p className={styles.eyebrow}>Capabilities</p>
+        <h2 className={styles.title}>
+          Capability &amp; <em>Execution</em>
+        </h2>
+        <p className={styles.description}>
+          Core competencies driving AI system development and deployment at scale.
+        </p>
 
-      <div className={styles.grid}>
-        {capabilities.map(({ num, title, icon: Icon, tag, description }) => (
-          <article key={num} className={styles.card}>
-            <div className={styles.dot} />
-            <div className={styles.glow} />
+        <div className={styles.grid}>
+          {capabilities.map(({ num, title, icon: Icon, tag, description }) => (
+            <article key={num} className={styles.card}>
+              <div className={styles.dot} />
+              <div className={styles.glow} />
 
-            <div className={styles.num}>{num}</div>
+              <div className={styles.num}>{num}</div>
 
-            <div className={styles.iconWrap}>
-              <Icon className={styles.icon} size={18} strokeWidth={1.5} />
-            </div>
+              <div className={styles.iconWrap}>
+                <Icon className={styles.icon} size={18} strokeWidth={1.5} />
+              </div>
 
-            <h3 className={styles.cardTitle}>{title}</h3>
-            <p className={styles.desc}>{description}</p>
+              <h3 className={styles.cardTitle}>{title}</h3>
+              <p className={styles.desc}>{description}</p>
 
-            <div className={styles.footer}>
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 13 13"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M2 6.5h9M7.5 3l3.5 3.5L7.5 10"
-                  stroke="#9b5c3d"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>{tag}</span>
-            </div>
-          </article>
-        ))}
+              <div className={styles.footer}>
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 13 13"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 6.5h9M7.5 3l3.5 3.5L7.5 10"
+                    stroke="#9b5c3d"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>{tag}</span>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

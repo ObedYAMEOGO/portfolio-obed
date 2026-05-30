@@ -19,8 +19,8 @@ export default async function AdminLayout({
   const primaryEmail =
     user.primaryEmailAddress?.emailAddress;
 
-  console.log("PRIMARY EMAIL:", primaryEmail);
-  console.log("ADMIN EMAIL:", ADMIN_EMAIL);
+  // console.log("PRIMARY EMAIL:", primaryEmail);
+  // console.log("ADMIN EMAIL:", ADMIN_EMAIL);
 
   if (
     !primaryEmail ||

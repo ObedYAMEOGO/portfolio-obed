@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 import resend  # type: ignore
 
@@ -110,7 +110,7 @@ def base_wrapper(
                     color:#aaa;
                     font-size:11px;
                   ">
-                    AI & Machine Learning Engineering
+                    AI Engineering · Machine Learning · LLM Systems
                   </p>
 
                 </td>
@@ -131,7 +131,7 @@ def base_wrapper(
                     color:#999;
                     line-height:1.7;
                   ">
-                    You're receiving this email because you interacted with
+                    You're receiving this email because you subscribed on
                     <a
                       href="{get_base_url()}"
                       style="color:#111;"
@@ -197,6 +197,19 @@ def cta_button(
 
 
 # =========================================================
+# SAFE SEND
+# =========================================================
+
+
+def send_email(payload: dict):
+    try:
+        resend.Emails.send(payload)
+
+    except Exception as e:
+        logger.exception(f"Failed sending email: {e}")
+
+
+# =========================================================
 # WELCOME EMAIL
 # =========================================================
 
@@ -222,9 +235,10 @@ def send_welcome_email(
           color:{COLOR_MUTED};
         ">
           Thanks for subscribing to the newsletter.
-          You'll receive updates about AI engineering,
-          infrastructure, RAG systems,
-          production ML and distributed systems.
+          You'll receive updates about AI Engineering,
+          LLM systems, RAG architectures,
+          MLOps, inference optimization,
+          and production machine learning.
         </p>
 
         <div style="margin-top:32px;">
@@ -235,16 +249,14 @@ def send_welcome_email(
     </tr>
     """
 
-    resend.Emails.send(
+    send_email(
         {
             "from": str(settings.EMAIL_FROM),
             "to": [to_email],
             "subject": "Welcome to the AI Engineering Newsletter",
             "html": base_wrapper(
                 content,
-                blog_unsubscribe_url(
-                    to_email
-                ),
+                blog_unsubscribe_url(to_email),
                 "Unsubscribe from blog emails",
             ),
         }
@@ -302,7 +314,7 @@ def send_lead_notification(
     </tr>
     """
 
-    resend.Emails.send(
+    send_email(
         {
             "from": str(settings.EMAIL_FROM),
             "to": [str(settings.ADMIN_EMAIL)],
@@ -324,11 +336,14 @@ def send_lead_notification(
 def broadcast_new_post(
     subscriber_emails: List[str],
     post_title: str,
-    post_summary: str,
+    post_summary: Optional[str],
     post_slug: str,
 ):
-    post_url = (
-        f"{get_base_url()}/blog/{post_slug}"
+    post_url = f"{get_base_url()}/blog/{post_slug}"
+
+    summary = (
+        post_summary
+        or "A new AI engineering article has just been published."
     )
 
     for email in subscriber_emails:
@@ -350,7 +365,7 @@ def broadcast_new_post(
               line-height:1.8;
               color:{COLOR_MUTED};
             ">
-              {post_summary}
+              {summary}
             </p>
 
             <div style="margin-top:32px;">
@@ -361,16 +376,14 @@ def broadcast_new_post(
         </tr>
         """
 
-        resend.Emails.send(
+        send_email(
             {
                 "from": str(settings.EMAIL_FROM),
                 "to": [email],
-                "subject": f"New Post: {post_title}",
+                "subject": f"New AI Article: {post_title}",
                 "html": base_wrapper(
                     content,
-                    blog_unsubscribe_url(
-                        email
-                    ),
+                    blog_unsubscribe_url(email),
                     "Unsubscribe from blog emails",
                 ),
             }
@@ -385,11 +398,14 @@ def broadcast_new_post(
 def broadcast_new_project(
     subscriber_emails: List[str],
     project_title: str,
-    project_description: str,
+    project_description: Optional[str],
     project_slug: str,
 ):
-    project_url = (
-        f"{get_base_url()}/projects/{project_slug}"
+    project_url = f"{get_base_url()}/projects/{project_slug}"
+
+    description = (
+        project_description
+        or "A new AI project has been published."
     )
 
     for email in subscriber_emails:
@@ -411,7 +427,7 @@ def broadcast_new_project(
               line-height:1.8;
               color:{COLOR_MUTED};
             ">
-              {project_description}
+              {description}
             </p>
 
             <div style="margin-top:32px;">
@@ -422,16 +438,14 @@ def broadcast_new_project(
         </tr>
         """
 
-        resend.Emails.send(
+        send_email(
             {
                 "from": str(settings.EMAIL_FROM),
                 "to": [email],
-                "subject": f"New Project: {project_title}",
+                "subject": f"New AI Project: {project_title}",
                 "html": base_wrapper(
                     content,
-                    platform_unsubscribe_url(
-                        email
-                    ),
+                    platform_unsubscribe_url(email),
                     "Disable platform notifications",
                 ),
             }
@@ -446,11 +460,14 @@ def broadcast_new_project(
 def broadcast_new_material(
     subscriber_emails: List[str],
     material_title: str,
-    material_description: str,
+    material_description: Optional[str],
     material_slug: str,
 ):
-    material_url = (
-        f"{get_base_url()}/materials/{material_slug}"
+    material_url = f"{get_base_url()}/materials/{material_slug}"
+
+    description = (
+        material_description
+        or "A new learning resource has been added."
     )
 
     for email in subscriber_emails:
@@ -472,7 +489,7 @@ def broadcast_new_material(
               line-height:1.8;
               color:{COLOR_MUTED};
             ">
-              {material_description}
+              {description}
             </p>
 
             <div style="margin-top:32px;">
@@ -483,16 +500,14 @@ def broadcast_new_material(
         </tr>
         """
 
-        resend.Emails.send(
+        send_email(
             {
                 "from": str(settings.EMAIL_FROM),
                 "to": [email],
-                "subject": f"New Material: {material_title}",
+                "subject": f"New Resource: {material_title}",
                 "html": base_wrapper(
                     content,
-                    platform_unsubscribe_url(
-                        email
-                    ),
+                    platform_unsubscribe_url(email),
                     "Disable platform notifications",
                 ),
             }

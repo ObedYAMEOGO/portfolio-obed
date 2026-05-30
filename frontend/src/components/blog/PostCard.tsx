@@ -1,108 +1,88 @@
-"use client";
-
 import Link from "next/link";
+import Image from "next/image";
 import { Clock } from "lucide-react";
 
-import type { BlogPost } from "@/types/blog";
-import { formatPostDate } from "@/lib/blog-utils";
+import type { Post } from "@/types";
 import { cn } from "@/lib/utils";
-
-export type PostCardSize = "md" | "sm"; // md = this-week, sm = this-month
+import RelativeDate from "@/components/blog/RelativeDate";
 
 interface PostCardProps {
-  post: BlogPost;
-  size?: PostCardSize;
+  post: Post;
+  compact?: boolean;
 }
 
 const CATEGORY_DOT: Record<string, string> = {
-  Engineering: "bg-emerald-500",
-  "Next.js":   "bg-sky-500",
-  Design:      "bg-violet-500",
-  Career:      "bg-amber-500",
-  Database:    "bg-blue-500",
-  DevOps:      "bg-orange-500",
-  CSS:         "bg-pink-500",
-  React:       "bg-cyan-500",
-  Auth:        "bg-indigo-500",
+  "AI Engineering":   "bg-emerald-500",
+  LLMs:               "bg-sky-500",
+  "Machine Learning": "bg-violet-500",
+  MLOps:              "bg-orange-500",
+  RAG:                "bg-cyan-500",
+  "AI Agents":        "bg-indigo-500",
+  Inference:          "bg-pink-500",
+  Infrastructure:     "bg-amber-500",
+  Research:           "bg-blue-500",
 };
 
-export default function PostCard({ post, size = "md" }: PostCardProps) {
+export default function PostCard({ post, compact = false }: PostCardProps) {
   const dot = CATEGORY_DOT[post.category] ?? "bg-neutral-400";
+  const displayDate = post.published_at || post.created_at;
 
   return (
-    <Link href={`/blog/${post.slug}`} className="group block h-full">
-      <article
-        className={cn(
-          `
-            flex
-            h-full
-            flex-col
-            gap-3
-            rounded-2xl
-            border
-            border-neutral-200
-            bg-white
-            p-5
-            transition-all
-            duration-200
-            group-hover:border-neutral-300
-            group-hover:shadow-sm
-          `,
-          size === "sm" && "gap-2 p-4",
-        )}
-      >
-        {/* ── Decorative thumbnail ── */}
-        {size === "md" && (
-          <div
-            className="
-              h-28
-              w-full
-              overflow-hidden
-              rounded-xl
-              bg-neutral-100
-              transition-all
-              duration-300
-              group-hover:bg-neutral-200
-            "
-          />
-        )}
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-200 hover:border-neutral-300 hover:shadow-sm">
 
-        {/* ── Category + title ── */}
+      {!compact && post.cover_image_url && (
+        <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
+          <div className="relative aspect-video w-full">
+            <Image
+              src={post.cover_image_url}
+              alt={post.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+            />
+          </div>
+        </Link>
+      )}
+
+      {!compact && !post.cover_image_url && (
+        <div className="h-36 w-full bg-neutral-100 transition-colors duration-200 group-hover:bg-neutral-200" />
+      )}
+
+      <div className={cn("flex flex-1 flex-col", compact ? "gap-2 p-4" : "gap-3 p-5")}>
+
         <div className="flex items-center gap-2">
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dot)} />
-          <span
-            className={cn(
-              "font-semibold uppercase tracking-wider text-neutral-500",
-              size === "md" ? "text-[10px]" : "text-[10px]",
-            )}
-          >
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
             {post.category}
           </span>
         </div>
 
-        <h3
-          className={cn(
-            "font-semibold leading-snug tracking-tight text-neutral-900 transition-colors duration-200 group-hover:text-neutral-600",
-            size === "md" ? "text-[15px]" : "text-[13px]",
-          )}
-        >
-          {post.title}
-        </h3>
+        <Link href={`/blog/${post.slug}`}>
+          <h2
+            className={cn(
+              "font-semibold leading-snug tracking-tight text-neutral-900 transition-colors duration-150 group-hover:text-neutral-600",
+              compact ? "line-clamp-2 text-[14px]" : "line-clamp-2 text-[17px]",
+            )}
+          >
+            {post.title}
+          </h2>
+        </Link>
 
-        {size === "md" && (
+        {!compact && (
           <p className="line-clamp-2 text-[13px] leading-relaxed text-neutral-500">
-            {post.excerpt}
+            {post.summary || post.content.substring(0, 120) + "…"}
           </p>
         )}
 
-        {/* ── Meta ── */}
-        <div className="mt-auto flex items-center gap-1.5 text-[11px] text-neutral-400">
-          <span>{formatPostDate(post.publishedAt)}</span>
-          <span>·</span>
-          <Clock className="h-3 w-3" />
-          <span>{post.readingTime} min</span>
+        {/* ✅ RelativeDate replaces the raw formatPostDate span */}
+        <div className="mt-auto flex items-center gap-3 text-[11px] text-neutral-400">
+          <RelativeDate dateString={displayDate} />
+          <div className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{post.reading_time} min read</span>
+          </div>
         </div>
-      </article>
-    </Link>
+      </div>
+    </article>
   );
 }

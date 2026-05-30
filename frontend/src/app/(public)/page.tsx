@@ -129,8 +129,8 @@ export default async function HomePage() {
                   leading-[1.05]
                   tracking-[-0.02em]
                   text-neutral-900
-                  sm:text-[2.8rem]
-                  md:text-[3.7rem]
+                  sm:text-[2.5rem]
+                  md:text-[3rem]
                 "
               >
                 Focused on building production grade ML &amp; intelligent systems.
@@ -340,11 +340,11 @@ export default async function HomePage() {
           <div className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-6 md:flex-row md:items-end">
 
             <div className="space-y-2">
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.3em] text-neutral-400">
+              <span className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 Selected Works
               </span>
 
-              <h2 className="text-4xl font-semibold tracking-[-0.02em] text-neutral-900 md:text-5xl">
+              <h2 className="text-3xl sm:text-4x  font-semibold tracking-[-0.02em] text-neutral-900">
                 Projects
               </h2>
             </div>
@@ -368,7 +368,7 @@ export default async function HomePage() {
               "
             >
               All Projects
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+              <ArrowRight className="h-3.5 w-3.5 text-[15px] text-neutral-500 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
 
           </div>

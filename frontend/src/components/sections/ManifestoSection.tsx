@@ -65,20 +65,17 @@ export default function ManifestoSection() {
             <h2
               className="
                 max-w-4xl
-                text-[2rem]
+                text-3xl sm:text-4x1
                 font-semibold
                 text-center
                 italic
                 leading-[1.1]
                 tracking-[-0.02em]
                 text-neutral-400
-                sm:text-[2.5rem]
-                md:text-[3rem]
               "
             >
               {" "}
               &quot;I don&apos;t only experiment with AI tools.
-              <br />
               <span className="not-italic text-white">
                 {" "}
                 I build the tools.

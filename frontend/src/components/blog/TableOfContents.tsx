@@ -122,7 +122,7 @@ export default function TableOfContents({
 
                   <span
                     className={`
-                      mt-[7px]
+                      mt-1.75
                       block
                       shrink-0
                       transition-all
@@ -130,8 +130,8 @@ export default function TableOfContents({
                       group-hover:bg-black
                       ${
                         heading.level === 2
-                          ? "h-[5px] w-[5px] bg-neutral-400"
-                          : "h-[4px] w-[18px] bg-neutral-300"
+                          ? "h-1.25 w-1.25 bg-neutral-400"
+                          : "h-1 w-4.5 bg-neutral-300"
                       }
                     `}
                   />

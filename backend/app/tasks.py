@@ -1,4 +1,4 @@
-from celery import Celery
+from celery import Celery  # type: ignore
 
 from app.core.config import settings
 
@@ -33,7 +33,7 @@ celery.conf.update(
 )
 
 # =========================================================
-# NEWSLETTER TASKS
+# WELCOME EMAIL TASK
 # =========================================================
 
 
@@ -42,12 +42,12 @@ def send_welcome_email_task(
     to_email: str,
 ):
     send_welcome_email(
-        to_email
+        to_email=to_email,
     )
 
 
 # =========================================================
-# LEAD TASK
+# LEAD NOTIFICATION TASK
 # =========================================================
 
 
@@ -63,6 +63,7 @@ def send_lead_notification_task(
         message=message,
     )
 
+
 # =========================================================
 # POST BROADCAST TASK
 # =========================================================
@@ -72,7 +73,7 @@ def send_lead_notification_task(
 def broadcast_new_post_task(
     subscriber_emails: list[str],
     post_title: str,
-    post_summary: str,
+    post_summary: str | None,
     post_slug: str,
 ):
     broadcast_new_post(
@@ -92,7 +93,7 @@ def broadcast_new_post_task(
 def broadcast_new_project_task(
     subscriber_emails: list[str],
     project_title: str,
-    project_description: str,
+    project_description: str | None,
     project_slug: str,
 ):
     broadcast_new_project(
@@ -112,7 +113,7 @@ def broadcast_new_project_task(
 def broadcast_new_material_task(
     subscriber_emails: list[str],
     material_title: str,
-    material_description: str,
+    material_description: str | None,
     material_slug: str,
 ):
     broadcast_new_material(

@@ -1,27 +1,42 @@
 export type BlogCategory =
-  | "Engineering"
-  | "Design"
-  | "Career"
-  | "Next.js"
-  | "Database"
-  | "DevOps"
-  | "CSS"
-  | "React"
-  | "Auth";
+  | "AI Engineering"
+  | "LLMs"
+  | "Machine Learning"
+  | "MLOps"
+  | "RAG"
+  | "AI Agents"
+  | "Inference"
+  | "Infrastructure"
+  | "Research";
 
-export type TimeBucket = "today" | "this-week" | "this-month" | "archive";
-
+/**
+ * Backend → Frontend normalized BlogPost contract
+ * MUST match FastAPI PostResponse mapping
+ */
 export interface BlogPost {
-  slug: string;
+  id: number;
+
   title: string;
-  excerpt: string;
-  category: BlogCategory;
-  author: {
-    name: string;
-    initials: string;
-  };
-  publishedAt: string; // ISO date string e.g. "2024-09-15"
-  readingTime: number; // minutes
-  featured?: boolean;   // editor's pick — only one post should have this true
-  coverImage?: string;  // optional, URL or local path
+  slug: string;
+
+  excerpt: string | null;
+  content: string;
+
+  category: BlogCategory | string;
+
+  tags: string[];
+
+  coverImageUrl: string | null;
+
+  isPublished: boolean;
+  featured: boolean;
+
+  createdAt: string;
+  updatedAt: string | null;
+  publishedAt: string | null;
+
+  readingTime: number;
+
+  authorName: string;
+  authorInitials: string;
 }

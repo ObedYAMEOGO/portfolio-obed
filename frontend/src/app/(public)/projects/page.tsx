@@ -1,252 +1,179 @@
-/* app/page.tsx
-   GORDON: Updated to use server-only settings API for SSR */
+// app/projects/page.tsx
 
 import Link from "next/link";
-import Image from "next/image";
-import { Suspense } from "react";
-
-import {
-  ArrowRight,
-  GraduationCap,
-  Download,
-} from "lucide-react";
-
-import CapabilityMatrix from "@/components/sections/SkillMatrix";
-import ManifestoSection from "@/components/sections/ManifestoSection";
-import ProjectsGrid from "@/components/projects/ProjectsGrid";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Project } from "@/types";
-import { getProjects } from "@/lib/server-api";
-import { getSettingsServer } from "@/lib/api/settings-server";
+import ProjectCard from "@/components/projects/ProjectCard";
 
 export const revalidate = 3600;
 
 /* =========================================================
-   PROJECTS
+   CONFIG
 ========================================================= */
 
-async function ProjectsSection() {
-  let projects: Project[] = [];
+const API_URL =
+  process.env.INTERNAL_API_URL || "http://backend:8000/api/v1";
 
-  try {
-    const data = await getProjects();
-    projects = data.slice(0, 4);
-  } catch (error) {
-    console.error("PROJECT_FETCH_ERROR:", error);
-  }
-
-  if (projects.length === 0) {
-    return (
-      <div className="col-span-2 py-10 md:py-20 text-center">
-        <p className="text-sm text-neutral-400">No projects available</p>
-      </div>
-    );
-  }
-
-  return <ProjectsGrid projects={projects} />;
-}
+const PROJECTS_PER_PAGE = 6;
 
 /* =========================================================
-   SKELETON
+   FETCH
 ========================================================= */
 
-function ProjectsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-6 md:gap-8 md:grid-cols-2">
-      {[1, 2, 3, 4].map((item) => (
-        <div key={item} className="space-y-4">
-          <div className="aspect-16/10 w-full animate-pulse rounded-xl bg-neutral-100" />
-          <div className="h-4 w-2/3 animate-pulse rounded-full bg-neutral-100" />
-          <div className="h-3 w-full animate-pulse rounded-full bg-neutral-100" />
-        </div>
-      ))}
-    </div>
-  );
+async function getProjects(): Promise<Project[]> {
+  const res = await fetch(`${API_URL}/projects`, {
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch projects");
+
+  return res.json();
 }
 
 /* =========================================================
    PAGE
 ========================================================= */
 
-export default async function HomePage() {
-  let resumeUrl = "";
+interface ProjectsPageProps {
+  searchParams: Promise<{ page?: string }>;
+}
 
-  const settings = await getSettingsServer();
-  resumeUrl = settings?.resume_url || "";
+export default async function ProjectsPage({
+  searchParams,
+}: ProjectsPageProps) {
+  const params = await searchParams;
+  const currentPage = Number(params.page) || 1;
+
+  let projects: Project[] = [];
+
+  try {
+    projects = await getProjects();
+  } catch (err) {
+    console.error(err);
+  }
+
+  /* ── Pagination ── */
+  const totalProjects = projects.length;
+  const totalPages = Math.ceil(totalProjects / PROJECTS_PER_PAGE) || 1;
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safePage - 1) * PROJECTS_PER_PAGE;
+  const paginatedProjects = projects.slice(startIndex, startIndex + PROJECTS_PER_PAGE);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f5f5f5] text-[#050505] selection:bg-neutral-200">
-      {/* Adjusted padding: pt-6 on mobile, pt-20 on md+ | pb-10 on mobile, pb-14 on md+ */}
-      <main className="relative flex flex-col items-center overflow-hidden px-4 pb-10 pt-6 sm:px-6 md:pb-14 md:pt-20">
+    <div className="min-h-screen bg-neutral-50">
 
-        {/* GRID BACKGROUND */}
-        <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-size-[40px_40px]" />
+      {/* =========================================================
+          HEADER — matches blog/page.tsx exactly
+      ========================================================= */}
 
-        {/* =========================================================
-            HERO
-        ========================================================= */}
+      <div className="border-b border-neutral-200 bg-white">
+        <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+            Selected Work
+          </p>
+          <h1 className="text-3xl sm:text-4x font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            Projects
+          </h1>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-neutral-500">
+            Production-grade machine learning systems, intelligent
+            infrastructure, applied AI tooling, and engineering research.
+          </p>
+        </div>
+      </div>
 
-        {/* Adjusted min-height for mobile to prevent excess empty space */}
-        <section className="flex min-h-[40vh] py-6 md:py-0 md:min-h-[58vh] w-full max-w-7xl items-center">
-          {/* Reduced grid gap on mobile: gap-8 instead of gap-14 */}
-          <div className="grid w-full grid-cols-1 items-center gap-8 lg:grid-cols-[60%_40%] lg:gap-14">
+      {/* =========================================================
+          CONTENT
+      ========================================================= */}
 
-            {/* LEFT */}
-            {/* Reduced vertical space between elements on mobile: space-y-4 instead of space-y-6 */}
-            <div className="flex flex-col items-center space-y-4 text-center lg:items-start lg:text-left md:space-y-6">
+      <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
 
-              <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500 shadow-sm">
-                A Machine Learning Engineer
-              </div>
+        {/* ── Empty state ── */}
+        {paginatedProjects.length === 0 ? (
+          <div className="py-32 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+              <svg
+                className="h-8 w-8 text-neutral-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-neutral-600">No projects yet</p>
+            <p className="mt-1 text-xs text-neutral-400">Check back soon for new work</p>
+          </div>
+        ) : (
+          <>
+            {/* ── Grid ── */}
+            <div className="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2 lg:gap-x-10 lg:gap-y-12">
+              {paginatedProjects.map((project, index) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  index={index}
+                />
+              ))}
+            </div>
 
-              <h1 className="max-w-3xl text-[2rem] font-semibold leading-[1.05] tracking-[-0.02em] text-neutral-900 sm:text-[2.8rem] md:text-[3.7rem]">
-                Focused on building production grade ML &amp; intelligent systems.
-              </h1>
-
-              <span className="block text-sm font-medium uppercase tracking-[0.3em] text-neutral-400">
-                Research · Engineering · Deployment
-              </span>
-
-              <div className="flex flex-col items-center gap-3 pt-1 sm:flex-row lg:items-start">
+            {/* ── Pagination ── */}
+            {totalPages > 1 && (
+              <nav className="mt-16 flex items-center justify-center gap-2">
 
                 <Link
-                  href="/projects"
-                  prefetch
-                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-neutral-900 px-8 text-[12px] font-semibold uppercase tracking-widest text-white transition-colors duration-200 hover:bg-neutral-700 sm:w-auto"
+                  href={safePage > 1 ? `/projects?page=${safePage - 1}` : "#"}
+                  aria-disabled={safePage === 1}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                    safePage === 1
+                      ? "pointer-events-none cursor-not-allowed text-neutral-300"
+                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900"
+                  }`}
                 >
-                  View My Projects
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ChevronLeft className="h-4 w-4" />
                 </Link>
 
-                {resumeUrl && (
-                  <a
-                    href={resumeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-neutral-300 bg-white px-8 text-[12px] font-semibold uppercase tracking-widest text-neutral-700 transition-colors duration-200 hover:border-neutral-400 hover:bg-neutral-50 sm:w-auto"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    Download My CV
-                  </a>
-                )}
-
-              </div>
-            </div>
-
-            {/* RIGHT — IMAGE */}
-            <div className="relative flex justify-center">
-              <div className="relative flex aspect-square w-70 items-center justify-center sm:w-[320px] md:w-[107.5] lg:h-125 lg:w-125">
-
-                <div className="absolute inset-0 rounded-full bg-linear-to-br from-neutral-200/90 via-white to-neutral-300/80 blur-3xl" />
-
-                <div className="relative z-10 h-full w-full overflow-hidden rounded-none">
-                  <Image
-                    src="/profile-obed.png"
-                    alt="Obed Yameogo"
-                    fill
-                    priority
-                    sizes="(max-width: 768px) 100vw, 500px"
-                    className="pointer-events-none select-none object-cover"
-                  />
-
-                  <div className="absolute bottom-0 left-0 right-0 z-20 bg-white/95 px-4 py-4 backdrop-blur-md md:hidden">
-                    <div className="text-center">
-                      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-neutral-900">
-                        Obed Yameogo
-                      </p>
-                      <p className="mt-1 text-[11px] leading-relaxed text-neutral-600">
-                        A PhD Scholar in AI and Machine Learning Engineer.
-                      </p>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const page = i + 1;
+                    const active = safePage === page;
+                    return (
+                      <Link
+                        key={page}
+                        href={`/projects?page=${page}`}
+                        className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-all ${
+                          active
+                            ? "bg-neutral-900 text-white"
+                            : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                        }`}
+                      >
+                        {page}
+                      </Link>
+                    );
+                  })}
                 </div>
 
-                <div className="absolute -left-6 top-3 z-20 hidden max-w-55 flex-col gap-2 rounded-xl border border-white/40 bg-white/80 p-5 backdrop-blur-md md:flex lg:-left-14">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                    Profile
-                  </p>
+                <Link
+                  href={safePage < totalPages ? `/projects?page=${safePage + 1}` : "#"}
+                  aria-disabled={safePage === totalPages}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                    safePage === totalPages
+                      ? "pointer-events-none cursor-not-allowed text-neutral-300"
+                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900"
+                  }`}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
 
-                  <h3 className="text-xl font-semibold leading-snug tracking-tight text-neutral-900">
-                    Obed Yameogo
-                  </h3>
-
-                  <div className="mb-2 flex flex-col gap-2 border-t border-neutral-200 pt-3">
-                    <p className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
-                      <GraduationCap className="h-4 w-4 text-neutral-400" />
-                      PhD Scholar in AI · MLE
-                    </p>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* MANIFESTO */}
-        <ManifestoSection />
-
-        {/* CAPABILITIES */}
-        <section className="w-full max-w-7xl">
-          <CapabilityMatrix />
-        </section>
-
-        {/* QUOTE TICKER */}
-        <section className="relative w-full overflow-hidden border-y border-neutral-200 bg-white/60 py-4 backdrop-blur-sm">
-          <div className="flex whitespace-nowrap animate-[ticker_22s_linear_infinite]">
-            <div className="mx-10 flex items-center gap-4 text-neutral-700">
-              <span className="text-sm tracking-[0.25em] text-neutral-400">— CAL NEWPORT</span>
-              <p className="text-sm font-medium sm:text-base">
-                &quot;Clarity about what matters provides clarity about what does not.&quot;
-              </p>
-            </div>
-            <div className="mx-10 flex items-center gap-4 text-neutral-700">
-              <span className="text-sm tracking-[0.25em] text-neutral-400">— CAL NEWPORT</span>
-              <p className="text-sm font-medium sm:text-base">
-                &quot;Clarity about what matters provides clarity about what does not.&quot;
-              </p>
-            </div>
-            <div className="mx-10 flex items-center gap-4 text-neutral-700">
-              <span className="text-sm tracking-[0.25em] text-neutral-400">— CAL NEWPORT</span>
-              <p className="text-sm font-medium sm:text-base">
-                &quot;Clarity about what matters provides clarity about what does not.&quot;
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* PROJECTS */}
-        {/* Adjusted top margin and spacing: mt-10 space-y-6 on mobile, mt-16 space-y-10 on md+ */}
-        <section className="mt-10 md:mt-16 w-full max-w-7xl space-y-6 md:space-y-10">
-
-          <div className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-6 md:flex-row md:items-end">
-            <div className="space-y-2">
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.3em] text-neutral-400">
-                Selected Works
-              </span>
-              <h2 className="text-4xl font-semibold tracking-[-0.02em] text-neutral-900 md:text-5xl">
-                Projects
-              </h2>
-            </div>
-
-            <Link
-              href="/projects"
-              prefetch
-              className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-widest text-neutral-500 transition-colors duration-150 hover:text-neutral-900"
-            >
-              All Projects
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
-            </Link>
-          </div>
-
-          <Suspense fallback={<ProjectsSkeleton />}>
-            <ProjectsSection />
-          </Suspense>
-
-        </section>
-
+              </nav>
+            )}
+          </>
+        )}
       </main>
     </div>
   );

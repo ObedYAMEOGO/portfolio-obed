@@ -1,174 +1,170 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import type { BlogPost, BlogCategory } from "@/types/blog";
-import { groupPostsByBucket, paginateArchive, ARCHIVE_PAGE_SIZE } from "@/lib/blog-utils";
-import FeaturedHero from "@/components/blog/FeaturedHero";
-import PostCard from "@/components/blog/PostCard";
-import ArchiveRow from "@/components/blog/ArchiveRow";
-import BlogSidebar from "@/components/blog/BlogSideBar";
+import type { Post, BlogCategory } from "@/types";
+import {
+  groupPostsByBucket,
+  paginateArchive,
+  extractCategories,
+  getArchiveYears,
+  ARCHIVE_PAGE_SIZE,
+} from "@/types/blog-utils";
 import { cn } from "@/lib/utils";
 
-const ALL_CATEGORIES: BlogCategory[] = [
-  "Engineering",
-  "Next.js",
-  "Design",
-  "Career",
-  "Database",
-  "DevOps",
-  "CSS",
-  "React",
-  "Auth",
-];
+import FeaturedHero from "./FeaturedHero";
+import PostCard from "./PostCard";
+import ArchiveRow from "./ArchiveRow";
+import BlogSidebar from "./BlogSideBar";
 
 interface BlogFeedProps {
-  posts: BlogPost[];
+  posts: Post[];
+  // ISO string captured on the server — passed down so that bucket
+  // calculations are identical on server and client (no hydration mismatch).
+  now: string;
 }
 
-export default function BlogFeed({ posts }: BlogFeedProps) {
-  const [activeCategory, setActiveCategory] = useState<BlogCategory | null>(null);
+export default function BlogFeed({ posts, now }: BlogFeedProps) {
+  const [activeCategory, setActiveCategory] = useState<BlogCategory | "All">("All");
   const [archivePage, setArchivePage] = useState(1);
 
-  // ── Filter posts by active category ─────────────────────────────────────
+  // Parse once; stable reference across renders since `now` never changes.
+  const nowDate = useMemo(() => new Date(now), [now]);
+
+  // Reset pagination whenever the filter changes
+  const handleCategory = (cat: BlogCategory | "All") => {
+    setActiveCategory(cat);
+    setArchivePage(1);
+  };
+
+  // ── Derived data ────────────────────────────────────────────────────────────
+  const allCategories = useMemo(() => extractCategories(posts), [posts]);
+  const archiveYears  = useMemo(() => getArchiveYears(posts), [posts]);
+  const trendingPosts = useMemo(() => posts.slice(0, 5), [posts]);
+
   const filteredPosts = useMemo(
     () =>
-      activeCategory
-        ? posts.filter((p) => p.category === activeCategory)
-        : posts,
+      activeCategory === "All"
+        ? posts
+        : posts.filter((p) => p.category === activeCategory),
     [posts, activeCategory],
   );
 
-  const { featured, thisWeek, thisMonth, archive } =
-    groupPostsByBucket(filteredPosts);
+  // nowDate is passed in so bucketing matches the server render exactly.
+  const { hero, thisWeek, thisMonth, archive } = useMemo(
+    () => groupPostsByBucket(filteredPosts, nowDate),
+    [filteredPosts, nowDate],
+  );
 
   const visibleArchive = paginateArchive(archive, archivePage);
   const hasMore = visibleArchive.length < archive.length;
+  const remaining = archive.length - visibleArchive.length;
 
-  // ── Sidebar data ─────────────────────────────────────────────────────────
-  // Trending = top 3 posts by position (replace with view-count sort in production)
-  const trendingPosts = posts.slice(0, 3);
-  const archiveYears = [
-    { year: 2024, count: 31 },
-    { year: 2023, count: 24 },
-    { year: 2022, count: 18 },
-  ];
+  const isEmpty =
+    !hero && thisWeek.length === 0 && thisMonth.length === 0 && archive.length === 0;
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
 
-      {/* ══════════════════════════════════════════
-          MOBILE — sticky category pill strip
-          (hidden on md+ screens)
-      ══════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════
+          MOBILE — horizontal scrollable category pills
+          Hidden on md+ (sidebar handles filtering there)
+      ══════════════════════════════════════════════════ */}
       <div
         className="
           -mx-4
-          mb-6
+          mb-8
           flex
           gap-2
           overflow-x-auto
           px-4
           pb-1
-          scrollbar-none
-          md:hidden
           [&::-webkit-scrollbar]:hidden
+          md:hidden
         "
       >
-        <button
-          onClick={() => setActiveCategory(null)}
-          className={cn(
-            "shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all duration-150",
-            activeCategory === null
-              ? "border-neutral-900 bg-neutral-900 text-white"
-              : "border-neutral-200 bg-white text-neutral-500",
-          )}
-        >
-          All
-        </button>
-
-        {ALL_CATEGORIES.map((cat) => (
-          <button
+        <CategoryPill
+          label="All"
+          active={activeCategory === "All"}
+          onClick={() => handleCategory("All")}
+        />
+        {allCategories.map((cat) => (
+          <CategoryPill
             key={cat}
-            onClick={() => setActiveCategory(cat === activeCategory ? null : cat)}
-            className={cn(
-              "shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all duration-150",
-              activeCategory === cat
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-200 bg-white text-neutral-500",
-            )}
-          >
-            {cat}
-          </button>
+            label={cat}
+            active={activeCategory === cat}
+            onClick={() => handleCategory(cat as BlogCategory)}
+          />
         ))}
       </div>
 
-      {/* ══════════════════════════════════════════
-          MAIN GRID — feed (left) + sidebar (right, desktop only)
-      ══════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_260px] lg:grid-cols-[1fr_280px]">
+      {/* ══════════════════════════════════════════════════
+          MAIN LAYOUT — feed (left) + sidebar (right)
+      ══════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_272px]">
 
-        {/* ── LEFT: Feed ───────────────────────────────────────────── */}
-        <main className="min-w-0 space-y-10">
+        {/* ── FEED ──────────────────────────────────────────────── */}
+        <main className="min-w-0 space-y-12">
 
-          {/* ── Featured hero ── */}
-          {featured && (
+          {/* Empty state */}
+          {isEmpty && (
+            <div className="py-24 text-center">
+              <p className="text-sm text-neutral-400">
+                No posts in this category yet.
+              </p>
+            </div>
+          )}
+
+          {/* ── 1. Featured hero ── */}
+          {hero && (
             <section>
-              <SectionLabel label="Featured today" />
-              <FeaturedHero post={featured} />
+              <SectionLabel label="Featured" />
+              <FeaturedHero post={hero} />
             </section>
           )}
 
-          {/* ── This week ── */}
+          {/* ── 2. This week — 2-col grid ── */}
           {thisWeek.length > 0 && (
             <section>
               <SectionLabel label="This week" />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {thisWeek.map((post) => (
-                  <PostCard key={post.slug} post={post} size="md" />
+                  <PostCard key={post.id} post={post} />
                 ))}
               </div>
             </section>
           )}
 
-          {/* ── Earlier this month ── */}
+          {/* ── 3. Earlier this month — 3-col grid ── */}
           {thisMonth.length > 0 && (
             <section>
               <SectionLabel label="Earlier this month" />
-              {/* Desktop: 3-col grid | Mobile: single col list */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {thisMonth.map((post) => (
-                  <PostCard key={post.slug} post={post} size="sm" />
+                  <PostCard key={post.id} post={post} compact />
                 ))}
               </div>
             </section>
           )}
 
-          {/* ── Archive ── */}
+          {/* ── 4. Archive — compact list ── */}
           {archive.length > 0 && (
             <section>
               <SectionLabel label="Archive" />
-              <div
-                className="
-                  overflow-hidden
-                  rounded-2xl
-                  border
-                  border-neutral-200
-                  bg-white
-                "
-              >
+
+              <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
                 {visibleArchive.map((post) => (
-                  <ArchiveRow key={post.slug} post={post} />
+                  <ArchiveRow key={post.id} post={post} />
                 ))}
               </div>
 
-              {/* ── Load more ── */}
               {hasMore && (
                 <button
                   onClick={() => setArchivePage((p) => p + 1)}
                   className="
-                    mt-4
+                    mt-3
                     flex
                     w-full
                     items-center
@@ -186,31 +182,26 @@ export default function BlogFeed({ posts }: BlogFeedProps) {
                     duration-200
                     hover:border-neutral-300
                     hover:bg-neutral-50
-                    hover:text-neutral-700
+                    hover:text-neutral-800
                     active:scale-[0.99]
                   "
                 >
                   <ChevronDown className="h-4 w-4" />
-                  Load {Math.min(ARCHIVE_PAGE_SIZE, archive.length - visibleArchive.length)} more posts
+                  Load {Math.min(ARCHIVE_PAGE_SIZE, remaining)} more posts
                 </button>
               )}
             </section>
           )}
-
-          {/* Empty state */}
-          {!featured && thisWeek.length === 0 && thisMonth.length === 0 && archive.length === 0 && (
-            <div className="py-20 text-center text-neutral-400">
-              <p className="text-sm">No posts in this category yet.</p>
-            </div>
-          )}
         </main>
 
-        {/* ── RIGHT: Sidebar (desktop only) ────────────────────────── */}
+        {/* ── SIDEBAR (desktop only) ────────────────────────────── */}
         <div className="hidden md:block">
           <div className="sticky top-24">
             <BlogSidebar
               trendingPosts={trendingPosts}
-              categories={activeCategory ? [activeCategory] : []}
+              allCategories={allCategories}
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategory}
               archiveYears={archiveYears}
             />
           </div>
@@ -220,14 +211,39 @@ export default function BlogFeed({ posts }: BlogFeedProps) {
   );
 }
 
-// ── Small helper ──────────────────────────────────────────────────────────────
+/* ── Small reusable helpers ────────────────────────────────────────────────── */
+
 function SectionLabel({ label }: { label: string }) {
   return (
-    <div className="mb-4 flex items-center gap-3">
+    <div className="mb-5 flex items-center gap-3">
       <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
         {label}
       </span>
       <div className="h-px flex-1 bg-neutral-200" />
     </div>
+  );
+}
+
+function CategoryPill({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "shrink-0 rounded-full border px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all duration-150",
+        active
+          ? "border-neutral-900 bg-neutral-900 text-white"
+          : "border-neutral-200 bg-white text-neutral-500 hover:border-neutral-400 hover:text-neutral-800",
+      )}
+    >
+      {label}
+    </button>
   );
 }

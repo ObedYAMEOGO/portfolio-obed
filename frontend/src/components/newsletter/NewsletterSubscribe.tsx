@@ -15,7 +15,7 @@ export default function NewsletterSubscribe() {
     initialState,
   );
 
-  const [visibleMessage, setVisibleMessage] = useState(state);
+  const [visibleMessage, setVisibleMessage] = useState(initialState);
 
   // Sync action state into local state, then auto-clear after 4 s
   useEffect(() => {
@@ -29,6 +29,9 @@ export default function NewsletterSubscribe() {
 
     return () => clearTimeout(timer);
   }, [state]);
+
+  const showSuccess = visibleMessage.success && visibleMessage.message;
+  const showError = !visibleMessage.success && visibleMessage.message;
 
   return (
     <section className="bg-white py-10">
@@ -74,7 +77,7 @@ export default function NewsletterSubscribe() {
               inline-flex items-center justify-center gap-2 rounded-full
               bg-[#c17650] px-6 py-3 text-[12px] font-semibold uppercase
               text-white shadow-xs transition-all duration-300
-              hover:bg-[#7f4b31] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
+              hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
             "
           >
             {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
@@ -82,15 +85,15 @@ export default function NewsletterSubscribe() {
           </button>
         </form>
 
-        <div className="min-h-5">
-          {visibleMessage.success && visibleMessage.message && (
+        <div className="min-h-5" suppressHydrationWarning>
+          {showSuccess && (
             <div className="flex items-center gap-2 text-[13px] font-medium text-green-600">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
               {visibleMessage.message}
             </div>
           )}
 
-          {!visibleMessage.success && visibleMessage.message && (
+          {showError && (
             <div className="flex items-center gap-2 text-[13px] font-medium text-red-500">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {visibleMessage.message}

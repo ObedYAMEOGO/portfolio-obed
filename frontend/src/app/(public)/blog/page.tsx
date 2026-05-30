@@ -1,77 +1,103 @@
-// app/blog/page.tsx
-// Server component — data is fetched here, then passed to the client BlogFeed.
-// Replace MOCK_POSTS with your real CMS/MDX fetch below.
-
 import type { Metadata } from "next";
 
-import { MOCK_POSTS } from "@/lib/blog-utils";
 import BlogFeed from "@/components/blog/BlogFeed";
+import type { Post } from "@/types";
 
-// ── ISR: rebuild the page at most once per hour ──────────────────────────────
-// Remove or adjust this when using a real CMS with webhooks.
 export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
-// ── SEO ──────────────────────────────────────────────────────────────────────
+const API_URL =
+  process.env.INTERNAL_API_URL || "http://backend:8000/api/v1";
+
+/* ── SEO ────────────────────────────────────────────────────────────────────── */
 export const metadata: Metadata = {
   title: "Blog — Obed Yameogo",
   description:
-    "Thoughts on engineering, design, and building products that matter.",
+    "Thoughts on AI engineering, ML systems, inference, LLMs, and modern AI infrastructure.",
   openGraph: {
     title: "Blog — Obed Yameogo",
     description:
-      "Thoughts on engineering, design, and building products that matter.",
+      "Thoughts on AI engineering, ML systems, inference, LLMs, and modern AI infrastructure.",
   },
 };
 
-// ── Page ─────────────────────────────────────────────────────────────────────
-export default async function BlogPage() {
-  // ── 1. Fetch posts ──────────────────────────────────────────────────────
-  // When you're ready to use a real data source, replace the line below
-  // with your CMS client.  Examples:
-  //
-  //   Sanity:        const posts = await client.fetch(groq`*[_type=="post"]`)
-  //   Contentlayer:  import { allPosts } from "contentlayer/generated"
-  //   MDX folder:    const posts = await getMdxPosts()   // your helper
-  //
-  const posts = MOCK_POSTS;
+/* ── Data fetching ──────────────────────────────────────────────────────────── */
+async function getPosts(): Promise<Post[]> {
+  try {
+    const res = await fetch(`${API_URL}/posts`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-  // ── 2. Sort by date descending (newest first) ───────────────────────────
-  const sorted = [...posts].sort(
-    (a, b) =>
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-  );
+    const data = await res.json();
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  } catch (err) {
+    console.error("Error fetching posts:", err);
+    return [];
+  }
+}
 
-  // ── 3. Render ───────────────────────────────────────────────────────────
+/* ── Page ───────────────────────────────────────────────────────────────────── */
+interface BlogPageProps {
+  searchParams: Promise<{ year?: string }>;
+}
+
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const { year } = await searchParams;
+  const yearFilter = year ? parseInt(year, 10) : null;
+
+  const rawPosts = await getPosts();
+
+  // Capture now on the server as a stable ISO string.
+  // Passing it as a prop ensures server and client bucket posts identically,
+  // preventing hydration mismatches from new Date() drift between renders.
+  const now = new Date().toISOString();
+
+  const posts = rawPosts
+    .filter((p) => {
+      if (!p.is_published) return false;
+      // Apply year filter server-side so server and client see the same array.
+      if (yearFilter) {
+        const date = new Date(p.published_at || p.created_at);
+        return date.getUTCFullYear() === yearFilter;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const da = new Date(a.published_at || a.created_at).getTime();
+      const db = new Date(b.published_at || b.created_at).getTime();
+      // Primary: newest first.
+      // Secondary: higher id first — stable tiebreaker for posts with
+      // identical timestamps, ensuring server and client produce the
+      // same order regardless of JS engine sort stability.
+      if (db !== da) return db - da;
+      return b.id - a.id;
+    });
+
   return (
-    <main className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50">
 
       {/* ── Page header ── */}
-      <div
-        className="
-          border-b
-          border-neutral-200
-          bg-white
-          px-4
-          py-12
-          sm:px-6
-          lg:px-8
-        "
-      >
-        <div className="mx-auto max-w-5xl">
+      <div className="border-b border-neutral-200 bg-white">
+        <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
             Writing
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl">
-            Blog
+          <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            {yearFilter ? `Posts from ${yearFilter}` : "Blog"}
           </h1>
-          <p className="mt-2 max-w-md text-[15px] leading-relaxed text-neutral-500">
-            Thoughts on engineering, design, and building products that matter.
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-neutral-500">
+            Thoughts on AI engineering, ML systems, inference, LLMs, and modern
+            AI infrastructure.
           </p>
         </div>
       </div>
 
-      {/* ── Feed ── */}
-      <BlogFeed posts={sorted} />
-    </main>
+      {/* ── Feed (handles empty state internally) ── */}
+      <BlogFeed posts={posts} now={now} />
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import {
   AlertCircle,
@@ -18,16 +18,32 @@ const initialState = {
 };
 
 export default function NewsletterUnsubscribe() {
-  const [state, formAction, pending] =
-    useActionState(
-      unsubscribeFromNewsletter,
-      initialState,
-    );
+  const [state, formAction, pending] = useActionState(
+    unsubscribeFromNewsletter,
+    initialState,
+  );
+
+  const [visibleMessage, setVisibleMessage] = useState(initialState);
+
+  // Sync action state into local state, then auto-clear after 4 seconds
+  useEffect(() => {
+    if (!state.message) return;
+
+    setVisibleMessage(state);
+
+    const timer = setTimeout(() => {
+      setVisibleMessage({ success: false, message: "" });
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [state]);
+
+  const showSuccess = visibleMessage.success && visibleMessage.message;
+  const showError = !visibleMessage.success && visibleMessage.message;
 
   return (
     <section className="bg-white py-10">
       <div className="mx-auto flex max-w-xl flex-col gap-6 px-6">
-
         <div>
           <h2 className="text-2xl font-semibold text-neutral-900">
             Unsubscribe from Newsletter
@@ -38,10 +54,7 @@ export default function NewsletterUnsubscribe() {
           </p>
         </div>
 
-        <form
-          action={formAction}
-          className="flex flex-col gap-3"
-        >
+        <form action={formAction} className="flex flex-col gap-3">
           <input
             type="email"
             name="email"
@@ -57,6 +70,7 @@ export default function NewsletterUnsubscribe() {
               text-sm
               outline-none
               focus:border-neutral-400
+              disabled:opacity-50
             "
           />
 
@@ -80,30 +94,26 @@ export default function NewsletterUnsubscribe() {
               disabled:opacity-50
             "
           >
-            {pending && (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            )}
-
-            Unsubscribe
+            {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {pending ? "Unsubscribing..." : "Unsubscribe"}
           </button>
         </form>
 
-        <div className="min-h-5">
-          {state.success && (
-            <div className="flex items-center gap-2 text-green-600 text-sm">
+        <div className="min-h-5" suppressHydrationWarning>
+          {showSuccess && (
+            <div className="flex items-center gap-2 text-sm text-green-600">
               <CheckCircle2 className="h-4 w-4" />
-              {state.message}
+              {visibleMessage.message}
             </div>
           )}
 
-          {!state.success && state.message && (
-            <div className="flex items-center gap-2 text-red-500 text-sm">
+          {showError && (
+            <div className="flex items-center gap-2 text-sm text-red-500">
               <AlertCircle className="h-4 w-4" />
-              {state.message}
+              {visibleMessage.message}
             </div>
           )}
         </div>
-
       </div>
     </section>
   );

@@ -1,7 +1,9 @@
+// app/blog/[slug]/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { notFound } from "next/navigation";
+
 import type { Components } from "react-markdown";
 
 import {
@@ -10,7 +12,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 
-import { Post } from "@/types";
+import type { Post } from "@/types";
 
 import PrintButton from "@/components/blog/PrintButton";
 import ShareButtons from "@/components/blog/ShareButtons";
@@ -38,7 +40,9 @@ async function getPost(slug: string): Promise<Post | null> {
       next: { revalidate: 3600 },
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      return null;
+    }
 
     return res.json();
   } catch (error) {
@@ -48,13 +52,30 @@ async function getPost(slug: string): Promise<Post | null> {
 }
 
 /* =========================================================
-   CALCULATE READING TIME
+   READING TIME
 ========================================================= */
 
 function calculateReadingTime(content: string): number {
   const wordsPerMinute = 200;
   const wordCount = content.trim().split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
+  return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+}
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(dateString: string | null | undefined): string {
+  if (!dateString) return "Date not available";
+  
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Date not available";
+  
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 /* =========================================================
@@ -69,320 +90,218 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
-  const readingTime = calculateReadingTime(post.content || "");
+  const readingTime = post.reading_time || calculateReadingTime(post.content || "");
 
   const markdownComponents: Components = {
-    h1: ({ children }) => <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mt-12 mb-6">{children}</h1>,
-    h2: ({ children }) => {
-      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
-      return <h2 id={id} className="text-3xl font-semibold text-neutral-800 mt-12 mb-4 pb-2 border-b border-neutral-200">{children}</h2>;
-    },
-    h3: ({ children }) => {
-      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
-      return <h3 id={id} className="text-2xl font-semibold text-neutral-800 mt-8 mb-3">{children}</h3>;
-    },
-    h4: ({ children }) => <h4 className="text-xl font-semibold text-neutral-800 mt-6 mb-3">{children}</h4>,
-    p: ({ children }) => <p className="text-[16px] leading-[1.8] text-neutral-700 mb-6">{children}</p>,
-
-    pre: ({ children }) => (
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-[#0a0a0a] shadow-lg my-8">
-        <div className="flex items-center gap-2 border-b border-neutral-800 bg-[#161616] px-5 py-3">
-          <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
-          <div className="h-2.5 w-2.5 rounded-full bg-yellow-500" />
-          <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-          <span className="ml-3 text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-400">
-            Code
-          </span>
-        </div>
-        <pre className="m-0 overflow-x-auto p-6 text-[14px] leading-[1.8] text-neutral-100">
-          {children}
-        </pre>
-      </div>
+    h1: ({ children }) => (
+      <h1 className="mt-12 mb-6 text-4xl font-bold text-neutral-900 md:text-5xl">
+        {children}
+      </h1>
     ),
 
-    code: ({ node, className, children, ...props }) => {
-      const isInline = !className || (!className.includes('language-') && String(children).length < 100);
-
-      if (isInline) {
-        return (
-          <code
-            className="rounded-md bg-neutral-100 px-1.5 py-0.5 font-mono text-[14px] text-rose-600"
-            {...props}
-          >
-            {children}
-          </code>
-        );
-      }
-
+    h2: ({ children }) => {
+      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
       return (
-        <code
-          className={`font-mono text-[14px] text-neutral-100 ${className || ""}`}
-          {...props}
+        <h2
+          id={id}
+          className="mt-12 mb-4 border-b border-neutral-200 pb-2 text-3xl font-semibold text-neutral-800"
         >
           {children}
-        </code>
+        </h2>
       );
     },
 
-    img: ({ src, alt }) => {
-      const imageSrc = src ? String(src) : "";
-      return (
-        <div className="relative my-10 -mx-8 md:-mx-16">
-          <Image
-            src={imageSrc}
-            alt={alt || ""}
-            width={1200}
-            height={600}
-            className="w-full h-auto shadow-md"
-            unoptimized={!imageSrc.startsWith('/') && !imageSrc.startsWith('http')}
-          />
-          {alt && (
-            <p className="text-center text-sm text-neutral-500 mt-3 italic px-8 md:px-16">
-              {alt}
-            </p>
-          )}
-        </div>
-      );
-    },
+    h3: ({ children }) => (
+      <h3 className="mt-8 mb-3 text-2xl font-semibold text-neutral-800">
+        {children}
+      </h3>
+    ),
+
+    h4: ({ children }) => (
+      <h4 className="mt-6 mb-2 text-xl font-semibold text-neutral-800">
+        {children}
+      </h4>
+    ),
+
+    p: ({ children }) => (
+      <p className="mb-6 text-[16px] leading-[1.8] text-neutral-700">
+        {children}
+      </p>
+    ),
 
     a: ({ href, children }) => (
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-neutral-600 hover:text-neutral-900 underline decoration-neutral-300 hover:decoration-neutral-600 transition-colors"
+        className="text-neutral-900 underline decoration-neutral-300 hover:decoration-neutral-900"
       >
         {children}
       </a>
     ),
 
-    ul: ({ children }) => <ul className="list-disc pl-6 mb-6 space-y-2 text-neutral-700">{children}</ul>,
-    ol: ({ children }) => <ol className="list-decimal pl-6 mb-6 space-y-2 text-neutral-700">{children}</ol>,
-    li: ({ children }) => <li className="text-[16px] leading-[1.8]">{children}</li>,
+    ul: ({ children }) => (
+      <ul className="mb-6 list-disc pl-6 text-neutral-700">{children}</ul>
+    ),
+
+    ol: ({ children }) => (
+      <ol className="mb-6 list-decimal pl-6 text-neutral-700">{children}</ol>
+    ),
+
+    li: ({ children }) => (
+      <li className="mb-2 text-[16px] leading-[1.8]">{children}</li>
+    ),
 
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-neutral-300 pl-6 my-8 py-2 bg-neutral-50 rounded-r-xl italic text-neutral-600">
+      <blockquote className="mb-6 border-l-4 border-neutral-300 pl-5 italic text-neutral-600">
         {children}
       </blockquote>
     ),
 
-    hr: () => <hr className="my-12 border-neutral-200" />,
-
-    table: ({ children }) => (
-      <div className="overflow-x-auto my-8">
-        <table className="min-w-full border-collapse border border-neutral-200 rounded-lg">
+    code: ({ children, className }) => {
+      const isInline = !className;
+      if (isInline) {
+        return (
+          <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-sm font-mono text-neutral-800">
+            {children}
+          </code>
+        );
+      }
+      return (
+        <code className="block rounded-lg bg-neutral-900 p-4 text-sm font-mono text-neutral-100 overflow-x-auto">
           {children}
-        </table>
-      </div>
+        </code>
+      );
+    },
+
+    pre: ({ children }) => (
+      <pre className="mb-6 rounded-lg bg-neutral-900 p-4 overflow-x-auto">
+        {children}
+      </pre>
     ),
-    th: ({ children }) => <th className="border border-neutral-200 bg-neutral-50 px-4 py-3 text-left font-semibold text-neutral-800">{children}</th>,
-    td: ({ children }) => <td className="border border-neutral-200 px-4 py-3 text-neutral-700">{children}</td>,
+
+    img: ({ src, alt }) => {
+      const imageSrc = typeof src === 'string' ? src : '';
+      if (!imageSrc) return null;
+      
+      return (
+        <div className="relative my-8 aspect-video w-full overflow-hidden rounded-lg">
+          <Image
+            src={imageSrc}
+            alt={alt || ""}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 1024px"
+          />
+        </div>
+      );
+    },
   };
 
   return (
     <div className="min-h-screen bg-white">
-
       <main className="mx-auto max-w-4xl px-6 pb-32 pt-28">
-
-        {/* =========================================================
-            BACK BUTTON
-        ========================================================= */}
-
+        {/* BACK */}
         <div className="mb-12">
           <Link
             href="/blog"
-            className="
-              inline-flex
-              items-center
-              gap-2
-              text-[11px]
-              font-semibold
-              uppercase
-              tracking-[0.12em]
-              text-neutral-400
-              transition-all
-              duration-300
-              hover:text-neutral-600
-              hover:gap-3
-              group
-            "
+            className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-400 hover:text-neutral-600"
           >
-            <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
+            <ArrowLeft className="h-3.5 w-3.5" />
             Back to Blog
           </Link>
         </div>
 
-        {/* =========================================================
-            HERO SECTION
-        ========================================================= */}
+        {/* META */}
+        <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {post.category && (
+            <span className="rounded-full border bg-neutral-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700">
+              {post.category}
+            </span>
+          )}
 
-        <section className="mb-12">
-          {/* META ROW */}
-          <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-            {post.category && (
-              <span
-                className="
-                  rounded-full
-                  bg-neutral-100
-                  px-3
-                  py-1
-                  text-[11px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.12em]
-                  text-neutral-700
-                  border
-                  border-neutral-200
-                "
-              >
-                {post.category}
-              </span>
-            )}
-
-            <span className="text-neutral-300">·</span>
-
-            <div className="flex items-center gap-1.5 text-[11px] text-neutral-500">
-              <CalendarDays className="h-3.5 w-3.5" />
-              <time>
-                {post.created_at
-                  ? new Date(post.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "—"}
-              </time>
-            </div>
-
-            <span className="text-neutral-300">·</span>
-
-            <div className="flex items-center gap-1.5 text-[11px] text-neutral-500">
-              <Clock className="h-3.5 w-3.5" />
-              <span>{readingTime} min read</span>
-            </div>
+          <div className="flex items-center gap-1.5 text-[11px] text-neutral-500">
+            <CalendarDays className="h-3.5 w-3.5" />
+            <time dateTime={post.published_at || post.created_at || ""}>
+              {formatDate(post.published_at || post.created_at)}
+            </time>
           </div>
 
-          {/* TITLE */}
-          <h1
-            className="
-              text-4xl
-              font-bold
-              leading-[1.2]
-              tracking-[-0.02em]
-              text-neutral-900
-              md:text-5xl
-              lg:text-6xl
-            "
-          >
-            {post.title}
-          </h1>
+          <div className="flex items-center gap-1.5 text-[11px] text-neutral-500">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{readingTime} min read</span>
+          </div>
+        </div>
 
-          {/* SUMMARY */}
-          {post.summary && (
-            <p
-              className="
-                mt-6
-                border-l-4
-                border-neutral-300
-                pl-5
-                text-[17px]
-                leading-relaxed
-                text-neutral-600
-              "
-            >
-              {post.summary}
-            </p>
-          )}
-        </section>
+        {/* TITLE */}
+        <h1 className="text-4xl font-bold leading-tight text-neutral-900 md:text-5xl">
+          {post.title}
+        </h1>
 
-        {/* =========================================================
-            FEATURE IMAGE
-        ========================================================= */}
+        {/* SUMMARY */}
+        {post.summary && (
+          <p className="mt-6 border-l-4 border-neutral-300 pl-5 text-[17px] leading-relaxed text-neutral-600">
+            {post.summary}
+          </p>
+        )}
 
-        {post.feature_image_url && (
-          <div className="mb-16 -mx-6">
-            <div className="relative w-full">
-              <div className="relative aspect-video">
-                <Image
-                  src={post.feature_image_url}
-                  alt={post.title}
-                  fill
-                  priority
-                  className="object-cover"
-                />
-              </div>
+        {/* COVER IMAGE */}
+        {post.cover_image_url && (
+          <div className="mt-12 mb-16">
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+              <Image
+                src={post.cover_image_url}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, 1024px"
+              />
             </div>
           </div>
         )}
 
-        {/* =========================================================
-            ARTICLE CONTENT
-        ========================================================= */}
-
-         <article className="prose prose-lg max-w-none">
+        {/* CONTENT */}
+        <article className="prose max-w-none">
           <ReactMarkdown components={markdownComponents}>
             {post.content}
           </ReactMarkdown>
         </article>
-        {/* =========================================================
-            FOOTER - Author & Actions
-        ========================================================= */}
 
-        <div className="mt-20 space-y-8">
-
-          {/* Divider */}
-          <div className="border-t border-neutral-200" />
-
-          {/* Author Section */}
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                Written by
-              </p>
-
-              <div className="flex items-center gap-4">
-                {/* Profile Image */}
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
-                  <Image
-                    src="/profile-obed.png"
-                    alt="Obed Yameogo"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-neutral-900">
-                    Obed Yameogo
-                  </h3>
-                  <p className="text-sm text-neutral-500">
-                    PhD Scholar in AI · ML Engineer
-                  </p>
-                </div>
-              </div>
-
-              <p className="max-w-2xl text-[14px] leading-relaxed text-neutral-600">
-                Building scalable intelligent systems, machine learning infrastructure,
-                and production AI architectures. Passionate about bridging research and engineering.
-              </p>
+        {/* AUTHOR & SHARE BUTTONS - SAME ROW */}
+        <div className="mt-20 flex flex-col items-start justify-between gap-6 border-t pt-10 md:flex-row md:items-center">
+          {/* AUTHOR SECTION - LEFT */}
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900 font-bold text-white">
+              {post.author_initials || "OY"}
             </div>
 
-            <div className="flex gap-3">
-              <PrintButton />
+            <div>
+              <h3 className="font-semibold">{post.author_name || "Obed Yameogo"}</h3>
+              <p className="text-sm text-neutral-500">ML Engineer · PhD Scholar in AI</p>
             </div>
           </div>
 
-          {/* Social Share Section */}
-          <div className="border-t border-neutral-200 pt-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                Share this article
-              </p>
-
-              <ShareButtons />
-            </div>
+          {/* ARCHIVE & SHARE BUTTONS - RIGHT */}
+          <div className="flex gap-3">
+            <PrintButton />
+            <ShareButtons />
           </div>
         </div>
 
+        {/* TAGS - Below author section */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs text-neutral-600"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
