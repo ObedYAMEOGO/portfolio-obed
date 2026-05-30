@@ -16,27 +16,27 @@ export default function EditMaterialForm({ material, onRefresh }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const [formData, setFormData] = useState<MaterialCreate>({
-    title:         material.title,
-    slug:          material.slug,
-    description:   material.description,
+    title:         material.title ?? "",
+    slug:          material.slug ?? "",
+    description:   material.description ?? "",
     material_type: material.material_type,
     video_context: material.video_context,
-    category:      material.category,
-    resource_url:  material.resource_url,
-    thumbnail_url: material.thumbnail_url || "",
+    category:      material.category ?? "",
+    resource_url:  material.resource_url ?? "",
+    thumbnail_url: material.thumbnail_url ?? "",
     is_published:  true,
   });
 
   useEffect(() => {
     setFormData({
-      title:         material.title,
-      slug:          material.slug,
-      description:   material.description,
+      title:         material.title ?? "",
+      slug:          material.slug ?? "",
+      description:   material.description ?? "",
       material_type: material.material_type,
       video_context: material.video_context,
-      category:      material.category,
-      resource_url:  material.resource_url,
-      thumbnail_url: material.thumbnail_url || "",
+      category:      material.category ?? "",
+      resource_url:  material.resource_url ?? "",
+      thumbnail_url: material.thumbnail_url ?? "",
       is_published:  true,
     });
   }, [material]);
