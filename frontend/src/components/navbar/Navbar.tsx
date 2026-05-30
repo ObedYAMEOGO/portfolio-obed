@@ -54,7 +54,7 @@ export default function Navbar() {
           <Link
             href="/"
             className="
-              text-[30px]
+              text-[22px]
               font-semibold
               tracking-[-0.02em]
               text-neutral-900
@@ -63,7 +63,7 @@ export default function Navbar() {
               hover:text-neutral-600
             "
           >
-            obed.ai
+            obedtech.ai
           </Link>
         </div>
 

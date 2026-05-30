@@ -133,21 +133,17 @@ export default function MobileMenu({
               px-6
             "
           >
-            <Link
-              href="/"
-              onClick={() => setOpen(false)}
+            <span
               className="
-                text-[22px]
-                font-semibold
-                tracking-[-0.02em]
-                text-neutral-900
-                transition-colors
-                duration-150
-                hover:text-neutral-600
+                text-sm
+                font-medium
+                uppercase
+                tracking-widest
+                text-neutral-400
               "
             >
-              obed.ai
-            </Link>
+              Menu
+            </span>
 
             <SheetClose asChild>
               <Button
@@ -194,7 +190,6 @@ export default function MobileMenu({
                 <Link
                   key={item.path}
                   href={item.path}
-                  onClick={() => setOpen(false)}
                   className={cn(
                     `
                       relative
@@ -236,7 +231,6 @@ export default function MobileMenu({
 
             <Link
               href="/contact"
-              onClick={() => setOpen(false)}
               className="
                 flex
                 w-full
@@ -266,7 +260,6 @@ export default function MobileMenu({
               !isSignedIn ? (
                 <SignInButton mode="modal">
                   <button
-                    onClick={() => setOpen(false)}
                     className="
                       flex
                       w-full
