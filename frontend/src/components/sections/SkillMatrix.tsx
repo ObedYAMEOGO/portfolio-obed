@@ -8,7 +8,7 @@ const capabilities = [
     icon: Cpu,
     tag: "Machine learning",
     description:
-      "Scalable AI & ML systems using Python, NumPy, Pandas, Scikit-Learn, TensorFlow and PyTorch — from predictive models to autonomous LLM/RAG pipelines.",
+      "Scalable AI & ML systems using Python, NumPy, Pandas, Scikit-Learn, TensorFlow and PyTorch  from predictive models to autonomous LLM/RAG pipelines.",
   },
   {
     num: "02",
@@ -16,7 +16,7 @@ const capabilities = [
     icon: Network,
     tag: "MLOps / DevOps",
     description:
-      "Full-stack and MLOps infrastructures orchestrated through ZenML, Docker and Kubernetes — built for efficient deployment and distributed execution at scale.",
+      "Full-stack and MLOps infrastructures orchestrated through ZenML, Docker and Kubernetes  built for efficient deployment and distributed execution at scale.",
   },
   {
     num: "03",
@@ -24,7 +24,7 @@ const capabilities = [
     icon: Globe,
     tag: "Cross-functional",
     description:
-      "Execution-driven engineer bridging technical depth with business impact — fluent in French and English, comfortable across contexts from startup to enterprise.",
+      "Execution-driven engineer bridging technical depth with business impact  fluent in French and English, comfortable across contexts from startup to enterprise.",
   },
 ];
 
