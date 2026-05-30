@@ -68,7 +68,6 @@ export default function ManifestoSection() {
                 text-3xl sm:text-4x1
                 font-semibold
                 text-center
-                italic
                 leading-[1.1]
                 tracking-[-0.02em]
                 text-neutral-400
