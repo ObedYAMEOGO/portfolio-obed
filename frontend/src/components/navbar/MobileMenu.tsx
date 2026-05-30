@@ -62,7 +62,6 @@ export default function MobileMenu({
   }, []);
 
   // CLOSE MENU ON ROUTE CHANGE
-
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
@@ -97,7 +96,6 @@ export default function MobileMenu({
             "
           >
             <Menu className="h-5 w-5 text-neutral-700" />
-
             <span className="sr-only">
               Open menu
             </span>
@@ -115,6 +113,7 @@ export default function MobileMenu({
             px-0
             py-0
             sm:w-87.5
+            [&>button]:hidden
           "
         >
           <SheetTitle className="sr-only">
@@ -164,7 +163,6 @@ export default function MobileMenu({
                 "
               >
                 <X className="h-4 w-4 text-neutral-700" />
-
                 <span className="sr-only">
                   Close menu
                 </span>
