@@ -104,7 +104,8 @@ export default function Navbar() {
               text-white
               transition-colors
               duration-200
-              hover:bg-[#c17650]
+              hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
+
               md:inline-flex
             "
           >

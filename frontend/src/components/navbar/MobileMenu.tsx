@@ -237,7 +237,7 @@ export default function MobileMenu({
                 items-center
                 justify-center
                 rounded-full
-                bg-neutral-900
+                bg-[#c17650]
                 px-6
                 py-3
                 text-[12px]
@@ -247,8 +247,7 @@ export default function MobileMenu({
                 text-white
                 transition-all
                 duration-200
-                hover:bg-neutral-700
-                active:scale-[0.98]
+               hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
               "
             >
               Let&apos;s Connect
