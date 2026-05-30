@@ -22,7 +22,7 @@ interface Material {
   id: number;
   title: string;
   slug?: string;
-  description?: string;
+  description?: string | null;  // FIXED: Allow null
 
   material_type:
     | "DOCUMENT"
@@ -85,9 +85,7 @@ export default function MaterialsTable({
           const data =
             await materialsApi.getAll();
 
-          const sorted = (
-            data ?? []
-          ).sort((a, b) => {
+          const sorted = (data ?? []).sort((a, b) => {
             const dateA =
               a.created_at
                 ? new Date(
@@ -107,9 +105,7 @@ export default function MaterialsTable({
             );
           });
 
-          setMaterials(
-            sorted,
-          );
+          setMaterials(sorted);
         } catch (error) {
           console.error(
             "Failed to fetch materials:",
