@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Material, MaterialCreate } from "@/types";
 import { materialsApi } from "@/lib/api/materials";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ interface Props {
 export default function EditMaterialForm({ material, onRefresh }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState<MaterialCreate>({
     title:         material.title ?? "",
@@ -46,7 +48,11 @@ export default function EditMaterialForm({ material, onRefresh }: Props) {
     startTransition(async () => {
       try {
         await materialsApi.update(material.id, formData);
-        toast.success("Material updated.");
+        
+        // Invalidate courses cache to refresh public courses page
+        await queryClient.invalidateQueries({ queryKey: ["courses"] });
+        
+        toast.success("Material updated successfully.");
         setIsOpen(false);
         onRefresh?.();
       } catch (error) {

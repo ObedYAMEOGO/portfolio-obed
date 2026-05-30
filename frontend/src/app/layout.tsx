@@ -13,6 +13,7 @@ import NewsletterSubscribe from "@/components/newsletter/NewsletterSubscribe";
 import AuthProvider from "@/components/providers/AuthProvider";
 import UserSync from "@/components/providers/UserSync";
 import WelcomeToast from "@/components/providers/WelcomeToast";
+import { Providers } from "./providers"; // Import the Query Provider
 
 const sora = Sora({
   subsets: ["latin"],
@@ -75,22 +76,24 @@ export default function RootLayout({
             antialiased
           `}
         >
-          <AuthProvider>
-            <UserSync />
+          <Providers>
+            <AuthProvider>
+              <UserSync />
 
-            <Navbar />
+              <Navbar />
 
-            <div className="fixed right-4 top-18 z-50">
-              <WelcomeToast />
-            </div>
+              <div className="fixed right-4 top-18 z-50">
+                <WelcomeToast />
+              </div>
 
-            <main className="flex-1 pt-16">
-              {children}
-            </main>
+              <main className="flex-1 pt-16">
+                {children}
+              </main>
 
-            <NewsletterSubscribe />
-            <Footer />
-          </AuthProvider>
+              <NewsletterSubscribe />
+              <Footer />
+            </AuthProvider>
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

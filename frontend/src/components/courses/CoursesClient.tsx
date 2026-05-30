@@ -1,215 +1,117 @@
 "use client";
 
 import {
-  useEffect,
   useMemo,
   useState,
 } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import { materialsApi } from "@/lib/api/materials";
 import { Material } from "@/types";
-import { AxiosError } from "axios";
 
 import CoursesLayout from "@/components/courses/CoursesLayout";
 import CoursesSidebar from "@/components/courses/CoursesSidebar";
 import CoursesTopbar from "@/components/courses/CoursesTopBar";
 import CoursesContent from "@/components/courses/CoursesContent";
 
-// Type guard to check if error is AxiosError
-function isAxiosError(error: unknown): error is AxiosError {
-  return (error as AxiosError).isAxiosError === true;
-}
-
-// Type for error response
-interface ErrorResponse {
-  message?: string;
-}
+type MaterialType = "ALL" | "DOCUMENT" | "VIDEO";
 
 export default function CoursesClient() {
-  const [materials, setMaterials] =
-    useState<Material[]>([]);
+  const [selectedType, setSelectedType] = useState<MaterialType>("ALL");
 
-  const [loading, setLoading] =
-    useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
 
-  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [selectedType, setSelectedType] =
-    useState<
-      "ALL" | "DOCUMENT" | "VIDEO"
-    >("ALL");
-
-  const [selectedCategory, setSelectedCategory] =
-    useState("ALL");
-
-  const [searchQuery, setSearchQuery] =
-    useState("");
-
-  const [currentPage, setCurrentPage] =
-    useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const ITEMS_PER_PAGE = 8;
 
-  useEffect(() => {
-    let mounted = true;
+  // Use React Query for caching
+  const { 
+    data: materials = [], 
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: ["courses"],
+    queryFn: () => materialsApi.getPublicCourses(),
+    staleTime: 5 * 60 * 1000, // 5 minutes - data becomes stale after 5 min
+    gcTime: 10 * 60 * 1000,   // 10 minutes - keep in cache for 10 min
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
-    const fetchMaterials =
-      async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          
-          // Use materialsApi instead of direct api call
-          const data = await materialsApi.getPublicCourses();
-          console.log("Fetched materials:", data);
-
-          if (mounted) {
-            setMaterials(Array.isArray(data) ? data : []);
-          }
-        } catch (err: unknown) {
-          console.error("Failed to fetch materials:", err);
-          
-          let errorMessage = "Failed to load courses. Please try again later.";
-          
-          if (isAxiosError(err)) {
-            // Handle Axios error
-            const errorData = err.response?.data as ErrorResponse;
-            errorMessage = errorData?.message || err.message || errorMessage;
-          } else if (err instanceof Error) {
-            // Handle regular Error object
-            errorMessage = err.message;
-          }
-          
-          if (mounted) {
-            setError(errorMessage);
-            setMaterials([]);
-          }
-        } finally {
-          if (mounted) {
-            setLoading(false);
-          }
-        }
-      };
-
-    fetchMaterials();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const categories =
-    useMemo(
-      () => [
-        "ALL",
-        ...Array.from(
-          new Set(
-            materials
-              .map(
-                (m) =>
-                  m.category,
-              )
-              .filter(Boolean),
-          ),
-        ),
-      ],
-      [materials],
-    );
-
-  const filteredMaterials =
-    useMemo(() => {
-      return materials.filter(
-        (material) => {
-          const matchesType =
-            selectedType ===
-              "ALL" ||
-            material.material_type ===
-              selectedType;
-
-          const matchesCategory =
-            selectedCategory ===
-              "ALL" ||
-            material.category ===
-              selectedCategory;
-
-          const matchesSearch =
-            material.title
-              ?.toLowerCase()
-              .includes(
-                searchQuery.toLowerCase(),
-              ) ||
-            material.description
-              ?.toLowerCase()
-              .includes(
-                searchQuery.toLowerCase(),
-              );
-
-          return (
-            matchesType &&
-            matchesCategory &&
-            matchesSearch
-          );
-        },
-      );
-    }, [
-      materials,
-      selectedType,
-      selectedCategory,
-      searchQuery,
-    ]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    selectedType,
-    selectedCategory,
-    searchQuery,
-  ]);
-
-  const totalPages =
-    Math.ceil(
-      filteredMaterials.length /
-        ITEMS_PER_PAGE,
-    ) || 1;
-
-  const safePage = Math.min(
-    Math.max(currentPage, 1),
-    totalPages,
+  const categories = useMemo(
+    () => [
+      "ALL",
+      ...Array.from(
+        new Set(
+          materials
+            .map((m) => m.category)
+            .filter(Boolean)
+        )
+      ),
+    ],
+    [materials]
   );
 
-  const paginatedMaterials =
-    useMemo(() => {
-      const start =
-        (safePage - 1) *
-        ITEMS_PER_PAGE;
+  const filteredMaterials = useMemo(() => {
+    return materials.filter((material) => {
+      const matchesType =
+        selectedType === "ALL" || material.material_type === selectedType;
 
-      return filteredMaterials.slice(
-        start,
-        start +
-          ITEMS_PER_PAGE,
-      );
-    }, [
-      filteredMaterials,
-      safePage,
-    ]);
+      const matchesCategory =
+        selectedCategory === "ALL" || material.category === selectedCategory;
+
+      const matchesSearch =
+        material.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        material.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesType && matchesCategory && matchesSearch;
+    });
+  }, [materials, selectedType, selectedCategory, searchQuery]);
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = (updates: {
+    selectedType?: MaterialType;
+    selectedCategory?: string;
+    searchQuery?: string;
+  }) => {
+    if (updates.selectedType !== undefined) setSelectedType(updates.selectedType);
+    if (updates.selectedCategory !== undefined) setSelectedCategory(updates.selectedCategory);
+    if (updates.searchQuery !== undefined) setSearchQuery(updates.searchQuery);
+    setCurrentPage(1);
+  };
+
+  const totalPages = Math.ceil(filteredMaterials.length / ITEMS_PER_PAGE) || 1;
+
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+
+  const paginatedMaterials = useMemo(() => {
+    const start = (safePage - 1) * ITEMS_PER_PAGE;
+    return filteredMaterials.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredMaterials, safePage]);
 
   // Error state
-  if (error) {
+  if (queryError) {
+    const errorMessage = queryError instanceof Error ? queryError.message : "Failed to load courses. Please try again later.";
+    
     return (
       <CoursesLayout
         sidebar={
           <CoursesSidebar
             categories={["ALL"]}
             selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
+            setSelectedCategory={(cat) => handleFilterChange({ selectedCategory: cat })}
           />
         }
         topbar={
           <CoursesTopbar
             selectedType={selectedType}
-            setSelectedType={setSelectedType}
+            setSelectedType={(type) => handleFilterChange({ selectedType: type })}
             searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
+            setSearchQuery={(query) => handleFilterChange({ searchQuery: query })}
           />
         }
         content={
@@ -221,7 +123,7 @@ export default function CoursesClient() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900">Error Loading Courses</h3>
-              <p className="mt-2 text-sm text-gray-500">{error}</p>
+              <p className="mt-2 text-sm text-gray-500">{errorMessage}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="mt-4 rounded-full bg-neutral-900 px-4 py-2 text-sm text-white transition-colors hover:bg-neutral-700"
@@ -241,20 +143,20 @@ export default function CoursesClient() {
         <CoursesSidebar
           categories={categories}
           selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
+          setSelectedCategory={(cat) => handleFilterChange({ selectedCategory: cat })}
         />
       }
       topbar={
         <CoursesTopbar
           selectedType={selectedType}
-          setSelectedType={setSelectedType}
+          setSelectedType={(type) => handleFilterChange({ selectedType: type })}
           searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          setSearchQuery={(query) => handleFilterChange({ searchQuery: query })}
         />
       }
       content={
         <CoursesContent
-          loading={loading}
+          loading={loading && materials.length === 0} // Only show loading on first load
           materials={paginatedMaterials}
           currentPage={currentPage}
           totalPages={totalPages}

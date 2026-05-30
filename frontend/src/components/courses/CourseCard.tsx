@@ -21,8 +21,8 @@ export default function CourseCard({
       {/* =====================================================
           MOBILE
       ===================================================== */}
-      <div className="flex md:hidden overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm transition-all duration-300">
-        <div className="relative w-32 shrink-0 self-stretch bg-neutral-100">
+      <div className="flex md:hidden overflow-hidden rounded-xl border border-neutral-200 bg-white/80 backdrop-blur-sm transition-all duration-300 dark:border-neutral-800 dark:bg-neutral-900/80">
+        <div className="relative w-32 shrink-0 self-stretch bg-neutral-100 dark:bg-neutral-800">
           {material.thumbnail_url ? (
             <Image
               src={material.thumbnail_url}
@@ -32,7 +32,7 @@ export default function CourseCard({
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <FileText className="h-6 w-6 text-neutral-400" />
+              <FileText className="h-6 w-6 text-neutral-400 dark:text-neutral-600" />
             </div>
           )}
         </div>
@@ -50,7 +50,7 @@ export default function CourseCard({
             </h3>
 
             {material.description && (
-              <p className="mt-1 line-clamp-2 text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="mt-1 line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
                 {material.description}
               </p>
             )}

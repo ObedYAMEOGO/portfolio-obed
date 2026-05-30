@@ -7,6 +7,7 @@ import {
   useTransition,
 } from "react";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { MaterialCreate, VideoContext } from "@/types";
 import { materialsApi } from "@/lib/api/materials";
 import { toast } from "sonner";
@@ -51,6 +52,8 @@ export default function CreateMaterialForm({ onRefresh }: CreateMaterialFormProp
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isUploadingThumb, setIsUploadingThumb] = useState(false);
   const [formData, setFormData] = useState<FormState>(INITIAL_STATE);
+  
+  const queryClient = useQueryClient();
 
   const isVideo = formData.material_type === "VIDEO";
 
@@ -170,6 +173,10 @@ export default function CreateMaterialForm({ onRefresh }: CreateMaterialFormProp
           video_context: isVideo ? formData.video_context : "NONE",
         };
         await materialsApi.create(payload);
+        
+        // Invalidate courses cache to refresh public courses page
+        await queryClient.invalidateQueries({ queryKey: ["courses"] });
+        
         toast.success("Material created successfully.");
         setFormData(INITIAL_STATE);
         setIsOpen(false);

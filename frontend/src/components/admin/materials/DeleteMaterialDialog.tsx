@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { materialsApi } from "@/lib/api/materials";
 
 import { Button } from "@/components/ui/button";
@@ -27,10 +28,12 @@ export default function DeleteMaterialDialog({
     startTransition,
   ] = useTransition();
 
+  const queryClient = useQueryClient();
+
   const handleDelete = () => {
     const confirmed =
       window.confirm(
-        "Delete this material?"
+        "Delete this material permanently? This action cannot be undone."
       );
 
     if (!confirmed) {
@@ -40,21 +43,18 @@ export default function DeleteMaterialDialog({
     startTransition(
       async () => {
         try {
-          await materialsApi.delete(
-            materialId
-          );
+          await materialsApi.delete(materialId);
 
-          toast.success(
-            "Material deleted."
-          );
+          // Invalidate courses cache to refresh public courses page
+          await queryClient.invalidateQueries({ queryKey: ["courses"] });
+
+          toast.success("Material deleted successfully.");
 
           onRefresh?.();
         } catch (error) {
           console.error(error);
 
-          toast.error(
-            "Failed to delete material."
-          );
+          toast.error("Failed to delete material.");
         }
       }
     );
@@ -66,7 +66,7 @@ export default function DeleteMaterialDialog({
       variant="destructive"
       onClick={handleDelete}
       disabled={isPending}
-      className="h-9 rounded-none"
+      className="h-9 rounded-full px-4"
     >
       {isPending ? (
         <Loader2 className="h-4 w-4 animate-spin" />
