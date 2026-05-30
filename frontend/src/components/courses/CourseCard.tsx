@@ -21,7 +21,7 @@ export default function CourseCard({
       {/* =====================================================
           MOBILE
       ===================================================== */}
-      <div className="flex md:hidden overflow-hidden rounded-xl border border-neutral-200 bg-white/80 backdrop-blur-sm transition-all duration-300 dark:border-neutral-800 dark:bg-neutral-900/80">
+      <div className="flex md:hidden overflow-hidden rounded-xl border border-neutral-400 bg-white/80 backdrop-blur-sm transition-all duration-300 dark:border-neutral-800 dark:bg-neutral-900/80">
         <div className="relative w-32 shrink-0 self-stretch bg-neutral-100 dark:bg-neutral-800">
           {material.thumbnail_url ? (
             <Image
