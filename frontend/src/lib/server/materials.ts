@@ -11,6 +11,10 @@ if (!API_URL) {
   throw new Error("Neither INTERNAL_API_URL nor NEXT_PUBLIC_API_URL is set.");
 }
 
+// Strip trailing /api/v1 if already baked into the env var,
+// so the path is never doubled: /api/v1/api/v1/admin/...
+const BASE_URL = API_URL.replace(/\/api\/v1\/?$/, "");
+
 /* =========================================================
    CORE HELPER
 ========================================================= */
@@ -28,7 +32,7 @@ async function serverFetch<T>(
     );
   }
 
-  const url = `${API_URL}/api/v1${path}`;
+  const url = `${BASE_URL}/api/v1${path}`;
 
   const res = await fetch(url, {
     ...options,
@@ -37,7 +41,7 @@ async function serverFetch<T>(
       Authorization: `Bearer ${token}`,
       ...options.headers,
     },
-    cache: "no-store", // admin data must never be stale
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -50,8 +54,6 @@ async function serverFetch<T>(
 
 /* =========================================================
    PER-RESOURCE HELPERS
-   Mirror the shape of the browser API clients so pages can
-   swap imports without changing call sites.
 ========================================================= */
 
 import type { Material, Post, Project } from "@/types";
