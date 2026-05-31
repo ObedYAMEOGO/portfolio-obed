@@ -1,13 +1,9 @@
 // src/app/admin/dashboard/projects/page.tsx
-'use client';
 
 import ProjectsTable from "@/components/admin/projects/ProjectsTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Plus,
-} from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 
 export default function ProjectsPage() {
   return (

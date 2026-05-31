@@ -1,3 +1,5 @@
+// src/app/admin/dashboard/page.tsx
+
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -22,34 +24,26 @@ import PostsTable from "@/components/admin/posts/PostsTable";
 import MaterialsTable from "@/components/admin/materials/MaterialsTable";
 import LeadsTable from "@/components/admin/leads/LeadsTable";
 import SubscribersTable from "@/components/admin/subscribers/SubscribersTable";
-
-import { getDashboardStats } from "@/lib/server-admin-api";
-import type { DashboardStats } from "@/types";
 import UsersTable from "@/components/admin/users/UsersTable";
+
+import { getDashboardStats } from "@/lib/server-api";
+import type { DashboardStats } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-// ========================================================
-// ADMIN EMAIL FIX
-// ========================================================
-// This must match the ADMIN_EMAIL environment variable in the backend.
-// When a user logs in with this email, they get admin access to the dashboard.
-// Backend environment: ADMIN_EMAIL=obedyameogo.bg50@yahoo.com
-// Frontend check: Must be identical for dashboard access to work.
 const ADMIN_EMAIL = "obedyameogo.bg50@yahoo.com";
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const { userId } = await auth();
   if (!userId) redirect("/");
 
   const user = await currentUser();
   const email = user?.primaryEmailAddress?.emailAddress;
-  
-  // ========================================================
-  // ADMIN ACCESS CHECK
-  // ========================================================
-  // Verify the logged-in user's email matches ADMIN_EMAIL.
-  // If not, redirect to home page (unauthorized).
+
   if (email !== ADMIN_EMAIL) redirect("/");
 
   let stats: DashboardStats = {
@@ -67,6 +61,7 @@ export default async function AdminDashboardPage() {
     console.error("Dashboard stats fetch failed:", error);
   }
 
+  const { q } = await searchParams;
   const isOperational = stats.system_status === "Operational";
 
   return (
@@ -81,7 +76,6 @@ export default async function AdminDashboardPage() {
 
           {/* LEFT */}
           <div className="space-y-3">
-
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-neutral-400">
               <Activity className="h-3 w-3 animate-pulse" />
               Admin Dashboard
@@ -94,22 +88,26 @@ export default async function AdminDashboardPage() {
             <div className="flex items-center gap-2 text-[12px] text-neutral-500">
               <Radio
                 className={`h-3 w-3 ${
-                  isOperational ? "animate-pulse text-green-500" : "text-red-400"
+                  isOperational
+                    ? "animate-pulse text-green-500"
+                    : "text-red-400"
                 }`}
               />
               <span>
                 System status:{" "}
-                <span className={`font-semibold ${isOperational ? "text-green-600" : "text-red-500"}`}>
+                <span
+                  className={`font-semibold ${
+                    isOperational ? "text-green-600" : "text-red-500"
+                  }`}
+                >
                   {stats.system_status}
                 </span>
               </span>
             </div>
-
           </div>
 
           {/* ACTIONS */}
           <div className="flex flex-wrap items-center gap-2">
-
             <Link
               href="/admin/dashboard/posts/new"
               className="inline-flex h-9 items-center gap-2 rounded-full bg-neutral-900 px-5 text-[11px] font-semibold uppercase tracking-widest text-white transition-colors hover:bg-neutral-700"
@@ -148,7 +146,6 @@ export default async function AdminDashboardPage() {
                 Sign Out
               </button>
             </SignOutButton>
-
           </div>
 
         </div>
@@ -158,11 +155,11 @@ export default async function AdminDashboardPage() {
         ========================================================= */}
 
         <div className="mb-16 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
-          <StatCard title="Projects"    value={stats.total_projects}      icon={<Database className="h-4 w-4" />} />
-          <StatCard title="Posts"       value={stats.total_articles}      icon={<FileText className="h-4 w-4" />} />
-          <StatCard title="Subscribers" value={stats.active_subscribers}  icon={<Users className="h-4 w-4" />} />
-          <StatCard title="Leads"       value={stats.total_leads}         icon={<Mail className="h-4 w-4" />} />
-          <StatCard title="Materials"   value={stats.total_materials}     icon={<BookOpen className="h-4 w-4" />} />
+          <StatCard title="Projects"    value={stats.total_projects}     icon={<Database className="h-4 w-4" />} />
+          <StatCard title="Posts"       value={stats.total_articles}     icon={<FileText className="h-4 w-4" />} />
+          <StatCard title="Subscribers" value={stats.active_subscribers} icon={<Users className="h-4 w-4" />} />
+          <StatCard title="Leads"       value={stats.total_leads}        icon={<Mail className="h-4 w-4" />} />
+          <StatCard title="Materials"   value={stats.total_materials}    icon={<BookOpen className="h-4 w-4" />} />
         </div>
 
         {/* =========================================================
@@ -174,7 +171,7 @@ export default async function AdminDashboardPage() {
           <ProjectsTable />
           <MaterialsTable />
           <LeadsTable />
-          <UsersTable/>
+          <UsersTable searchQuery={q ?? ""} />
           <SubscribersTable />
         </div>
 

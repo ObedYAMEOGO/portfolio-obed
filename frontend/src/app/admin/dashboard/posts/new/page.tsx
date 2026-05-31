@@ -1,3 +1,5 @@
+//C:\Users\Obed\Desktop\ai-portfolio\frontend\src\app\admin\dashboard\posts\new\page.tsx
+
 "use client";
 
 import { useState, useCallback, useMemo } from "react";

@@ -1,4 +1,4 @@
-/** frontend\src\app\admin\dashboard\posts\page.tsx */
+//C:\Users\Obed\Desktop\ai-portfolio\frontend\src\app\admin\dashboard\posts\[id]\edit\page.tsx
 
 import { notFound } from "next/navigation";
 import EditPostForm from "@/components/admin/posts/EditPostForm";
