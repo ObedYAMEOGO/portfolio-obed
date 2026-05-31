@@ -56,17 +56,21 @@ export default function ContactPage() {
     if (status === "loading") return;
 
     setStatus("loading");
-    fireParticles();
 
     try {
       await api.post("/leads", formData);
+      fireParticles(); // only fire on success
       setTimeout(() => {
         setStatus("success");
         setFormData({ full_name: "", email: "", message: "" });
       }, 900);
     } catch (error) {
       console.error("Submission error:", error);
-      setTimeout(() => setStatus("error"), 900);
+      setTimeout(() => {
+        setStatus("error");
+        // auto-clear error after 4s so user can retry
+        setTimeout(() => setStatus("idle"), 4000);
+      }, 900);
     }
   };
 
@@ -105,7 +109,7 @@ export default function ContactPage() {
 
           {status === "success" ? (
 
-            <div className={styles.successCard}>
+            <div className={styles.successCard} role="alert">
               <div className={styles.checkCircle}>
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
                   <path
@@ -136,7 +140,11 @@ export default function ContactPage() {
 
           ) : (
 
-            <form onSubmit={handleSubmit} className={styles.form}>
+            <form
+              onSubmit={handleSubmit}
+              className={styles.form}
+              aria-label="Contact form"
+            >
 
               <div className={styles.formCard}>
 
@@ -174,6 +182,7 @@ export default function ContactPage() {
                   <label className={styles.fieldLabel}>Message</label>
                   <Textarea
                     required
+                    maxLength={2000}
                     placeholder="Tell me about your project…"
                     value={formData.message}
                     onChange={(e) =>
@@ -190,7 +199,7 @@ export default function ContactPage() {
                 ref={btnRef}
                 type="submit"
                 disabled={status === "loading"}
-                className={`${styles.submitBtn} ${status === "loading" ? styles.submitBtnLoading : ""}`}
+                className={styles.submitBtn}
               >
                 <div ref={particlesRef} className={styles.particles} aria-hidden="true" />
 
@@ -213,7 +222,7 @@ export default function ContactPage() {
 
               {/* ERROR */}
               {status === "error" && (
-                <div className={styles.errorBanner}>
+                <div className={styles.errorBanner} role="alert">
                   <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
                     <circle cx="7.5" cy="7.5" r="6.5" stroke="#dc2626" strokeWidth="1.2" />
                     <path d="M7.5 4.5v4M7.5 10.5v.5" stroke="#dc2626" strokeWidth="1.4" strokeLinecap="round" />

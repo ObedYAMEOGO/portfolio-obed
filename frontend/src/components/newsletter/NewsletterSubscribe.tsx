@@ -47,7 +47,7 @@ export default function NewsletterSubscribe() {
 
           <p className="text-[16px] leading-relaxed text-neutral-500">
             Receive technical deep-dives on machine learning engineering, AI
-            infrastructure, RAG systems, LLMs, and AI agents and more, straight
+            infrastructure, RAG systems, LLMs, AI agents etc, straight
             to your inbox.
           </p>
         </div>

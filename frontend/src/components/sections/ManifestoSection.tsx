@@ -70,7 +70,7 @@ export default function ManifestoSection() {
                 text-center
                 leading-[1.1]
                 tracking-[-0.02em]
-                text-neutral-400
+                text-neutral-300
               "
             >
               {" "}
@@ -89,7 +89,7 @@ export default function ManifestoSection() {
                 grid-cols-1
                 gap-8
                 border-t
-                border-[#9b5c3d]
+                border-[#ffffff]
                 pt-10
                 md:grid-cols-2
                 md:gap-16

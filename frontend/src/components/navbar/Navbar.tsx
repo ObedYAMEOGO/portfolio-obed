@@ -14,7 +14,7 @@ import MobileMenu from "./MobileMenu";
 const navItems = [
   { name: "Projects", path: "/projects" },
   { name: "Blog", path: "/blog" },
-  { name: "Courses", path: "/courses" },
+  { name: "Materials", path: "/courses" },
   { name: "Contact", path: "/contact" },
 ];
 

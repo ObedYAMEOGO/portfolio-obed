@@ -241,7 +241,7 @@ export default async function HomePage() {
                         Obed Yameogo
                       </p>
                       <p className="mt-1 text-[11px] leading-relaxed text-neutral-600">
-                        A PhD Scholar in AI and Machine Learning Engineer.
+                        Machine Learning Engineer, PhD Scholar.
                       </p>
                     </div>
                   </div>
@@ -265,7 +265,7 @@ export default async function HomePage() {
                     p-5
                     backdrop-blur-md
                     md:flex
-                    lg:-left-14
+                    lg:-left-20
                   "
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
@@ -279,7 +279,7 @@ export default async function HomePage() {
                   <div className="mb-2 flex flex-col gap-2 border-t border-neutral-200 pt-3">
                     <p className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
                       <GraduationCap className="h-4 w-4 text-neutral-400" />
-                      PhD Scholar in AI · MLE
+                     Machine Learning Engineer
                     </p>
                   </div>
                 </div>
