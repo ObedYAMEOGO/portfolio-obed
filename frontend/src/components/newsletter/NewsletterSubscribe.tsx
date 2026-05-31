@@ -46,9 +46,9 @@ export default function NewsletterSubscribe() {
           </h2>
 
           <p className="text-[16px] leading-relaxed text-neutral-500">
-            Receive technical deep-dives on AI infrastructure, RAG systems,
-            production ML engineering, distributed systems and modern backend
-            architecture.
+            Receive technical deep-dives on machine learning engineering, AI
+            infrastructure, RAG systems, LLMs, and AI agents and more, straight
+            to your inbox.
           </p>
         </div>
 
