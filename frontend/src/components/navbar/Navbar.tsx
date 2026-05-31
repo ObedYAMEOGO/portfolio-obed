@@ -15,6 +15,7 @@ const navItems = [
   { name: "Projects", path: "/projects" },
   { name: "Blog", path: "/blog" },
   { name: "Courses", path: "/courses" },
+  { name: "Contact", path: "/contact" },
 ];
 
 export default function Navbar() {
@@ -62,8 +63,7 @@ export default function Navbar() {
               duration-150
               hover:text-neutral-600
             "
-          >
-            obedtech.ai
+          >obedai.space
           </Link>
         </div>
 
@@ -84,33 +84,6 @@ export default function Navbar() {
         {/* RIGHT */}
 
         <div className="ml-auto flex items-center gap-3">
-
-          {/* CONTACT */}
-
-          <Link
-            href="/contact"
-            className="
-              hidden
-              items-center
-              justify-center
-              rounded-full
-              bg-[#c17650]
-              px-5
-              py-2
-              text-[12px]
-              font-semibold
-              uppercase
-              tracking-widest
-              text-white
-              transition-colors
-              duration-200
-              hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
-
-              md:inline-flex
-            "
-          >
-            Contact
-          </Link>
 
           {/* AUTH */}
 

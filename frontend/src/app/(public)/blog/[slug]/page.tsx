@@ -1,4 +1,3 @@
-// app/blog/[slug]/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
@@ -6,11 +5,7 @@ import { notFound } from "next/navigation";
 
 import type { Components } from "react-markdown";
 
-import {
-  ArrowLeft,
-  Clock,
-  CalendarDays,
-} from "lucide-react";
+import { ArrowLeft, Clock, CalendarDays } from "lucide-react";
 
 import type { Post } from "@/types";
 
@@ -18,17 +13,43 @@ import PrintButton from "@/components/blog/PrintButton";
 import ShareButtons from "@/components/blog/ShareButtons";
 
 interface PostPageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
 }
 
-const API_URL =
-  process.env.INTERNAL_API_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://backend:8000/api/v1";
+const API_URL = process.env.INTERNAL_API_URL;
+
+if (!API_URL) {
+  throw new Error("INTERNAL_API_URL is missing");
+}
 
 export const revalidate = 3600;
+
+/* =========================================================
+   STATIC PARAMS
+========================================================= */
+
+export async function generateStaticParams() {
+  try {
+    const res = await fetch(`${API_URL}/posts`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    const posts: Post[] = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.items)
+        ? data.items
+        : [];
+
+    return posts
+      .filter((p) => p.is_published)
+      .map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
 
 /* =========================================================
    FETCH POST
@@ -40,9 +61,7 @@ async function getPost(slug: string): Promise<Post | null> {
       next: { revalidate: 3600 },
     });
 
-    if (!res.ok) {
-      return null;
-    }
+    if (!res.ok) return null;
 
     return res.json();
   } catch (error) {
@@ -67,10 +86,10 @@ function calculateReadingTime(content: string): number {
 
 function formatDate(dateString: string | null | undefined): string {
   if (!dateString) return "Date not available";
-  
+
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "Date not available";
-  
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -86,11 +105,10 @@ export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   const post = await getPost(slug);
 
-  if (!post) {
-    notFound();
-  }
+  if (!post) notFound();
 
-  const readingTime = post.reading_time || calculateReadingTime(post.content || "");
+  const readingTime =
+    post.reading_time || calculateReadingTime(post.content || "");
 
   const markdownComponents: Components = {
     h1: ({ children }) => (
@@ -100,7 +118,8 @@ export default async function PostPage({ params }: PostPageProps) {
     ),
 
     h2: ({ children }) => {
-      const id = children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
+      const id =
+        children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
       return (
         <h2
           id={id}
@@ -168,22 +187,22 @@ export default async function PostPage({ params }: PostPageProps) {
         );
       }
       return (
-        <code className="block rounded-lg bg-neutral-900 p-4 text-sm font-mono text-neutral-100 overflow-x-auto">
+        <code className="block overflow-x-auto rounded-lg bg-neutral-900 p-4 text-sm font-mono text-neutral-100">
           {children}
         </code>
       );
     },
 
     pre: ({ children }) => (
-      <pre className="mb-6 rounded-lg bg-neutral-900 p-4 overflow-x-auto">
+      <pre className="mb-6 overflow-x-auto rounded-lg bg-neutral-900 p-4">
         {children}
       </pre>
     ),
 
     img: ({ src, alt }) => {
-      const imageSrc = typeof src === 'string' ? src : '';
+      const imageSrc = typeof src === "string" ? src : "";
       if (!imageSrc) return null;
-      
+
       return (
         <div className="relative my-8 aspect-video w-full overflow-hidden rounded-lg">
           <Image
@@ -201,6 +220,7 @@ export default async function PostPage({ params }: PostPageProps) {
   return (
     <div className="min-h-screen bg-white">
       <main className="mx-auto max-w-4xl px-6 pb-32 pt-28">
+
         {/* BACK */}
         <div className="mb-12">
           <Link
@@ -268,28 +288,29 @@ export default async function PostPage({ params }: PostPageProps) {
           </ReactMarkdown>
         </article>
 
-        {/* AUTHOR & SHARE BUTTONS - SAME ROW */}
+        {/* AUTHOR & SHARE */}
         <div className="mt-20 flex flex-col items-start justify-between gap-6 border-t pt-10 md:flex-row md:items-center">
-          {/* AUTHOR SECTION - LEFT */}
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900 font-bold text-white">
               {post.author_initials || "OY"}
             </div>
-
             <div>
-              <h3 className="font-semibold">{post.author_name || "Obed Yameogo"}</h3>
-              <p className="text-sm text-neutral-500">ML Engineer · PhD Scholar in AI</p>
+              <h3 className="font-semibold">
+                {post.author_name || "Obed Yameogo"}
+              </h3>
+              <p className="text-sm text-neutral-500">
+                ML Engineer · PhD Scholar in AI
+              </p>
             </div>
           </div>
 
-          {/* ARCHIVE & SHARE BUTTONS - RIGHT */}
           <div className="flex gap-3">
             <PrintButton />
             <ShareButtons />
           </div>
         </div>
 
-        {/* TAGS - Below author section */}
+        {/* TAGS */}
         {post.tags && post.tags.length > 0 && (
           <div className="mt-6 flex flex-wrap gap-2">
             {post.tags.map((tag) => (
@@ -302,6 +323,7 @@ export default async function PostPage({ params }: PostPageProps) {
             ))}
           </div>
         )}
+
       </main>
     </div>
   );

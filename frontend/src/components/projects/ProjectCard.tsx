@@ -63,32 +63,11 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
         {/* Content */}
         <div className="p-5">
           {/* Top row: category + links */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex  mb-3">
             <span className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400 transition-all duration-300 group-hover:text-neutral-700 dark:group-hover:text-neutral-300">
               Project
             </span>
-            <div className="flex items-center gap-3">
-              {project.github_url && (
-                <a
-                  href={project.github_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 transition-all duration-300 hover:scale-110"
-                >
-                  <Github className="h-4 w-4" />
-                </a>
-              )}
-              {project.live_url && (
-                <a
-                  href={project.live_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 transition-all duration-300 hover:scale-110"
-                >
-                  <ArrowUpRight className="h-4 w-4" />
-                </a>
-              )}
-            </div>
+          
           </div>
 
           {/* Title */}

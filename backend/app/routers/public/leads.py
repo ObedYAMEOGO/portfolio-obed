@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, status # type: ignore
-from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
+from fastapi import APIRouter, Depends, status  # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession  # type: ignore
 
 from app.database import get_db
 from app.schemas import LeadCreate, LeadResponse
@@ -21,17 +21,17 @@ async def submit_lead(
     data: LeadCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    lead = await LeadRepository.create(
-        db=db,
-        lead=data,
-    )
+    lead = await LeadRepository.create(db=db, lead=data)
 
-    # IMPORTANT:
-    # Use positional arguments OR exact keyword names
-    send_lead_notification_task.delay(
-        full_name=lead.full_name,
-        email=lead.email,
-        message=lead.message,
-    )
+    try:
+        send_lead_notification_task.delay(
+            full_name=lead.full_name,
+            email=lead.email,
+            message=lead.message,
+        )
+    except Exception as e:
+        # Lead is saved — notification email will not fire
+        # but we don't fail the request over it
+        print(f"CELERY_TASK_ERROR: {e}")
 
     return lead

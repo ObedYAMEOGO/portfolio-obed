@@ -27,6 +27,7 @@ interface BlogFeedProps {
 
 export default function BlogFeed({ posts, now }: BlogFeedProps) {
   const [activeCategory, setActiveCategory] = useState<BlogCategory | "All">("All");
+  const [activeYear, setActiveYear] = useState<number | null>(null);
   const [archivePage, setArchivePage] = useState(1);
 
   // Parse once; stable reference across renders since `now` never changes.
@@ -38,18 +39,29 @@ export default function BlogFeed({ posts, now }: BlogFeedProps) {
     setArchivePage(1);
   };
 
+  const handleYear = (year: number | null) => {
+    setActiveYear(year);
+    setArchivePage(1);
+  };
+
   // ── Derived data ────────────────────────────────────────────────────────────
   const allCategories = useMemo(() => extractCategories(posts), [posts]);
   const archiveYears  = useMemo(() => getArchiveYears(posts), [posts]);
   const trendingPosts = useMemo(() => posts.slice(0, 5), [posts]);
 
-  const filteredPosts = useMemo(
-    () =>
-      activeCategory === "All"
-        ? posts
-        : posts.filter((p) => p.category === activeCategory),
-    [posts, activeCategory],
-  );
+  const filteredPosts = useMemo(() => {
+    return posts.filter((p) => {
+      const matchesCategory =
+        activeCategory === "All" || p.category === activeCategory;
+
+      const matchesYear = !activeYear || (() => {
+        const date = new Date(p.published_at || p.created_at);
+        return date.getUTCFullYear() === activeYear;
+      })();
+
+      return matchesCategory && matchesYear;
+    });
+  }, [posts, activeCategory, activeYear]);
 
   // nowDate is passed in so bucketing matches the server render exactly.
   const { hero, thisWeek, thisMonth, archive } = useMemo(
@@ -112,7 +124,9 @@ export default function BlogFeed({ posts, now }: BlogFeedProps) {
           {isEmpty && (
             <div className="py-24 text-center">
               <p className="text-sm text-neutral-400">
-                No posts in this category yet.
+                {activeYear
+                  ? `No posts from ${activeYear}.`
+                  : "No posts in this category yet."}
               </p>
             </div>
           )}
@@ -203,6 +217,8 @@ export default function BlogFeed({ posts, now }: BlogFeedProps) {
               activeCategory={activeCategory}
               onCategoryChange={handleCategory}
               archiveYears={archiveYears}
+              activeYear={activeYear}
+              onYearChange={handleYear}
             />
           </div>
         </div>

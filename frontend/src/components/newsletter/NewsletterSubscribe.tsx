@@ -61,7 +61,7 @@ export default function NewsletterSubscribe() {
             name="email"
             required
             autoComplete="email"
-            placeholder="obedtech@example.com"
+            placeholder="you@example.com"
             disabled={pending}
             className="
               flex-1 rounded-full border border-neutral-200 bg-white px-5 py-3

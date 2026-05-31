@@ -70,11 +70,11 @@ export default function FeaturedHero({ post }: FeaturedHeroProps) {
               <span
                 className="
                   inline-block rounded-full
-                  border border-[#c17650]/30
+                  border border-[##ffffff]/30
                   bg-[#c17650]/10
                   px-3 py-1
                   text-[10px] font-semibold uppercase tracking-wider
-                  text-[#c17650]
+                  text-white
                 "
               >
                 {post.category}

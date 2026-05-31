@@ -2,15 +2,68 @@
 
 import Image from "next/image";
 import { ArrowUpRight, FileText } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { Material } from "@/types";
 
 interface Props {
   material: Material;
 }
 
-export default function CourseCard({
-  material,
-}: Props) {
+interface ExpandableTextProps {
+  text: string;
+  maxLines: number;
+  className?: string;
+}
+
+function ExpandableText({ text, maxLines, className = "" }: ExpandableTextProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const textRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    // Compare scrollHeight vs clientHeight to detect overflow
+    setIsClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [text]);
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault(); // prevent the <a> from navigating
+    e.stopPropagation();
+    setExpanded((prev) => !prev);
+  };
+
+  return (
+    <p className={className}>
+      <span
+        ref={textRef}
+        style={
+          !expanded
+            ? {
+                display: "-webkit-box",
+                WebkitLineClamp: maxLines,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }
+            : undefined
+        }
+      >
+        {text}
+      </span>
+      {(isClamped || expanded) && (
+        <button
+          onClick={handleToggle}
+          className="ml-1 font-semibold focus:outline-none"
+          style={{ color: "#c17650" }}
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </p>
+  );
+}
+
+export default function CourseCard({ material }: Props) {
   return (
     <a
       href={material.resource_url}
@@ -50,9 +103,11 @@ export default function CourseCard({
             </h3>
 
             {material.description && (
-              <p className="mt-1 line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
-                {material.description}
-              </p>
+              <ExpandableText
+                text={material.description}
+                maxLines={3}
+                className="mt-1 text-[10px] text-neutral-600 dark:text-neutral-400"
+              />
             )}
           </div>
         </div>
@@ -90,9 +145,11 @@ export default function CourseCard({
             </h3>
 
             {material.description && (
-              <p className="line-clamp-3 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-                {material.description}
-              </p>
+              <ExpandableText
+                text={material.description}
+                maxLines={3}
+                className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-300"
+              />
             )}
           </div>
 

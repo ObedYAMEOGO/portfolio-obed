@@ -1,3 +1,4 @@
+//src/lib/api/index.ts
 import axios from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -99,5 +100,12 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+api.interceptors.request.use(async (config) => {
+  const token = await waitForClerkSession();
+  console.log("Token for", config.url, "→", token ? "✓ present" : "✗ missing");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
 export default api;

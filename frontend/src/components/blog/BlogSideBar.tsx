@@ -10,6 +10,8 @@ interface BlogSidebarProps {
   activeCategory: BlogCategory | "All";
   onCategoryChange: (cat: BlogCategory | "All") => void;
   archiveYears: { year: number; count: number }[];
+  activeYear: number | null;
+  onYearChange: (year: number | null) => void;
 }
 
 export default function BlogSidebar({
@@ -18,11 +20,13 @@ export default function BlogSidebar({
   activeCategory,
   onCategoryChange,
   archiveYears,
+  activeYear,
+  onYearChange,
 }: BlogSidebarProps) {
   return (
     <aside className="space-y-5">
 
-      {/* ── Trending ────────────────────────────────────────────── */}
+      {/* TRENDING */}
       <div className="rounded-2xl border border-neutral-200 bg-white p-6">
         <div className="mb-5 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-neutral-400" />
@@ -64,7 +68,7 @@ export default function BlogSidebar({
         </div>
       </div>
 
-      {/* ── AI Topics (interactive filter) ──────────────────────── */}
+      {/* AI TOPICS */}
       <div className="rounded-2xl border border-neutral-200 bg-white p-6">
         <div className="mb-5 flex items-center gap-2">
           <Cpu className="h-4 w-4 text-neutral-400" />
@@ -74,7 +78,6 @@ export default function BlogSidebar({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {/* All pill */}
           <button
             onClick={() => onCategoryChange("All")}
             className={cn(
@@ -104,7 +107,7 @@ export default function BlogSidebar({
         </div>
       </div>
 
-      {/* ── Archive by year ──────────────────────────────────────── */}
+      {/* ARCHIVE BY YEAR */}
       {archiveYears.length > 0 && (
         <div className="rounded-2xl border border-neutral-200 bg-white p-6">
           <div className="mb-5 flex items-center gap-2">
@@ -115,28 +118,37 @@ export default function BlogSidebar({
           </div>
 
           <ul className="flex flex-col gap-1">
+            {/* All years */}
+            <li>
+              <button
+                onClick={() => onYearChange(null)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-lg px-2 py-2 text-sm transition-colors duration-150",
+                  activeYear === null
+                    ? "bg-neutral-100 font-semibold text-neutral-900"
+                    : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700",
+                )}
+              >
+                <span className="font-medium">All years</span>
+              </button>
+            </li>
+
             {archiveYears.map(({ year, count }) => (
               <li key={year}>
-                <Link
-                  href={`/blog?year=${year}`}
-                  className="
-                    flex
-                    items-center
-                    justify-between
-                    rounded-lg
-                    px-2
-                    py-2
-                    text-sm
-                    transition-colors
-                    duration-150
-                    hover:bg-neutral-50
-                  "
+                <button
+                  onClick={() => onYearChange(activeYear === year ? null : year)}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-lg px-2 py-2 text-sm transition-colors duration-150",
+                    activeYear === year
+                      ? "bg-neutral-100 font-semibold text-neutral-900"
+                      : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700",
+                  )}
                 >
-                  <span className="font-medium text-neutral-700">{year}</span>
+                  <span className="font-medium">{year}</span>
                   <span className="text-[12px] text-neutral-400">
                     {count} {count === 1 ? "post" : "posts"}
                   </span>
-                </Link>
+                </button>
               </li>
             ))}
           </ul>

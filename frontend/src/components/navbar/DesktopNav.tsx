@@ -15,19 +15,43 @@ interface DesktopNavProps {
   items: NavItem[];
 }
 
-export default function DesktopNav({
-  items,
-}: DesktopNavProps) {
+export default function DesktopNav({ items }: DesktopNavProps) {
   const pathname = usePathname();
 
   return (
     <nav className="hidden items-center gap-10 md:flex">
-
       {/* NAV LINKS */}
 
       {items.map((item) => {
-        const isActive =
-          pathname === item.path;
+        const isActive = pathname === item.path;
+
+        if (item.path === "/contact") {
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className="hidden
+              items-center
+              justify-center
+              rounded-full
+              bg-[#c17650]
+              px-5
+              py-2
+              text-[12px]
+              font-semibold
+              uppercase
+              tracking-widest
+              text-white
+              transition-colors
+              duration-200
+              hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
+
+              md:inline-flex"
+            >
+              {item.name}
+            </Link>
+          );
+        }
 
         return (
           <Link
@@ -68,7 +92,6 @@ export default function DesktopNav({
           </Link>
         );
       })}
-
     </nav>
   );
 }

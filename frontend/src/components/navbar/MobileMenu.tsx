@@ -105,7 +105,7 @@ export default function MobileMenu({
         <SheetContent
           side="right"
           className="
-            w-[300px]
+            w-75
             border-l
             border-neutral-200
             bg-white/95
@@ -223,38 +223,9 @@ export default function MobileMenu({
 
           <div className="mx-6 h-px bg-neutral-200" />
 
-          {/* CTA + AUTH */}
+          {/* AUTH */}
 
-          <div className="space-y-4 px-6 py-8">
-
-            {/* CONTACT */}
-
-            <Link
-              href="/contact"
-              className="
-                flex
-                w-full
-                items-center
-                justify-center
-                rounded-full
-                bg-[#c17650]
-                px-6
-                py-3
-                text-[12px]
-                font-semibold
-                uppercase
-                tracking-widest
-                text-white
-                transition-all
-                duration-200
-               hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
-              "
-            >
-              Let&apos;s Connect
-            </Link>
-
-            {/* AUTH */}
-
+          <div className="px-6 py-8">
             {isLoaded && (
               !isSignedIn ? (
                 <SignInButton mode="modal">
@@ -303,7 +274,6 @@ export default function MobileMenu({
                 </div>
               )
             )}
-
           </div>
 
           {/* SOCIALS */}

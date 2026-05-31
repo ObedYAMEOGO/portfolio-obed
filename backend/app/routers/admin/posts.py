@@ -171,3 +171,19 @@ async def update_post(
             )
 
     return PostResponse.model_validate(post)
+
+@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post(
+    post_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    query = select(Post).where(Post.id == post_id)
+    result = await db.execute(query)
+    post = result.scalars().first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found.")
+
+    await db.delete(post)
+    await db.commit()

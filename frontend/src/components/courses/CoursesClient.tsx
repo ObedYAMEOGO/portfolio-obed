@@ -7,7 +7,6 @@ import {
 
 import { useQuery } from "@tanstack/react-query";
 import { materialsApi } from "@/lib/api/materials";
-import { Material } from "@/types";
 
 import CoursesLayout from "@/components/courses/CoursesLayout";
 import CoursesSidebar from "@/components/courses/CoursesSidebar";
@@ -15,6 +14,7 @@ import CoursesTopbar from "@/components/courses/CoursesTopBar";
 import CoursesContent from "@/components/courses/CoursesContent";
 
 type MaterialType = "ALL" | "DOCUMENT" | "VIDEO";
+const ITEMS_PER_PAGE = 8;
 
 export default function CoursesClient() {
   const [selectedType, setSelectedType] = useState<MaterialType>("ALL");
@@ -25,7 +25,6 @@ export default function CoursesClient() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const ITEMS_PER_PAGE = 8;
 
   // Use React Query for caching
   const { 

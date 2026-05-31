@@ -76,8 +76,12 @@ function ProjectsSkeleton() {
 export default async function HomePage() {
   let resumeUrl = "";
 
-  /* GORDON: Use server-side settings API which connects via Docker network */
-  const settings = await getSettingsServer();
+  /* GORDON: Use server-side settings API which connects via Docker network.
+     Race against a 3s timeout so a slow Railway response never blocks the page. */
+  const settings = await Promise.race([
+    getSettingsServer(),
+    new Promise<null>((res) => setTimeout(() => res(null), 3000)),
+  ]);
   resumeUrl = settings?.resume_url || "";
 
   return (
@@ -344,7 +348,7 @@ export default async function HomePage() {
                 Selected Works
               </span>
 
-              <h2 className="text-3xl sm:text-4x  font-semibold tracking-[-0.02em] text-neutral-900">
+              <h2 className="text-3xl sm:text-4xl font-semibold tracking-[-0.02em] text-neutral-900">
                 Projects
               </h2>
             </div>
