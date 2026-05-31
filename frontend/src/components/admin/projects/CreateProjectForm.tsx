@@ -86,17 +86,44 @@ export default function CreateProjectForm() {
   }
 
   /* =========================================================
-     TECH STACK
+     TECH STACK - Enhanced with bulk input
   ========================================================= */
 
   function addTech() {
     const trimmed = techInput.trim();
-    if (!trimmed || formData.tech_stack.includes(trimmed)) {
+    if (!trimmed) {
       setTechInput("");
       return;
     }
-    setFormData((prev) => ({ ...prev, tech_stack: [...prev.tech_stack, trimmed] }));
+    
+    // Split by comma or space, filter out empty strings, trim each item
+    const newTechs = trimmed
+      .split(/[,\s]+/)  // Split by comma or whitespace
+      .map(tech => tech.trim())
+      .filter(tech => tech.length > 0 && !formData.tech_stack.includes(tech));
+    
+    if (newTechs.length === 0) {
+      setTechInput("");
+      return;
+    }
+    
+    setFormData((prev) => ({ 
+      ...prev, 
+      tech_stack: [...prev.tech_stack, ...newTechs] 
+    }));
     setTechInput("");
+  }
+
+  function handleTechKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTech();
+    }
+    // Optional: Add comma or space as trigger too
+    if (e.key === "," || e.key === " ") {
+      e.preventDefault();
+      addTech();
+    }
   }
 
   function removeTech(tech: string) {
@@ -274,17 +301,17 @@ export default function CreateProjectForm() {
         )}
       </div>
 
-      {/* TECH STACK */}
+      {/* TECH STACK - Enhanced with bulk input */}
       <div className="space-y-3">
         <label className={labelClass}>Tech Stack</label>
-
+        
         <div className="flex gap-2">
           <input
             type="text"
             value={techInput}
             onChange={(e) => setTechInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTech())}
-            placeholder="e.g. React"
+            onKeyDown={handleTechKeyDown}
+            placeholder="e.g. React, Next.js, Tailwind or React Next.js Tailwind"
             className={`${inputClass} flex-1`}
           />
           <button
@@ -292,10 +319,14 @@ export default function CreateProjectForm() {
             onClick={addTech}
             className="rounded-full bg-neutral-900 px-5 text-[12px] font-semibold text-white transition-colors hover:bg-neutral-700"
           >
-            Add
+            Add All
           </button>
         </div>
-
+        
+        <p className="text-[10px] text-neutral-400">
+          Separate technologies with spaces, commas, or both. Example: &quot;React, Next.js Tailwind TypeScript&quot;
+        </p>
+        
         {formData.tech_stack.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {formData.tech_stack.map((tech) => (

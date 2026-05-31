@@ -158,7 +158,7 @@ export default function EditMaterialForm({ material, onRefresh }: Props) {
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-3.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-3.5 text-[12px] font-semibold uppercase tracking-widest text-white transition-colors hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
