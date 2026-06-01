@@ -11,6 +11,7 @@ import type { Post } from "@/types";
 
 import PrintButton from "@/components/blog/PrintButton";
 import ShareButtons from "@/components/blog/ShareButtons";
+import Comments from "@/components/blog/Comments";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -323,6 +324,9 @@ export default async function PostPage({ params }: PostPageProps) {
             ))}
           </div>
         )}
+
+        {/* COMMENTS */}
+        <Comments />
 
       </main>
     </div>
