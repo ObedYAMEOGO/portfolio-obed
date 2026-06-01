@@ -33,7 +33,7 @@ export default function Comments() {
       <div
         className={cn(
           "overflow-hidden transition-all duration-300",
-          open ? "mt-6 max-h-[9999px] opacity-100" : "max-h-0 opacity-0",
+          open ? "mt-6 max-h-2499.75 opacity-100" : "max-h-0 opacity-0",
         )}
       >
         <Giscus
