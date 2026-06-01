@@ -74,7 +74,7 @@ export default function FeaturedHero({ post }: FeaturedHeroProps) {
                   bg-[#c17650]/10
                   px-3 py-1
                   text-[10px] font-semibold uppercase tracking-wider
-                  text-white
+                  text-neutral-700
                 "
               >
                 {post.category}

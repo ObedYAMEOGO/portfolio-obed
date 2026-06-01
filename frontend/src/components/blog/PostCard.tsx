@@ -74,7 +74,7 @@ export default function PostCard({ post, compact = false }: PostCardProps) {
           </p>
         )}
 
-        {/* ✅ RelativeDate replaces the raw formatPostDate span */}
+        {/* RelativeDate replaces the raw formatPostDate span */}
         <div className="mt-auto flex items-center gap-3 text-[11px] text-neutral-400">
           <RelativeDate dateString={displayDate} />
           <div className="flex items-center gap-1">

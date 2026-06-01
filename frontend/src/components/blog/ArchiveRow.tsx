@@ -50,7 +50,7 @@ export default function ArchiveRow({ post }: ArchiveRowProps) {
         {post.title}
       </span>
 
-      {/* ✅ RelativeDate replaces the raw formatPostDate span */}
+      {/*RelativeDate replaces the raw formatPostDate span */}
       <RelativeDate
         dateString={postDate(post)}
         className="shrink-0 text-[11px] text-neutral-400"
