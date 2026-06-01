@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export default function Comments() {
   const { resolvedTheme } = useTheme();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   return (
     <div className="mt-16 border-t border-neutral-200 pt-10">
@@ -33,7 +33,7 @@ export default function Comments() {
       <div
         className={cn(
           "overflow-hidden transition-all duration-300",
-          open ? "mt-6 max-h-2499.75 opacity-100" : "max-h-0 opacity-0",
+          open ? "mt-6 max-h-[9999px] opacity-100" : "max-h-0 opacity-0",
         )}
       >
         <Giscus
