@@ -16,9 +16,9 @@ export default function Comments() {
       {/* TOGGLE HEADER */}
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between group"
+        className="group flex w-full items-center justify-between"
       >
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400 group-hover:text-neutral-600 transition-colors duration-200">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400 transition-colors duration-200 group-hover:text-neutral-600">
           Discussion
         </h2>
         <ChevronDown
@@ -29,13 +29,8 @@ export default function Comments() {
         />
       </button>
 
-      {/* GISCUS */}
-      <div
-        className={cn(
-          "overflow-hidden transition-all duration-300",
-          open ? "mt-6 max-h-2499.75 opacity-100" : "max-h-0 opacity-0",
-        )}
-      >
+      {/* GISCUS — always mounted, just hidden when collapsed */}
+      <div className={cn("mt-6", !open && "hidden")}>
         <Giscus
           repo="ObedYAMEOGO/portfolio-obed"
           repoId="R_kgDOSevWdA"
