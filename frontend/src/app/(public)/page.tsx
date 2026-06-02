@@ -88,8 +88,15 @@ export default async function HomePage() {
     <div className="flex min-h-screen flex-col bg-[#f5f5f5] text-[#050505] selection:bg-neutral-200">
       <main className="relative flex flex-col items-center overflow-hidden px-4 pb-14 pt-16 sm:px-6 md:pt-20">
 
-        {/* GRID BACKGROUND */}
-        <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-size-[40px_40px]" />
+        {/* RECTANGLE PATTERN BACKGROUND */}
+        <div 
+          className="absolute inset-x-0 top-0 -z-20 h-[800px] w-full opacity-[0.65]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cpath d='M0 0h120v60H0z' fill='none'/%3E%3Cpath d='M120 60H0V0h120v60zM1 59h118V1H1v58z' fill='%23000000' fill-opacity='.04'/%3E%3C/svg%3E")`,
+            maskImage: 'linear-gradient(to bottom, white 40%, transparent 95%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, white 40%, transparent 95%)',
+          }}
+        />
 
         {/* =========================================================
             HERO
