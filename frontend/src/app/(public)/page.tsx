@@ -99,7 +99,7 @@ export default async function HomePage() {
 
           {/* HERO GEOMETRIC PATTERN — top-right corner, repeated squares */}
           <div
-            className="pointer-events-none absolute right-0 top-0 -z-10 h-[420px] w-[420px] opacity-[0.045]"
+            className="pointer-events-none absolute right-0 top-0 -z-10 h-105 w-105 opacity-[0.045]"
             aria-hidden="true"
           >
             <svg
