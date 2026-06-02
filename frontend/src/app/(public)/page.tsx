@@ -91,18 +91,6 @@ export default async function HomePage() {
         {/* GRID BACKGROUND */}
         <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-size-[40px_40px]" />
 
-        {/* REPEATED PROJECT-CARD PATTERN */}
-        <div
-          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.045]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg width='112' height='112' viewBox='0 0 112 112' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='56' y='0' width='28' height='28' fill='%23050505'/%3E%3Crect x='84' y='0' width='28' height='28' fill='%23050505'/%3E%3Crect x='84' y='28' width='28' height='28' fill='%23050505'/%3E%3Crect x='56' y='56' width='28' height='28' fill='%23050505'/%3E%3Crect x='84' y='56' width='28' height='28' fill='%23050505'/%3E%3Crect x='84' y='84' width='28' height='28' fill='%23050505'/%3E%3C/svg%3E\")",
-            backgroundPosition: "top right",
-            backgroundRepeat: "repeat",
-            backgroundSize: "112px 112px",
-          }}
-        />
-
         {/* =========================================================
             HERO
         ========================================================= */}
