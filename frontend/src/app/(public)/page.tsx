@@ -22,7 +22,7 @@ export const revalidate = 3600;
 ========================================================= */
 
 const HERO_PATTERN_ID = "hero-grid-pattern";
-const HERO_FADE_ID    = "hero-fade";
+const HERO_FADE_ID = "hero-fade";
 
 /* =========================================================
    PROJECTS SECTION
@@ -90,7 +90,6 @@ export default async function HomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f5f5] text-[#050505] selection:bg-neutral-200">
       <main className="relative flex flex-col items-center overflow-hidden px-4 pb-14 pt-16 sm:px-6 md:pt-20">
-
         {/* ── GLOBAL GRID BACKGROUND ─────────────────────────────── */}
         <div
           className="
@@ -104,7 +103,6 @@ export default async function HomePage() {
             HERO
         ========================================================= */}
         <section className="relative flex min-h-[58vh] w-full max-w-7xl items-center">
-
           {/* ── HERO FULL-BLEED PATTERN BACKGROUND ─────────────────── */}
           <div
             className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
@@ -115,37 +113,53 @@ export default async function HomePage() {
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
-  {/* Checkerboard tile - more visible */}
-  <pattern
-    id={HERO_PATTERN_ID}
-    x="0"
-    y="0"
-    width="56"
-    height="56"
-    patternUnits="userSpaceOnUse"
-  >
-    <rect x="0"  y="0"  width="28" height="28" fill="#0a0a0a" opacity="0.12" />
-    <rect x="28" y="28" width="28" height="28" fill="#0a0a0a" opacity="0.12" />
-  </pattern>
+                {/* Checkerboard tile - more visible */}
+                <pattern
+                  id={HERO_PATTERN_ID}
+                  x="0"
+                  y="0"
+                  width="56"
+                  height="56"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <rect
+                    x="0"
+                    y="0"
+                    width="28"
+                    height="28"
+                    fill="#0a0a0a"
+                    opacity="0.55"
+                  />
+                  <rect
+                    x="28"
+                    y="28"
+                    width="28"
+                    height="28"
+                    fill="#0a0a0a"
+                    opacity="0.55"
+                  />
+                </pattern>
 
-  {/* Softer radial fade - keeps pattern visible in the middle */}
-  <radialGradient id={HERO_FADE_ID} cx="50%" cy="50%" r="75%">
-    <stop offset="0%"   stopColor="#f5f5f5" stopOpacity="0" />
-    <stop offset="60%"  stopColor="#f5f5f5" stopOpacity="0.2" />
-    <stop offset="100%" stopColor="#f5f5f5" stopOpacity="1" />
-  </radialGradient>
-</defs>
-              <rect width="100%" height="100%" fill={`url(#${HERO_PATTERN_ID})`} />
-              <rect width="100%" height="100%" fill={`url(#${HERO_FADE_ID})`}    />
+                {/* Softer radial fade - keeps pattern visible in the middle */}
+                <radialGradient id={HERO_FADE_ID} cx="50%" cy="50%" r="75%">
+                  <stop offset="0%" stopColor="#f5f5f5" stopOpacity="0" />
+                  <stop offset="75%" stopColor="#f5f5f5" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#f5f5f5" stopOpacity="1" />
+                </radialGradient>
+              </defs>
+              <rect
+                width="100%"
+                height="100%"
+                fill={`url(#${HERO_PATTERN_ID})`}
+              />
+              <rect width="100%" height="100%" fill={`url(#${HERO_FADE_ID})`} />
             </svg>
           </div>
 
           {/* ── HERO GRID ───────────────────────────────────────────── */}
           <div className="grid w-full grid-cols-1 items-center gap-14 lg:grid-cols-[60%_40%]">
-
             {/* LEFT — copy */}
             <div className="flex flex-col items-center space-y-6 text-center lg:items-start lg:text-left">
-
               {/* Eyebrow pill */}
               <div
                 className="
@@ -167,7 +181,8 @@ export default async function HomePage() {
                   text-neutral-900
                 "
               >
-                Focused on building production grade ML &amp; intelligent systems.
+                Focused on building production grade ML &amp; intelligent
+                systems.
               </h1>
 
               {/* Sub-label */}
@@ -177,7 +192,6 @@ export default async function HomePage() {
 
               {/* CTAs */}
               <div className="flex flex-col items-center gap-3 pt-1 sm:flex-row lg:items-start">
-
                 {/* Projects */}
                 <Link
                   href="/projects"
@@ -211,14 +225,12 @@ export default async function HomePage() {
                     Download My CV
                   </a>
                 )}
-
               </div>
             </div>
 
             {/* RIGHT — profile image */}
             <div className="relative flex justify-center">
               <div className="relative flex aspect-square w-70 items-center justify-center sm:w-[320px] md:w-[107.5] lg:h-125 lg:w-125">
-
                 {/* Glow */}
                 <div className="absolute inset-0 rounded-full bg-linear-to-br from-neutral-200/90 via-white to-neutral-300/80 blur-3xl" />
 
@@ -270,10 +282,8 @@ export default async function HomePage() {
                     </p>
                   </div>
                 </div>
-
               </div>
             </div>
-
           </div>
         </section>
 
@@ -288,26 +298,26 @@ export default async function HomePage() {
         {/* ── QUOTE TICKER ───────────────────────────────────────────── */}
         <section className="relative w-full overflow-hidden border-y border-neutral-200 bg-white/60 py-4 backdrop-blur-sm">
           <div className="flex whitespace-nowrap animate-[ticker_22s_linear_infinite]">
-
             {[0, 1, 2].map((i) => (
-              <div key={i} className="mx-10 flex items-center gap-4 text-neutral-700">
+              <div
+                key={i}
+                className="mx-10 flex items-center gap-4 text-neutral-700"
+              >
                 <span className="text-sm tracking-[0.25em] text-neutral-400">
                   — CAL NEWPORT
                 </span>
                 <p className="text-sm font-medium sm:text-base">
-                  &quot;Clarity about what matters provides clarity about what does not.&quot;
+                  &quot;Clarity about what matters provides clarity about what
+                  does not.&quot;
                 </p>
               </div>
             ))}
-
           </div>
         </section>
 
         {/* ── PROJECTS ───────────────────────────────────────────────── */}
         <section className="mt-16 w-full max-w-7xl space-y-10">
-
           <div className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-6 md:flex-row md:items-end">
-
             <div className="space-y-2">
               <span className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 Selected Works
@@ -329,15 +339,12 @@ export default async function HomePage() {
               All Projects
               <ArrowRight className="h-3.5 w-3.5 text-neutral-500 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
-
           </div>
 
           <Suspense fallback={<ProjectsSkeleton />}>
             <ProjectsSection />
           </Suspense>
-
         </section>
-
       </main>
     </div>
   );
