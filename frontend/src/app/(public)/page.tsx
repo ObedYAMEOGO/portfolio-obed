@@ -5,11 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 
-import {
-  ArrowRight,
-  GraduationCap,
-  Download,
-} from "lucide-react";
+import { ArrowRight, GraduationCap, Download } from "lucide-react";
 
 import ProjectCard from "@/components/projects/ProjectCard";
 import CapabilityMatrix from "@/components/sections/SkillMatrix";
@@ -87,9 +83,17 @@ export default async function HomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f5f5] text-[#050505] selection:bg-neutral-200">
       <main className="relative flex flex-col items-center overflow-hidden px-4 pb-14 pt-16 sm:px-6 md:pt-20">
-
-        {/* GRID BACKGROUND */}
-        <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-size-[40px_40px]" />
+        {/* HERO RECTANGLE PATTERN */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 -z-20 h-225 w-full opacity-60"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120'%3E%3Crect x='0.5' y='0.5' width='239' height='119' fill='none' stroke='%23000000' stroke-opacity='0.035'/%3E%3Crect x='60.5' y='30.5' width='119' height='59' fill='none' stroke='%23000000' stroke-opacity='0.025'/%3E%3C/svg%3E")`,
+            maskImage:
+              "linear-gradient(to bottom, white 45%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, white 45%, transparent 100%)",
+          }}
+        />
 
         {/* =========================================================
             HERO
@@ -97,10 +101,8 @@ export default async function HomePage() {
 
         <section className="flex min-h-[58vh] w-full max-w-7xl items-center">
           <div className="grid w-full grid-cols-1 items-center gap-14 lg:grid-cols-[60%_40%]">
-
             {/* LEFT */}
             <div className="flex flex-col items-center space-y-6 text-center lg:items-start lg:text-left">
-
               {/* Eyebrow — rounded pill */}
               <div
                 className="
@@ -137,7 +139,8 @@ export default async function HomePage() {
                   md:text-[3rem]
                 "
               >
-                Focused on building production grade ML &amp; intelligent systems.
+                Focused on building production grade ML &amp; intelligent
+                systems.
               </h1>
 
               {/* Sub-label */}
@@ -147,7 +150,6 @@ export default async function HomePage() {
 
               {/* CTAs */}
               <div className="flex flex-col items-center gap-3 pt-1 sm:flex-row lg:items-start">
-
                 {/* PROJECTS */}
                 <Link
                   href="/projects"
@@ -212,14 +214,12 @@ export default async function HomePage() {
                     Download My CV
                   </a>
                 )}
-
               </div>
             </div>
 
             {/* RIGHT — IMAGE (layout & sizes unchanged) */}
             <div className="relative flex justify-center">
               <div className="relative flex aspect-square w-70 items-center justify-center sm:w-[320px] md:w-[107.5] lg:h-125 lg:w-125">
-
                 {/* GLOW */}
                 <div className="absolute inset-0 rounded-full bg-linear-to-br from-neutral-200/90 via-white to-neutral-300/80 blur-3xl" />
 
@@ -279,14 +279,12 @@ export default async function HomePage() {
                   <div className="mb-2 flex flex-col gap-2 border-t border-neutral-200 pt-3">
                     <p className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
                       <GraduationCap className="h-4 w-4 text-neutral-400" />
-                     Machine Learning Engineer
+                      Machine Learning Engineer
                     </p>
                   </div>
                 </div>
-
               </div>
             </div>
-
           </div>
         </section>
 
@@ -300,16 +298,15 @@ export default async function HomePage() {
 
         {/* QUOTE TICKER */}
         <section className="relative w-full overflow-hidden border-y border-neutral-200 bg-white/60 py-4 backdrop-blur-sm">
-
           <div className="flex whitespace-nowrap animate-[ticker_22s_linear_infinite]">
-
             <div className="mx-10 flex items-center gap-4 text-neutral-700">
               <span className="text-sm tracking-[0.25em] text-neutral-400">
                 — CAL NEWPORT
               </span>
 
               <p className="text-sm font-medium sm:text-base">
-                &quot;Clarity about what matters provides clarity about what does not.&quot;
+                &quot;Clarity about what matters provides clarity about what
+                does not.&quot;
               </p>
             </div>
 
@@ -320,7 +317,8 @@ export default async function HomePage() {
               </span>
 
               <p className="text-sm font-medium sm:text-base">
-                &quot;Clarity about what matters provides clarity about what does not.&quot;
+                &quot;Clarity about what matters provides clarity about what
+                does not.&quot;
               </p>
             </div>
 
@@ -330,19 +328,16 @@ export default async function HomePage() {
               </span>
 
               <p className="text-sm font-medium sm:text-base">
-                &quot;Clarity about what matters provides clarity about what does not.&quot;
+                &quot;Clarity about what matters provides clarity about what
+                does not.&quot;
               </p>
             </div>
-
           </div>
-
         </section>
 
         {/* PROJECTS */}
         <section className="mt-16 w-full max-w-7xl space-y-10">
-
           <div className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-6 md:flex-row md:items-end">
-
             <div className="space-y-2">
               <span className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 Selected Works
@@ -374,15 +369,12 @@ export default async function HomePage() {
               All Projects
               <ArrowRight className="h-3.5 w-3.5 text-[15px] text-neutral-500 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
-
           </div>
 
           <Suspense fallback={<ProjectsSkeleton />}>
             <ProjectsSection />
           </Suspense>
-
         </section>
-
       </main>
     </div>
   );
