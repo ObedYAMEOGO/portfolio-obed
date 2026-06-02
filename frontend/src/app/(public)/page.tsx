@@ -96,6 +96,41 @@ export default async function HomePage() {
         ========================================================= */}
 
         <section className="flex min-h-[58vh] w-full max-w-7xl items-center">
+
+          {/* HERO GEOMETRIC PATTERN — top-right corner, repeated squares */}
+          <div
+            className="pointer-events-none absolute right-0 top-0 -z-10 h-[420px] w-[420px] opacity-[0.045]"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 420 420"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-full w-full"
+            >
+              {Array.from({ length: 6 }).map((_, col) =>
+                Array.from({ length: 6 }).map((_, row) => {
+                  // Same staggered pattern as the card — only render certain cells
+                  const shouldRender =
+                    (col + row) % 2 === 0 ||
+                    (col === 0 && row % 3 === 0) ||
+                    (row === 0 && col % 2 === 0);
+                  if (!shouldRender) return null;
+                  return (
+                    <rect
+                      key={`${col}-${row}`}
+                      x={col * 70}
+                      y={row * 70}
+                      width="56"
+                      height="56"
+                      fill="#050505"
+                    />
+                  );
+                })
+              )}
+            </svg>
+          </div>
+
           <div className="grid w-full grid-cols-1 items-center gap-14 lg:grid-cols-[60%_40%]">
 
             {/* LEFT */}
@@ -279,7 +314,7 @@ export default async function HomePage() {
                   <div className="mb-2 flex flex-col gap-2 border-t border-neutral-200 pt-3">
                     <p className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
                       <GraduationCap className="h-4 w-4 text-neutral-400" />
-                     Machine Learning Engineer
+                      Machine Learning Engineer
                     </p>
                   </div>
                 </div>
