@@ -40,6 +40,18 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
         transition: `opacity 0.5s cubic-bezier(0.22,1,0.36,1) ${index * 80}ms, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${index * 80}ms, box-shadow 0.3s ease, border-color 0.3s ease`,
       }}
     >
+      {/* TOP-RIGHT GEOMETRIC PATTERN */}
+      <div className="pointer-events-none absolute -right-4 -top-4 h-28 w-28 opacity-[0.07] transition-opacity duration-300 group-hover:opacity-[0.12] dark:opacity-[0.06] dark:group-hover:opacity-[0.1]">
+        <svg viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="56" y="0"  width="28" height="28" fill="#050505" />
+          <rect x="84" y="0"  width="28" height="28" fill="#050505" />
+          <rect x="84" y="28" width="28" height="28" fill="#050505" />
+          <rect x="56" y="56" width="28" height="28" fill="#050505" />
+          <rect x="84" y="56" width="28" height="28" fill="#050505" />
+          <rect x="84" y="84" width="28" height="28" fill="#050505" />
+        </svg>
+      </div>
+
       {/* Hover background wash */}
       <div className="absolute inset-0 bg-neutral-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:bg-neutral-800/40" />
 
