@@ -63,7 +63,7 @@ export default function Navbar() {
               duration-150
               hover:text-neutral-600
             "
-          >OBED_Y
+          >[OBED_Y]
           </Link>
         </div>
 
