@@ -18,7 +18,7 @@ export default function Comments() {
         onClick={() => setOpen((prev) => !prev)}
         className="group flex w-full items-center justify-between"
       >
-        <h2 className="text-[20px] font-bold uppercase tracking-[0.2em] text-neutral-400 transition-colors duration-200 group-hover:text-neutral-600">
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 transition-colors duration-200 group-hover:text-neutral-600">
           Discussion
         </h2>
         <ChevronDown
