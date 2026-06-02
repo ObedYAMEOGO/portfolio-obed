@@ -84,14 +84,22 @@ export default async function HomePage() {
     <div className="flex min-h-screen flex-col bg-[#f5f5f5] text-[#050505] selection:bg-neutral-200">
       <main className="relative flex flex-col items-center overflow-hidden px-4 pb-14 pt-16 sm:px-6 md:pt-20">
         {/* HERO RECTANGLE PATTERN */}
+        {/* Soft radial glow */}
+        <div className="absolute inset-x-0 top-0 -z-30 h-[700px] bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.06),transparent_70%)]" />
+
+        {/* Rectangle grid */}
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 -z-20 h-225 w-full opacity-60"
+          className="absolute inset-x-0 top-0 -z-20 h-[900px]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120'%3E%3Crect x='0.5' y='0.5' width='239' height='119' fill='none' stroke='%23000000' stroke-opacity='0.035'/%3E%3Crect x='60.5' y='30.5' width='119' height='59' fill='none' stroke='%23000000' stroke-opacity='0.025'/%3E%3C/svg%3E")`,
+            backgroundImage: `
+      linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px)
+    `,
+            backgroundSize: "220px 110px",
             maskImage:
-              "linear-gradient(to bottom, white 45%, transparent 100%)",
+              "linear-gradient(to bottom, white 50%, transparent 100%)",
             WebkitMaskImage:
-              "linear-gradient(to bottom, white 45%, transparent 100%)",
+              "linear-gradient(to bottom, white 50%, transparent 100%)",
           }}
         />
 
