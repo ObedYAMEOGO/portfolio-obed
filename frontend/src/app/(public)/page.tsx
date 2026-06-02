@@ -115,26 +115,26 @@ export default async function HomePage() {
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
-                {/* Checkerboard tile */}
-                <pattern
-                  id={HERO_PATTERN_ID}
-                  x="0"
-                  y="0"
-                  width="56"
-                  height="56"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <rect x="0"  y="0"  width="28" height="28" fill="#050505" opacity="0.06" />
-                  <rect x="28" y="28" width="28" height="28" fill="#050505" opacity="0.06" />
-                </pattern>
+  {/* Checkerboard tile - more visible */}
+  <pattern
+    id={HERO_PATTERN_ID}
+    x="0"
+    y="0"
+    width="56"
+    height="56"
+    patternUnits="userSpaceOnUse"
+  >
+    <rect x="0"  y="0"  width="28" height="28" fill="#0a0a0a" opacity="0.12" />
+    <rect x="28" y="28" width="28" height="28" fill="#0a0a0a" opacity="0.12" />
+  </pattern>
 
-                {/* Radial fade — pattern dissolves into page bg at edges */}
-                <radialGradient id={HERO_FADE_ID} cx="50%" cy="50%" r="70%">
-                  <stop offset="0%"   stopColor="white"   stopOpacity="0" />
-                  <stop offset="100%" stopColor="#f5f5f5" stopOpacity="1" />
-                </radialGradient>
-              </defs>
-
+  {/* Softer radial fade - keeps pattern visible in the middle */}
+  <radialGradient id={HERO_FADE_ID} cx="50%" cy="50%" r="75%">
+    <stop offset="0%"   stopColor="#f5f5f5" stopOpacity="0" />
+    <stop offset="60%"  stopColor="#f5f5f5" stopOpacity="0.2" />
+    <stop offset="100%" stopColor="#f5f5f5" stopOpacity="1" />
+  </radialGradient>
+</defs>
               <rect width="100%" height="100%" fill={`url(#${HERO_PATTERN_ID})`} />
               <rect width="100%" height="100%" fill={`url(#${HERO_FADE_ID})`}    />
             </svg>
