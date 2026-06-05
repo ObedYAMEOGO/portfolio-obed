@@ -457,7 +457,7 @@ export default function CommentsSection({ slug }: { slug: string }) {
       {isLoaded && !isSignedIn && (
         <div className="mb-10 rounded-xl border border-neutral-200 bg-neutral-50 px-6 py-5 text-center">
           <p className="text-[13px] text-neutral-500">
-            Sign in to join the discussion.
+            Login in to join the discussion.
           </p>
         </div>
       )}
