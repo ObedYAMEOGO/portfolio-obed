@@ -332,7 +332,7 @@ function CommentItem({
       <div className="flex-1 min-w-0">
         {/* Header */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[13px] font-semibold text-neutral-900">
+          <span className="text-[13px] font-semibold text-black">
             {comment.user_name}
           </span>
           <span
