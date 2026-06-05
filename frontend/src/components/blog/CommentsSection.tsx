@@ -35,8 +35,12 @@ interface Comment {
 // API HELPERS
 // =========================================================
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL ;
 
+
+if (!API) {
+  throw new Error("NEXT_PUBLIC_API_URL is missing");
+}
 async function fetchComments(slug: string): Promise<Comment[]> {
   const res = await fetch(`${API}/comments?slug=${slug}`);
   if (!res.ok) throw new Error("Failed to fetch comments");
