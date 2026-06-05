@@ -37,6 +37,10 @@ from app.routers.public.users import (
 from app.routers.public.notifications import (
     router as notifications_router,
 )
+
+from app.routers.public import comments as public_comments
+
+from app.routers.public import reactions as public_reactions
 # =========================================================
 # ADMIN ROUTERS
 # =========================================================
@@ -71,6 +75,8 @@ from app.routers.admin.admin_settings import (
 from app.routers.admin import users
 
 from app.routers.admin import auth
+
+from app.routers.admin import comments as admin_comments
 
 
 # =========================================================
@@ -142,6 +148,11 @@ app.include_router(
     tags=["Notifications"],
 )
 
+app.include_router(public_comments.router, prefix="/api/v1")
+
+app.include_router(public_reactions.router, prefix="/api/v1")
+
+
 # =========================================================
 # ADMIN ROUTES
 # =========================================================
@@ -205,6 +216,7 @@ app.include_router(
     prefix="/api/v1",
 )
 
+app.include_router(admin_comments.router, prefix="/api/v1")
 # =========================================================
 # ROOT
 # =========================================================

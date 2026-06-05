@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import (
+from pydantic import ( # type: ignore
     BaseModel,
     ConfigDict,
     EmailStr,
@@ -280,3 +280,56 @@ class AdminUserResponse(BaseModel):
     @classmethod
     def make_naive(cls, v):
         return ensure_naive(v)
+    
+class CommentCreate(BaseModel):
+    post_slug: str
+    content: str
+    parent_id: Optional[int] = None
+ 
+ 
+class CommentResponse(BaseModel):
+    id: int
+    post_slug: str
+    content: str
+    user_id: int
+    user_name: str
+    user_avatar: Optional[str] = None
+    parent_id: Optional[int] = None
+    is_deleted: bool
+    created_at: datetime
+    replies: List["CommentResponse"] = []  # ← quote the forward reference
+
+    model_config = {"from_attributes": True}
+
+CommentResponse.model_rebuild()
+
+# =========================================================
+# backend/app/schemas.py
+# =========================================================
+ 
+from enum import Enum as PyEnum
+ 
+class ReactionType(str, PyEnum):
+    LIKE       = "LIKE"
+    HEART      = "HEART"
+    FIRE       = "FIRE"
+    INSIGHTFUL = "INSIGHTFUL"
+ 
+ 
+class ReactionToggle(BaseModel):
+    post_slug: str
+    reaction: ReactionType
+ 
+ 
+class ReactionCount(BaseModel):
+    reaction: ReactionType
+    count: int
+    reacted: bool  # whether the current user has reacted
+ 
+ 
+class PostReactionsResponse(BaseModel):
+    post_slug: str
+    reactions: list[ReactionCount]
+ 
+    model_config = {"from_attributes": True}
+ 

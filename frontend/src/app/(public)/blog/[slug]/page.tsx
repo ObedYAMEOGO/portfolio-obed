@@ -11,7 +11,8 @@ import type { Post } from "@/types";
 
 import PrintButton from "@/components/blog/PrintButton";
 import ShareButtons from "@/components/blog/ShareButtons";
-import Comments from "@/components/blog/Comments";
+import CommentsSection from "@/components/blog/CommentsSection";
+import PostReactions from "@/components/blog/PostReactions";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -44,9 +45,7 @@ export async function generateStaticParams() {
         ? data.items
         : [];
 
-    return posts
-      .filter((p) => p.is_published)
-      .map((p) => ({ slug: p.slug }));
+    return posts.filter((p) => p.is_published).map((p) => ({ slug: p.slug }));
   } catch {
     return [];
   }
@@ -120,7 +119,10 @@ export default async function PostPage({ params }: PostPageProps) {
 
     h2: ({ children }) => {
       const id =
-        children?.toString().toLowerCase().replace(/[^\w]+/g, "-") || "";
+        children
+          ?.toString()
+          .toLowerCase()
+          .replace(/[^\w]+/g, "-") || "";
       return (
         <h2
           id={id}
@@ -221,7 +223,6 @@ export default async function PostPage({ params }: PostPageProps) {
   return (
     <div className="min-h-screen bg-white">
       <main className="mx-auto max-w-4xl px-6 pb-32 pt-28">
-
         {/* BACK */}
         <div className="mb-12">
           <Link
@@ -288,7 +289,7 @@ export default async function PostPage({ params }: PostPageProps) {
             {post.content}
           </ReactMarkdown>
         </article>
-
+        <PostReactions slug={post.slug} />
         {/* AUTHOR & SHARE */}
         <div className="mt-20 flex flex-col items-start justify-between gap-6 border-t pt-10 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
@@ -325,9 +326,7 @@ export default async function PostPage({ params }: PostPageProps) {
           </div>
         )}
 
-        {/* COMMENTS */}
-        <Comments />
-
+        <CommentsSection slug={post.slug} />
       </main>
     </div>
   );

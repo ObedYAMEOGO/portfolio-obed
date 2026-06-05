@@ -28,6 +28,7 @@ import UsersTable from "@/components/admin/users/UsersTable";
 
 import { getDashboardStats } from "@/lib/server-api";
 import type { DashboardStats } from "@/types";
+import CommentsTable from "@/components/admin/comments/CommentsTable";
 
 export const dynamic = "force-dynamic";
 
@@ -170,6 +171,7 @@ export default async function AdminDashboardPage({
           <PostsTable />
           <ProjectsTable />
           <MaterialsTable />
+          <CommentsTable />
           <LeadsTable />
           <UsersTable searchQuery={q ?? ""} />
           <SubscribersTable />

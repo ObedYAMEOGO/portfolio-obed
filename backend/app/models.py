@@ -29,6 +29,7 @@ class Base(DeclarativeBase):
 # BLOG CATEGORY ENUM
 # =========================================================
 
+
 class BlogCategory(str, enum.Enum):
     AI_ENGINEERING = "AI Engineering"
     LLMS = "LLMs"
@@ -45,6 +46,7 @@ class BlogCategory(str, enum.Enum):
 # SUBSCRIBERS
 # =========================================================
 
+
 class Subscriber(Base):
     __tablename__ = "subscribers"
 
@@ -57,6 +59,7 @@ class Subscriber(Base):
 # =========================================================
 # PROJECTS
 # =========================================================
+
 
 class Project(Base):
     __tablename__ = "projects"
@@ -78,6 +81,7 @@ class Project(Base):
 # LEADS
 # =========================================================
 
+
 class Lead(Base):
     __tablename__ = "leads"
 
@@ -92,9 +96,10 @@ class Lead(Base):
 # POSTS
 # =========================================================
 
+
 class Post(Base):
     __tablename__ = "posts"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     slug = Column(String, unique=True, nullable=False, index=True)
@@ -112,14 +117,18 @@ class Post(Base):
     author_name = Column(String, default="Obed Yameogo")
     author_initials = Column(String, default="OY")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
-    
+    updated_at = Column(
+        DateTime(timezone=True), onupdate=func.now(), server_default=func.now()
+    )
+
     author_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     author = relationship("User", back_populates="posts")
+
 
 # =========================================================
 # MATERIAL ENUMS
 # =========================================================
+
 
 class MaterialType(str, enum.Enum):
     DOCUMENT = "DOCUMENT"
@@ -136,6 +145,7 @@ class VideoContext(str, enum.Enum):
 # MATERIALS
 # =========================================================
 
+
 class Material(Base):
     __tablename__ = "materials"
 
@@ -143,8 +153,12 @@ class Material(Base):
     title = Column(String, nullable=False)
     slug = Column(String, unique=True, index=True, nullable=False)
     description = Column(Text, nullable=True)
-    material_type = Column(Enum(MaterialType), nullable=False, default=MaterialType.DOCUMENT)
-    video_context = Column(Enum(VideoContext), nullable=False, default=VideoContext.NONE)
+    material_type = Column(
+        Enum(MaterialType), nullable=False, default=MaterialType.DOCUMENT
+    )
+    video_context = Column(
+        Enum(VideoContext), nullable=False, default=VideoContext.NONE
+    )
     category = Column(String, nullable=False, default="General AI")
     resource_url = Column(String, nullable=False)
     thumbnail_url = Column(String, nullable=True)
@@ -156,17 +170,21 @@ class Material(Base):
 # SITE SETTINGS
 # =========================================================
 
+
 class SiteSettings(Base):
     __tablename__ = "site_settings"
 
     id = Column(Integer, primary_key=True, index=True)
     resume_url = Column(String, nullable=True)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 # =========================================================
 # USERS
 # =========================================================
+
 
 class User(Base):
     __tablename__ = "users"
@@ -178,6 +196,71 @@ class User(Base):
     receive_notifications = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     is_admin = Column(Boolean, default=False)
-    
+
     # Relationship - posts authored by this user
     posts = relationship("Post", back_populates="author")
+
+
+# =========================================================
+# ADD THIS TO backend/app/models.py
+# =========================================================
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_slug = Column(String, nullable=False, index=True)
+    content = Column(Text, nullable=False)
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_name = Column(String, nullable=False)
+    user_avatar = Column(String, nullable=True)
+
+    parent_id = Column(Integer, ForeignKey("comments.id"), nullable=True)
+
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    author = relationship("User", foreign_keys=[user_id])
+    replies = relationship(
+        "Comment",
+        primaryjoin="Comment.parent_id == Comment.id",
+        foreign_keys="Comment.parent_id",
+        back_populates="parent",
+        lazy="noload",  # ← don't auto-load, we'll do it manually
+    )
+    parent = relationship(
+        "Comment",
+        primaryjoin="Comment.parent_id == Comment.id",
+        foreign_keys="Comment.parent_id",
+        back_populates="replies",
+        remote_side="Comment.id",  # ← this is the fix
+    )
+    
+class ReactionType(str, enum.Enum):
+    LIKE       = "LIKE"        # 👍
+    HEART      = "HEART"       # ❤️
+    FIRE       = "FIRE"        # 🔥
+    INSIGHTFUL = "INSIGHTFUL"  # 💡
+ 
+ 
+class PostReaction(Base):
+    __tablename__ = "post_reactions"
+ 
+    id       = Column(Integer, primary_key=True, index=True)
+    post_slug = Column(String, nullable=False, index=True)
+    user_id  = Column(Integer, ForeignKey("users.id"), nullable=False)
+    reaction  = Column(Enum(ReactionType), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+ 
+    author = relationship("User", foreign_keys=[user_id])
+ 
+    # One reaction type per user per post
+    __table_args__ = (
+        __import__("sqlalchemy").UniqueConstraint(
+            "post_slug", "user_id", "reaction",
+            name="uq_post_reaction_user"
+        ),
+    )
+ 
