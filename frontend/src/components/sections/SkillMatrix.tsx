@@ -28,7 +28,7 @@ const capabilities = [
     icon: Globe,
     tag: "Cross-functional",
     description:
-      "Execution-driven engineer bridging technical depth with business impact fluent in French and English, comfortable across contexts from startup to enterprise.",
+      "Execution-driven engineer bridging technical depth with business impact, making tradeoffs very clear, negotiating realities and not opinions.",
   },
 ];
 

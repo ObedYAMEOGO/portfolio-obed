@@ -32,7 +32,7 @@ import CommentsTable from "@/components/admin/comments/CommentsTable";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_EMAIL = "obedyameogo.bg50@yahoo.com";
+const ADMIN_EMAIL = "obed@thehatbuddy.co.in";
 
 export default async function AdminDashboardPage({
   searchParams,

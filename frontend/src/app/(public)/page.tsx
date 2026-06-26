@@ -268,8 +268,8 @@ export default async function HomePage() {
                     lg:-left-20
                   "
                 >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                    Profile
+                  <p className="text-[10px] font-semibold tracking-[0.2em] text-neutral-400">
+                    TheHatBuddy
                   </p>
 
                   <h3 className="text-xl font-semibold leading-snug tracking-tight text-neutral-900">
