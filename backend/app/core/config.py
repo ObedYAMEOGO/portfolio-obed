@@ -30,9 +30,9 @@ class Settings(BaseSettings):
 
     RESEND_API_KEY: Optional[str] = None
 
-    EMAIL_FROM: Optional[str] = None
+    EMAIL_FROM: str
 
-    ADMIN_EMAIL: Optional[str] = None
+    ADMIN_EMAIL: str
 
     # =========================================================
     # CLERK

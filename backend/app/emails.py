@@ -203,6 +203,12 @@ def cta_button(
 
 def send_email(payload: dict):
     try:
+        if not settings.EMAIL_FROM:
+            logger.error("EMAIL_FROM is not configured")
+            raise ValueError("EMAIL_FROM environment variable is not set")
+        
+        # Ensure 'from' field is a valid email string, stripping whitespace
+        payload["from"] = str(settings.EMAIL_FROM).strip()
         resend.Emails.send(payload)
 
     except Exception as e:
@@ -251,7 +257,7 @@ def send_welcome_email(
 
     send_email(
         {
-            "from": str(settings.EMAIL_FROM),
+            "from": settings.EMAIL_FROM,
             "to": [to_email],
             "subject": "Welcome to the AI Engineering Newsletter",
             "html": base_wrapper(
@@ -316,7 +322,7 @@ def send_lead_notification(
 
     send_email(
         {
-            "from": str(settings.EMAIL_FROM),
+            "from": settings.EMAIL_FROM,
             "to": [str(settings.ADMIN_EMAIL)],
             "subject": f"New message from {lead_name}",
             "html": base_wrapper(
@@ -378,7 +384,7 @@ def broadcast_new_post(
 
         send_email(
             {
-                "from": str(settings.EMAIL_FROM),
+                "from": settings.EMAIL_FROM,
                 "to": [email],
                 "subject": f"New AI Article: {post_title}",
                 "html": base_wrapper(
@@ -440,7 +446,7 @@ def broadcast_new_project(
 
         send_email(
             {
-                "from": str(settings.EMAIL_FROM),
+                "from": settings.EMAIL_FROM,
                 "to": [email],
                 "subject": f"New AI Project: {project_title}",
                 "html": base_wrapper(
@@ -502,7 +508,7 @@ def broadcast_new_material(
 
         send_email(
             {
-                "from": str(settings.EMAIL_FROM),
+                "from": settings.EMAIL_FROM,
                 "to": [email],
                 "subject": f"New Resource: {material_title}",
                 "html": base_wrapper(
