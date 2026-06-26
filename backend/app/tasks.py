@@ -1,4 +1,9 @@
+import os
+from dotenv import load_dotenv  # type: ignore
 from celery import Celery  # type: ignore
+
+# Load .env explicitly for Celery worker process
+load_dotenv()
 
 from app.core.config import settings
 
