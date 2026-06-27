@@ -381,7 +381,7 @@ def send_welcome_email(to_email: str):
         <p style="font-size:14px; line-height:1.75; color:{COLOR_TEXT_SECONDARY};
                    margin:0 0 20px;">
           I'm Obed — better known as {NICKNAME}. I share technical deep dives
-          on ML systems, real-world project walkthroughs, and curated resources
+          on AI/ML systems, real-world project walkthroughs, and curated resources
           for practitioners. No noise — just content worth your time.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
@@ -390,9 +390,8 @@ def send_welcome_email(to_email: str):
           <tr>
             <td style="padding:14px 18px; font-size:13px; line-height:1.65;
                         color:{COLOR_TEXT_SECONDARY};">
-              <strong>What to expect:</strong>&nbsp;Occasional emails when new
-              articles, projects, or learning resources go live. No newsletters,
-              no promotions — unsubscribe anytime.
+              <strong>What to expect:</strong>&nbsp;Regular emails when new
+              articles, projects, or learning resources go live. 
             </td>
           </tr>
         </table>
