@@ -141,7 +141,6 @@ async def create_material(
         ]
 
         if emails:
-
             broadcast_new_material_task.delay(
                 subscriber_emails=emails,
                 material_title=db_material.title,
@@ -149,7 +148,7 @@ async def create_material(
                     db_material.description
                     or "New learning material available."
                 ),
-                material_slug=db_material.slug,
+                # material_slug removed — courses link to /courses
             )
 
     return db_material
@@ -222,7 +221,6 @@ async def update_material(
         ]
 
         if emails:
-
             broadcast_new_material_task.delay(
                 subscriber_emails=emails,
                 material_title=material.title,
@@ -230,7 +228,7 @@ async def update_material(
                     material.description
                     or "New learning material available."
                 ),
-                material_slug=material.slug,
+                # material_slug removed — courses link to /courses
             )
 
     return material

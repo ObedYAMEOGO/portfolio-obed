@@ -149,7 +149,7 @@ async def create_project(
                     created_project.description
                     or ""
                 ),
-                project_slug=created_project.slug,
+                # project_slug removed — projects link to /projects
             )
 
     return created_project
@@ -234,7 +234,7 @@ async def update_project(
                     project.description
                     or ""
                 ),
-                project_slug=project.slug,
+                # project_slug removed — projects link to /projects
             )
 
     return project

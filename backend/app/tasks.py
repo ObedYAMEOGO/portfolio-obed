@@ -93,19 +93,20 @@ def broadcast_new_post_task(
 # PROJECT BROADCAST TASK
 # =========================================================
 
+# project_slug removed — projects are only accessible at /projects
+# (no individual permalink pages exist yet).
+
 
 @celery.task(name="broadcast_new_project_task")
 def broadcast_new_project_task(
     subscriber_emails: list[str],
     project_title: str,
     project_description: str | None,
-    project_slug: str,
 ):
     broadcast_new_project(
         subscriber_emails=subscriber_emails,
         project_title=project_title,
         project_description=project_description,
-        project_slug=project_slug,
     )
 
 
@@ -113,17 +114,18 @@ def broadcast_new_project_task(
 # MATERIAL BROADCAST TASK
 # =========================================================
 
+# material_slug removed — courses are only accessible at /courses
+# (no individual permalink pages exist yet).
+
 
 @celery.task(name="broadcast_new_material_task")
 def broadcast_new_material_task(
     subscriber_emails: list[str],
     material_title: str,
     material_description: str | None,
-    material_slug: str,
 ):
     broadcast_new_material(
         subscriber_emails=subscriber_emails,
         material_title=material_title,
         material_description=material_description,
-        material_slug=material_slug,
     )
