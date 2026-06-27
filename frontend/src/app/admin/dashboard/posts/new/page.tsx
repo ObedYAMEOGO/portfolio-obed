@@ -53,6 +53,17 @@ function generateSlug(title: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+/**
+ * Parses a comma-separated string into an array of trimmed, non-empty tags.
+ * Handles mixed input: "tag1, tag2, tag3" or "tag1,tag2,tag3"
+ */
+function parseTagsFromInput(input: string): string[] {
+  return input
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0);
+}
+
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -120,7 +131,6 @@ export default function NewPostPage() {
       try {
         setUploadingImage(true);
 
-        // FIX: renamed to `fd` to avoid shadowing outer `formData` state
         const fd = new FormData();
         fd.append("file", file);
         fd.append(
@@ -154,24 +164,51 @@ export default function NewPostPage() {
     [updateField]
   );
 
-  const addTag = useCallback(() => {
-    const tag = tagInput.trim();
-    if (!tag) return;
+  /**
+   * Adds tags from the input field.
+   * Supports both single tags (Enter key) and comma-separated pasting.
+   * Deduplicates against existing tags automatically.
+   */
+  const addTags = useCallback(() => {
+    const rawInput = tagInput.trim();
+    if (!rawInput) return;
 
     const currentTags = formData.tags || [];
+    const newTags = parseTagsFromInput(rawInput);
 
-    if (currentTags.includes(tag)) {
-      toast.error("Tag already exists.");
+    if (newTags.length === 0) return;
+
+    // Validate tag length
+    const invalidTags = newTags.filter((tag) => tag.length > 50);
+    if (invalidTags.length > 0) {
+      toast.error(
+        `Tag(s) too long (max 50 chars): ${invalidTags.join(", ")}`
+      );
       return;
     }
 
-    if (tag.length > 50) {
-      toast.error("Tag must be less than 50 characters.");
+    // Deduplicate against existing tags
+    const duplicates = newTags.filter((tag) => currentTags.includes(tag));
+    const uniqueNewTags = newTags.filter((tag) => !currentTags.includes(tag));
+
+    if (uniqueNewTags.length === 0) {
+      toast.error(
+        duplicates.length === 1
+          ? `Tag "${duplicates[0]}" already exists.`
+          : "All tags already exist."
+      );
       return;
     }
 
-    updateField("tags", [...currentTags, tag]);
+    updateField("tags", [...currentTags, ...uniqueNewTags]);
     setTagInput("");
+
+    // Notify if some were skipped
+    if (duplicates.length > 0) {
+      toast.info(
+        `Added ${uniqueNewTags.length} tag(s). Skipped ${duplicates.length} duplicate(s): ${duplicates.join(", ")}`
+      );
+    }
   }, [tagInput, formData.tags, updateField]);
 
   const removeTag = useCallback(
@@ -185,15 +222,74 @@ export default function NewPostPage() {
     [formData.tags, updateField]
   );
 
-  // FIX: onKeyPress deprecated → onKeyDown
+  /**
+   * Handles tag input key events.
+   * Enter or comma triggers tag addition.
+   * Comma gives immediate feedback (tag appears as you type).
+   */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        addTag();
+        addTags();
+      } else if (e.key === ",") {
+        // Add tags immediately on comma for real-time feedback
+        e.preventDefault();
+        addTags();
       }
     },
-    [addTag]
+    [addTags]
+  );
+
+  /**
+   * Handle paste event to auto-parse comma-separated tags.
+   */
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>) => {
+      const pastedText = e.clipboardData.getData("text");
+
+      // Only auto-process if it contains commas (likely multiple tags)
+      if (pastedText.includes(",")) {
+        e.preventDefault();
+
+        const currentTags = formData.tags || [];
+        const pastedTags = parseTagsFromInput(pastedText);
+
+        // Validate
+        const invalidTags = pastedTags.filter((tag) => tag.length > 50);
+        if (invalidTags.length > 0) {
+          toast.error(
+            `Tag(s) too long (max 50 chars): ${invalidTags.join(", ")}`
+          );
+          return;
+        }
+
+        const duplicates = pastedTags.filter((tag) =>
+          currentTags.includes(tag)
+        );
+        const uniqueNewTags = pastedTags.filter(
+          (tag) => !currentTags.includes(tag)
+        );
+
+        if (uniqueNewTags.length === 0) {
+          toast.error("All pasted tags already exist.");
+          return;
+        }
+
+        updateField("tags", [...currentTags, ...uniqueNewTags]);
+        setTagInput("");
+
+        if (duplicates.length > 0) {
+          toast.info(
+            `Added ${uniqueNewTags.length} tag(s). Skipped ${duplicates.length} duplicate(s).`
+          );
+        } else {
+          toast.success(`Added ${uniqueNewTags.length} tag(s).`);
+        }
+      }
+      // If no commas, let the default paste behavior handle it (single tag)
+    },
+    [formData.tags, updateField]
   );
 
   const submitPost = useCallback(async () => {
@@ -232,7 +328,6 @@ export default function NewPostPage() {
       router.push("/admin/dashboard/posts");
       router.refresh();
     } catch (error) {
-      // FIX: improved error surfacing
       console.error("Post creation failed:", error);
       const message =
         error instanceof Error
@@ -296,7 +391,6 @@ export default function NewPostPage() {
               )}
             </Button>
 
-            {/* FIX: added disabled styles */}
             <Button
               type="button"
               onClick={submitPost}
@@ -398,18 +492,22 @@ export default function NewPostPage() {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Add a tag and press Enter"
+                onPaste={handlePaste}
+                placeholder="Paste comma-separated tags or type and press Enter"
                 className="h-11 flex-1 border border-neutral-300 bg-[#fafafa] px-4 outline-none focus:border-black"
               />
               <Button
                 type="button"
-                onClick={addTag}
+                onClick={addTags}
                 variant="outline"
                 className="h-11 rounded-none border-neutral-300 px-5 font-mono text-[10px] uppercase"
               >
                 Add
               </Button>
             </div>
+            <p className="text-xs text-neutral-400 mt-1">
+              Tip: Paste multiple tags separated by commas (e.g., &quot;python, RAG, LLMs&quot;)
+            </p>
             <div className="flex flex-wrap gap-2 mt-3">
               {safeTags.map((tag) => (
                 <span
