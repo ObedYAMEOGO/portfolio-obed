@@ -288,7 +288,7 @@ export default async function HomePage() {
                     p-5
                     backdrop-blur-md
                     md:flex
-                    lg:-left-10
+                    lg:-left-35
                   "
                 >
                   <p className="text-[10px] font-semibold tracking-[0.2em] text-neutral-400">
