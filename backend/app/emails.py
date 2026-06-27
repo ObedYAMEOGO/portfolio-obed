@@ -381,7 +381,7 @@ def send_welcome_email(to_email: str):
         <p style="font-size:14px; line-height:1.75; color:{COLOR_TEXT_SECONDARY};
                    margin:0 0 20px;">
           I'm Obed — better known as {NICKNAME}. I share technical deep dives
-          on AI/ML systems, real-world project walkthroughs, and curated resources
+          on ML systems, real-world project walkthroughs, and curated resources
           for practitioners. No noise — just content worth your time.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
@@ -390,8 +390,9 @@ def send_welcome_email(to_email: str):
           <tr>
             <td style="padding:14px 18px; font-size:13px; line-height:1.65;
                         color:{COLOR_TEXT_SECONDARY};">
-              <strong>What to expect:</strong>&nbsp;Regular emails when new
-              articles, projects, or learning resources go live. 
+              <strong>What to expect:</strong>&nbsp;Occasional emails when new
+              articles, projects, or learning resources go live. No newsletters,
+              no promotions — unsubscribe anytime.
             </td>
           </tr>
         </table>
@@ -599,7 +600,8 @@ def broadcast_new_project(
     subscriber_emails: List[str],
     project_title: str,
     project_description: Optional[str],
-    project_slug: str,
+    # project_slug intentionally not used — projects are only browsable at
+    # /projects (no individual permalink pages exist yet).
 ):
     _broadcast(
         subscriber_emails=subscriber_emails,
@@ -607,7 +609,7 @@ def broadcast_new_project(
         label=f"New project from {NICKNAME}",
         title=project_title,
         description=project_description or "A new project has been published.",
-        url=f"{BRAND_URL}/projects/{project_slug}",
+        url=f"{BRAND_URL}/projects",
         unsubscribe_url_fn=platform_unsubscribe_url,
         unsubscribe_text="Unsubscribe",
         log_prefix="broadcast_new_project",
@@ -624,7 +626,8 @@ def broadcast_new_material(
     subscriber_emails: List[str],
     material_title: str,
     material_description: Optional[str],
-    material_slug: str,
+    # material_slug intentionally not used — courses are only browsable at
+    # /courses (no individual permalink pages exist yet).
 ):
     _broadcast(
         subscriber_emails=subscriber_emails,
@@ -632,7 +635,7 @@ def broadcast_new_material(
         label=f"New resource from {NICKNAME}",
         title=material_title,
         description=material_description or "A new learning resource has been added.",
-        url=f"{BRAND_URL}/materials/{material_slug}",
+        url=f"{BRAND_URL}/courses",
         unsubscribe_url_fn=platform_unsubscribe_url,
         unsubscribe_text="Unsubscribe",
         log_prefix="broadcast_new_material",

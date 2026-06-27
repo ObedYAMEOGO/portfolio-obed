@@ -9,9 +9,10 @@ import { useState, useEffect, useRef } from "react";
 interface ProjectCardProps {
   project: Project;
   index?: number;
+  isNew?: boolean;
 }
 
-export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
+export default function ProjectCard({ project, index = 0, isNew = false }: ProjectCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -57,10 +58,18 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
 
       <div className="relative p-5">
 
-        {/* Eyebrow */}
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400 transition-colors duration-200 group-hover:text-neutral-500 dark:text-neutral-500 dark:group-hover:text-neutral-400">
-          Project
-        </p>
+        {/* Eyebrow — "New" badge replaces "Project" label when recently added */}
+        <div className="mb-3 flex items-center gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400 transition-colors duration-200 group-hover:text-neutral-500 dark:text-neutral-500 dark:group-hover:text-neutral-400">
+            Project
+          </p>
+          {isNew && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:ring-emerald-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+              New
+            </span>
+          )}
+        </div>
 
         {/* Title */}
         <h3 className="mb-2 text-[17px] font-semibold leading-snug text-neutral-900 dark:text-white">

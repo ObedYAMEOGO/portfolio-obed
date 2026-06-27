@@ -10,6 +10,15 @@ import ProjectCard from "@/components/projects/ProjectCard";
 
 const PROJECTS_PER_PAGE = 6;
 
+// Projects created within this many days are considered "new"
+const NEW_THRESHOLD_DAYS = 14;
+
+function isRecentlyAdded(created_at?: string | null): boolean {
+  if (!created_at) return false;
+  const age = Date.now() - new Date(created_at).getTime();
+  return age < NEW_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
+}
+
 export default function ProjectsClient({ projects }: { projects: Project[] }) {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -47,7 +56,12 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
       {/* GRID */}
       <div className="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2 lg:gap-x-10 lg:gap-y-12">
         {paginatedProjects.map((project, index) => (
-          <ProjectCard key={project.id} project={project} index={index} />
+          <ProjectCard
+            key={project.id}
+            project={project}
+            index={index}
+            isNew={isRecentlyAdded(project.created_at)}
+          />
         ))}
       </div>
 

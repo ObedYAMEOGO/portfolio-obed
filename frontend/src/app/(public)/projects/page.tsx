@@ -17,7 +17,14 @@ async function getProjects(): Promise<Project[]> {
       next: { revalidate: 3600 },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    const data: Project[] = await res.json();
+
+    // Newest first — fall back gracefully if created_at is absent
+    return data.sort((a, b) => {
+      const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return tb - ta;
+    });
   } catch (err) {
     console.error("Failed to fetch projects:", err);
     return [];

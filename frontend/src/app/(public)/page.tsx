@@ -22,6 +22,16 @@ import { getSettingsServer } from "@/lib/api/settings-server";
 
 export const revalidate = 3600;
 
+// Projects created within this many days are labelled "New".
+// Keep in sync with the same constant in ProjectsClient.tsx.
+const NEW_THRESHOLD_DAYS = 14;
+
+function isRecentlyAdded(created_at?: string | null): boolean {
+  if (!created_at) return false;
+  const age = Date.now() - new Date(created_at).getTime();
+  return age < NEW_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
+}
+
 /* =========================================================
    PROJECTS
 ========================================================= */
@@ -31,7 +41,15 @@ async function ProjectsSection() {
 
   try {
     const data = await getProjects();
-    projects = data.slice(0, 4);
+
+    // Newest first, then take the top 4 for the homepage preview
+    projects = data
+      .sort((a, b) => {
+        const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return tb - ta;
+      })
+      .slice(0, 4);
   } catch (error) {
     console.error("PROJECT_FETCH_ERROR:", error);
   }
@@ -40,7 +58,12 @@ async function ProjectsSection() {
     <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
       {projects.length > 0 ? (
         projects.map((project, index) => (
-          <ProjectCard key={project.id} project={project} index={index} />
+          <ProjectCard
+            key={project.id}
+            project={project}
+            index={index}
+            isNew={isRecentlyAdded(project.created_at)}
+          />
         ))
       ) : (
         <div className="col-span-2 py-20 text-center">
