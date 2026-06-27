@@ -20,7 +20,7 @@ function transformPost(post: Post): Post {
     slug: post.slug,
     summary: post.summary ?? "",
     content: post.content,
-    category: post.category || "Research", 
+    category: post.category || "Research",
     tags: post.tags ?? [],
     cover_image_url: post.cover_image_url ?? null,
     seo_title: post.seo_title ?? null,
@@ -49,7 +49,6 @@ export const postsApi = {
     const res = await api.get<PaginatedPosts>(
       `/admin/posts?page=${page}&page_size=${pageSize}`
     );
-
     return {
       items: res.data.items.map(transformPost),
       total: res.data.total,
@@ -72,6 +71,9 @@ export const postsApi = {
 
   /* =========================
      CREATE POST
+     Backend automatically broadcasts to subscribers
+     via Celery when is_published=true. No separate
+     notify call needed from the frontend.
   ========================= */
 
   async create(data: PostCreate) {
@@ -81,13 +83,12 @@ export const postsApi = {
 
   /* =========================
      UPDATE POST
+     Backend broadcasts when a draft transitions
+     to published (was_published=false → true).
   ========================= */
 
   async update(id: number, data: PostUpdate) {
-    const res = await api.put<Post>(
-      `/admin/posts/${id}`,
-      data
-    );
+    const res = await api.put<Post>(`/admin/posts/${id}`, data);
     return transformPost(res.data);
   },
 
@@ -100,14 +101,13 @@ export const postsApi = {
   },
 
   /* =========================
-     PUBLIC POSTS
+     PUBLIC - LIST PUBLISHED
   ========================= */
 
   async getPublished(page = 1, pageSize = 12) {
     const res = await api.get<PaginatedPosts>(
       `/posts?page=${page}&page_size=${pageSize}`
     );
-
     return {
       items: res.data.items.map(transformPost),
       total: res.data.total,
@@ -120,7 +120,7 @@ export const postsApi = {
   },
 
   /* =========================
-     GET BY SLUG
+     PUBLIC - GET BY SLUG
   ========================= */
 
   async getBySlug(slug: string) {

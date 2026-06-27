@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # APP
     # =========================================================
 
-    PROJECT_NAME: str = "obed.ai"
+    PROJECT_NAME: str = "thehatbuddy"
 
     ENVIRONMENT: str = "development"
 
