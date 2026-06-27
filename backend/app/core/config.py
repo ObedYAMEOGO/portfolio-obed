@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # APP
     # =========================================================
 
-    PROJECT_NAME: str = "thehatbuddy"
+    PROJECT_NAME: str = "TheHatBuddy"
 
     ENVIRONMENT: str = "development"
 
