@@ -37,6 +37,9 @@ def get_base_url() -> str:
 # =========================================================
 # UNSUBSCRIBE URLS
 # =========================================================
+# NOTE: left unchanged from the original — the 404 you're seeing is a
+# frontend routing / FRONTEND_URL config issue, not something in this
+# module. See chat notes for how to confirm and fix it.
 
 
 def blog_unsubscribe_url(
@@ -68,16 +71,18 @@ FONT = (
     "'Segoe UI', Helvetica, Arial, sans-serif;"
 )
 
-# Bold / modern palette. One confident accent (signal orange)
-# against deep ink, used sparingly against clean neutrals.
-COLOR_INK = "#0f1115"
-COLOR_TEXT = "#16181d"
-COLOR_MUTED = "#5b6068"
-COLOR_BORDER = "#e7e8ec"
-COLOR_BG = "#f6f6f8"
-COLOR_ACCENT = "#ff5a1f"
-COLOR_ACCENT_DARK = "#e44e16"
-COLOR_ACCENT_SOFT = "#fff1ea"
+# AI-themed palette: deep space-navy ink, electric violet/cyan accent
+# gradient feel (single solid accent for email-client safety), cool
+# neutral grays. Reads as "machine intelligence" rather than warm/human.
+COLOR_INK = "#0b0f1a"
+COLOR_TEXT = "#10131c"
+COLOR_MUTED = "#5a6175"
+COLOR_BORDER = "#e6e8f0"
+COLOR_BG = "#f5f6fb"
+COLOR_ACCENT = "#6d5bf3"
+COLOR_ACCENT_DARK = "#5340e0"
+COLOR_ACCENT_SOFT = "#efebff"
+COLOR_ACCENT_CYAN = "#22d3ee"
 
 # =========================================================
 # BASE EMAIL WRAPPER
@@ -108,7 +113,7 @@ def base_wrapper(
                 border-radius:16px;
                 border:1px solid {COLOR_BORDER};
                 overflow:hidden;
-                box-shadow:0 1px 3px rgba(15,17,21,0.04);
+                box-shadow:0 1px 3px rgba(11,15,26,0.04);
               "
             >
 
@@ -131,7 +136,7 @@ def base_wrapper(
                         ">
                           {BRAND_NAME}
                           <span style="
-                            color:{COLOR_ACCENT};
+                            color:{COLOR_ACCENT_CYAN};
                             font-weight:700;
                           ">
                             · {BRAND_NICKNAME}
@@ -140,7 +145,7 @@ def base_wrapper(
 
                         <p style="
                           margin:4px 0 0;
-                          color:#9a9da3;
+                          color:#9296a8;
                           font-size:11px;
                         ">
                           {BRAND_TAGLINE}
