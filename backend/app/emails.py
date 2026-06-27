@@ -1,5 +1,6 @@
 import html
 import logging
+import time
 from typing import List, Optional
 from urllib.parse import quote
 
@@ -14,6 +15,16 @@ from app.core.config import settings
 resend.api_key = settings.RESEND_API_KEY
 
 logger = logging.getLogger(__name__)
+
+# =========================================================
+# RATE LIMITING
+# =========================================================
+# Resend allows 10 requests/second. Send in batches of
+# BATCH_SIZE, then pause BATCH_PAUSE_SECONDS before the
+# next batch, to stay safely under that limit.
+
+BATCH_SIZE = 8
+BATCH_PAUSE_SECONDS = 1.0
 
 # =========================================================
 # BRAND
@@ -37,29 +48,42 @@ def get_base_url() -> str:
 # =========================================================
 # UNSUBSCRIBE URLS
 # =========================================================
-# NOTE: left unchanged from the original — the 404 you're seeing is a
-# frontend routing / FRONTEND_URL config issue, not something in this
-# module. See chat notes for how to confirm and fix it.
+# TEMPORARILY DISABLED — unsubscribe routing/logic needs to be revisited.
+# Original implementation kept below, commented out, so it can be
+# restored once the right approach is decided.
+#
+# def blog_unsubscribe_url(
+#     email: str,
+# ) -> str:
+#     return (
+#         f"{get_base_url()}"
+#         f"/unsubscribe/blog"
+#         f"?email={quote(email)}"
+#     )
+#
+#
+# def platform_unsubscribe_url(
+#     email: str,
+# ) -> str:
+#     return (
+#         f"{get_base_url()}"
+#         f"/unsubscribe/platform"
+#         f"?email={quote(email)}"
+#     )
 
 
 def blog_unsubscribe_url(
     email: str,
 ) -> str:
-    return (
-        f"{get_base_url()}"
-        f"/unsubscribe/blog"
-        f"?email={quote(email)}"
-    )
+    # PLACEHOLDER while unsubscribe logic is being redesigned.
+    return "#"
 
 
 def platform_unsubscribe_url(
     email: str,
 ) -> str:
-    return (
-        f"{get_base_url()}"
-        f"/unsubscribe/platform"
-        f"?email={quote(email)}"
-    )
+    # PLACEHOLDER while unsubscribe logic is being redesigned.
+    return "#"
 
 
 # =========================================================
@@ -181,6 +205,10 @@ def base_wrapper(
                     </a>
                   </p>
 
+                  <!--
+                  UNSUBSCRIBE TEMPORARILY HIDDEN — restore this block
+                  once unsubscribe logic is finalized.
+
                   <p style="
                     margin:12px 0 0;
                     font-size:11px;
@@ -195,6 +223,7 @@ def base_wrapper(
                       {unsubscribe_text}
                     </a>
                   </p>
+                  -->
 
                 </td>
               </tr>
@@ -269,7 +298,16 @@ def eyebrow(
 # =========================================================
 
 
-def send_email(payload: dict):
+def send_email(payload: dict) -> bool:
+    """
+    Sends a single email via Resend.
+
+    Returns True on success, False on failure. Failures are logged
+    with full context (including which recipient failed) so broadcast
+    loops can report accurate counts instead of assuming success.
+    """
+    to_field = payload.get("to")
+
     try:
         if not settings.EMAIL_FROM:
             logger.error("EMAIL_FROM is not configured")
@@ -278,9 +316,11 @@ def send_email(payload: dict):
         # Ensure 'from' field is a valid email string, stripping whitespace
         payload["from"] = str(settings.EMAIL_FROM).strip()
         resend.Emails.send(payload)
+        return True
 
     except Exception as e:
-        logger.exception(f"Failed sending email: {e}")
+        logger.exception(f"Failed sending email to {to_field}: {e}")
+        return False
 
 
 # =========================================================
@@ -466,7 +506,15 @@ def broadcast_new_post(
         or "A new AI engineering article has just been published."
     )
 
-    for email in subscriber_emails:
+    sent_count = 0
+    failed_emails: List[str] = []
+
+    for index, email in enumerate(subscriber_emails):
+
+        # Throttle: pause after every BATCH_SIZE sends to stay under
+        # Resend's 10 requests/second rate limit.
+        if index > 0 and index % BATCH_SIZE == 0:
+            time.sleep(BATCH_PAUSE_SECONDS)
 
         content = f"""
         <tr>
@@ -500,7 +548,7 @@ def broadcast_new_post(
         </tr>
         """
 
-        send_email(
+        ok = send_email(
             {
                 "to": [email],
                 "subject": f"New on TheHatBuddy: {post_title}",
@@ -510,6 +558,21 @@ def broadcast_new_post(
                     "Unsubscribe from blog emails",
                 ),
             }
+        )
+
+        if ok:
+            sent_count += 1
+        else:
+            failed_emails.append(email)
+
+    if failed_emails:
+        logger.warning(
+            f"broadcast_new_post: {sent_count}/{len(subscriber_emails)} sent. "
+            f"Failed for: {failed_emails}"
+        )
+    else:
+        logger.info(
+            f"broadcast_new_post: {sent_count}/{len(subscriber_emails)} sent successfully."
         )
 
 
@@ -532,7 +595,13 @@ def broadcast_new_project(
         or "A new AI project has been published."
     )
 
-    for email in subscriber_emails:
+    sent_count = 0
+    failed_emails: List[str] = []
+
+    for index, email in enumerate(subscriber_emails):
+
+        if index > 0 and index % BATCH_SIZE == 0:
+            time.sleep(BATCH_PAUSE_SECONDS)
 
         content = f"""
         <tr>
@@ -566,7 +635,7 @@ def broadcast_new_project(
         </tr>
         """
 
-        send_email(
+        ok = send_email(
             {
                 "to": [email],
                 "subject": f"New project on TheHatBuddy: {project_title}",
@@ -576,6 +645,21 @@ def broadcast_new_project(
                     "Disable platform notifications",
                 ),
             }
+        )
+
+        if ok:
+            sent_count += 1
+        else:
+            failed_emails.append(email)
+
+    if failed_emails:
+        logger.warning(
+            f"broadcast_new_project: {sent_count}/{len(subscriber_emails)} sent. "
+            f"Failed for: {failed_emails}"
+        )
+    else:
+        logger.info(
+            f"broadcast_new_project: {sent_count}/{len(subscriber_emails)} sent successfully."
         )
 
 
@@ -598,7 +682,13 @@ def broadcast_new_material(
         or "A new learning resource has been added."
     )
 
-    for email in subscriber_emails:
+    sent_count = 0
+    failed_emails: List[str] = []
+
+    for index, email in enumerate(subscriber_emails):
+
+        if index > 0 and index % BATCH_SIZE == 0:
+            time.sleep(BATCH_PAUSE_SECONDS)
 
         content = f"""
         <tr>
@@ -632,7 +722,7 @@ def broadcast_new_material(
         </tr>
         """
 
-        send_email(
+        ok = send_email(
             {
                 "to": [email],
                 "subject": f"New resource on TheHatBuddy: {material_title}",
@@ -642,4 +732,19 @@ def broadcast_new_material(
                     "Disable platform notifications",
                 ),
             }
+        )
+
+        if ok:
+            sent_count += 1
+        else:
+            failed_emails.append(email)
+
+    if failed_emails:
+        logger.warning(
+            f"broadcast_new_material: {sent_count}/{len(subscriber_emails)} sent. "
+            f"Failed for: {failed_emails}"
+        )
+    else:
+        logger.info(
+            f"broadcast_new_material: {sent_count}/{len(subscriber_emails)} sent successfully."
         )

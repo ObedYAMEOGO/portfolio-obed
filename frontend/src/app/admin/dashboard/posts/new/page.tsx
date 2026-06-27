@@ -573,8 +573,6 @@ export default function NewPostPage() {
                 </span>
               </label>
 
-              {/* FIX: removed broken unwired checkbox — backend handles
-                  notifications automatically via Celery when is_published=true */}
               {formData.is_published && (
                 <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-green-600">
                   <Bell className="h-3 w-3" />
