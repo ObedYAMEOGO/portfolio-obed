@@ -16,7 +16,7 @@ const socialLinks = [
 const navLinks = [
   { label: "Projects",  href: "/projects" },
   { label: "Blog",      href: "/blog" },
-  { label: "Courses",   href: "/courses" },
+  { label: "Materials",   href: "/courses" },
   { label: "Let's Connect",   href: "/contact" },
 ];
 
