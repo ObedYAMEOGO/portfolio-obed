@@ -301,7 +301,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 {post.author_name || "Obed Yameogo"}
               </h3>
               <p className="text-sm text-neutral-500">
-                ML Engineer · PhD Scholar in AI
+                ML Engineer · PhD Scholar
               </p>
             </div>
           </div>
