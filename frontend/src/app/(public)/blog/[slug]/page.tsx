@@ -24,7 +24,7 @@ if (!API_URL) {
   throw new Error("INTERNAL_API_URL is missing");
 }
 
-export const revalidate = 3600;
+export const revalidate = false;
 
 /* =========================================================
    STATIC PARAMS

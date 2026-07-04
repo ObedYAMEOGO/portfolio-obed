@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import BlogFeed from "@/components/blog/BlogFeed";
 import type { Post } from "@/types";
 
-export const revalidate = 3600;
+export const revalidate = false;
 
 const API_URL = process.env.INTERNAL_API_URL;
 

@@ -36,6 +36,8 @@ from app.core.security import (
     verify_admin,
 )
 
+from app.utils.revalidation import trigger_frontend_revalidation
+
 router = APIRouter(
     prefix="/admin/materials",
     tags=["Admin Materials"],
@@ -123,6 +125,9 @@ async def create_material(
 
     await db.refresh(db_material)
 
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("materials", db_material.slug)
+
     # =========================================================
     # SEND NOTIFICATION TO USERS
     # =========================================================
@@ -148,7 +153,7 @@ async def create_material(
                     db_material.description
                     or "New learning material available."
                 ),
-                # material_slug removed — courses link to /courses
+                material_slug=db_material.slug,
             )
 
     return db_material
@@ -186,6 +191,8 @@ async def update_material(
         material.is_published
     )
 
+    old_slug = material.slug
+
     update_data = (
         payload.model_dump()
     )
@@ -198,6 +205,11 @@ async def update_material(
     await db.commit()
 
     await db.refresh(material)
+
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("materials", material.slug)
+    if material.slug != old_slug:
+        await trigger_frontend_revalidation("materials", old_slug)
 
     # =========================================================
     # SEND ONLY IF:
@@ -228,7 +240,7 @@ async def update_material(
                     material.description
                     or "New learning material available."
                 ),
-                # material_slug removed — courses link to /courses
+                material_slug=material.slug,
             )
 
     return material
@@ -257,9 +269,13 @@ async def delete_material(
             detail="Material not found.",
         )
 
+    material_slug = material.slug
     await db.delete(material)
 
     await db.commit()
+
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("materials", material_slug)
 
     return {
         "success": True,

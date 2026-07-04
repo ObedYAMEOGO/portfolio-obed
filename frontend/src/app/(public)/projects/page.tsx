@@ -3,7 +3,7 @@
 import { Project } from "@/types";
 import ProjectsClient from "@/components/projects/ProjectsClient";
 
-export const revalidate = 3600;
+export const revalidate = false;
 
 const API_URL = process.env.INTERNAL_API_URL;
 

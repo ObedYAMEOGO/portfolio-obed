@@ -24,6 +24,7 @@ from app.schemas import (
 )
 from app.tasks import broadcast_new_post_task
 from app.utils.reading_time import calculate_reading_time
+from app.utils.revalidation import trigger_frontend_revalidation
 
 router = APIRouter(
     prefix="/admin/posts",
@@ -83,8 +84,6 @@ async def get_post(
     return PostResponse.model_validate(post)
 
 
-from datetime import datetime
-
 @router.post("", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
 async def create_post(
     post: PostCreate,
@@ -103,6 +102,9 @@ async def create_post(
         post.published_at = post.published_at.replace(tzinfo=None)
 
     new_post = await PostRepository.create(db, post)
+
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("posts", new_post.slug)
 
     if new_post.is_published:
         subscribers = await SubscriberRepository.get_active(db)
@@ -132,6 +134,7 @@ async def update_post(
         raise HTTPException(status_code=404, detail="Post not found.")
 
     was_published = post.is_published
+    old_slug = post.slug
 
     if updated_post.featured:
         featured_query = select(Post).where(
@@ -159,6 +162,11 @@ async def update_post(
     await db.commit()
     await db.refresh(post)
 
+    # Trigger frontend revalidation for both old and new slug (in case slug changed)
+    await trigger_frontend_revalidation("posts", post.slug)
+    if post.slug != old_slug:
+        await trigger_frontend_revalidation("posts", old_slug)
+
     if not was_published and post.is_published:
         subscribers = await SubscriberRepository.get_active(db)
         emails = [s.email for s in subscribers]
@@ -185,5 +193,9 @@ async def delete_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found.")
 
+    post_slug = post.slug
     await db.delete(post)
     await db.commit()
+
+    # Trigger frontend revalidation to remove from listing
+    await trigger_frontend_revalidation("posts", post_slug)

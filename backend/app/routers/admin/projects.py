@@ -33,6 +33,8 @@ from app.core.security import (
     verify_admin,
 )
 
+from app.utils.revalidation import trigger_frontend_revalidation
+
 # =========================================================
 # CELERY TASKS
 # =========================================================
@@ -119,6 +121,9 @@ async def create_project(
         )
     )
 
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("projects", created_project.slug)
+
     # =====================================================
     # SEND EMAIL IF PUBLISHED
     # =====================================================
@@ -149,7 +154,7 @@ async def create_project(
                     created_project.description
                     or ""
                 ),
-                # project_slug removed — projects link to /projects
+                project_slug=created_project.slug,
             )
 
     return created_project
@@ -187,6 +192,8 @@ async def update_project(
         project.is_published
     )
 
+    old_slug = project.slug
+
     update_data = (
         payload.model_dump()
     )
@@ -199,6 +206,11 @@ async def update_project(
     await db.commit()
 
     await db.refresh(project)
+
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("projects", project.slug)
+    if project.slug != old_slug:
+        await trigger_frontend_revalidation("projects", old_slug)
 
     # =====================================================
     # SEND EMAIL ONLY WHEN:
@@ -234,7 +246,7 @@ async def update_project(
                     project.description
                     or ""
                 ),
-                # project_slug removed — projects link to /projects
+                project_slug=project.slug,
             )
 
     return project
@@ -267,9 +279,13 @@ async def delete_project(
             detail="Project not found.",
         )
 
+    project_slug = project.slug
     await db.delete(project)
 
     await db.commit()
+
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("projects", project_slug)
 
     return {
         "success": True,
