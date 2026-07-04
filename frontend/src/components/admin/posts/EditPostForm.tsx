@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -69,6 +70,7 @@ interface EditPostFormProps {
 
 export default function EditPostForm({ post }: EditPostFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   
   // UI State
   const [isPreview, setIsPreview] = useState(false);
@@ -226,6 +228,7 @@ export default function EditPostForm({ post }: EditPostFormProps) {
       };
 
       await postsApi.update(post.id, updateData);
+      await queryClient.invalidateQueries({ queryKey: ["posts"] });
       toast.success("Post updated successfully.");
       router.push("/admin/dashboard/posts");
       router.refresh();
@@ -235,7 +238,7 @@ export default function EditPostForm({ post }: EditPostFormProps) {
     } finally {
       setLoading(false);
     }
-  }, [formData, post.id, router]);
+  }, [formData, post.id, router, queryClient]);
 
   // Get the final slug value
   const finalSlug = useMemo(() => {
