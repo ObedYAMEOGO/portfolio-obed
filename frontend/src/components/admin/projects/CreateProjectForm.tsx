@@ -3,6 +3,7 @@
 
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Upload, X } from "lucide-react";
 import api from "@/lib/api";
 
@@ -16,6 +17,7 @@ function toSlug(value: string): string {
 
 export default function CreateProjectForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [techInput, setTechInput] = useState("");
@@ -142,6 +144,7 @@ export default function CreateProjectForm() {
     try {
       setLoading(true);
       await api.post("/admin/projects", formData);
+      await queryClient.invalidateQueries({ queryKey: ["projects"] });
       router.push("/admin/dashboard/projects");
       router.refresh();
     } catch (err) {

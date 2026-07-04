@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Edit, Trash2, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { postsApi } from "@/lib/api/posts";
 import type { Post } from "@/types";
 
@@ -14,6 +15,7 @@ interface PostsTableProps {
 
 export default function PostsTable({ page = 1 }: PostsTableProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
@@ -21,11 +23,7 @@ export default function PostsTable({ page = 1 }: PostsTableProps) {
 
   const pageSize = 10;
 
-  useEffect(() => {
-    fetchPosts();
-  }, [page]);
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
       const data = await postsApi.getAll(page, pageSize);
@@ -38,17 +36,22 @@ export default function PostsTable({ page = 1 }: PostsTableProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   const deletePost = async (id: number) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
-    
+
     try {
       await postsApi.delete(id);
       toast.success("Post deleted successfully");
+      await queryClient.invalidateQueries({ queryKey: ["posts"] });
       fetchPosts();
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete post");
     }
   };
