@@ -1,5 +1,5 @@
 import os
-import httpx
+import httpx # type: ignore
 import logging
 
 logger = logging.getLogger(__name__)
