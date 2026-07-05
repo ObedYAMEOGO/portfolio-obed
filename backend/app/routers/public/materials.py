@@ -56,6 +56,6 @@ async def list_learning_materials(
 
     response.headers[
         "Cache-Control"
-    ] = "public, max-age=3600"
+    ] = "public, max-age=0, must-revalidate"
 
     return response

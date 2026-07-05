@@ -126,7 +126,7 @@ async def list_published_posts(
 
     response.headers[
         "Cache-Control"
-    ] = "public, max-age=1800"
+    ] = "public, max-age=0, must-revalidate"
 
     return response
 
@@ -172,6 +172,6 @@ async def get_post_details(
 
     response.headers[
         "Cache-Control"
-    ] = "public, max-age=3600"
+    ] = "public, max-age=0, must-revalidate"
 
     return response

@@ -50,6 +50,6 @@ async def list_projects(
 
     response.headers[
         "Cache-Control"
-    ] = "public, max-age=3600"
+    ] = "public, max-age=0, must-revalidate"
 
     return response
