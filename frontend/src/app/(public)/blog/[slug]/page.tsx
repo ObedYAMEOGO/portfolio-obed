@@ -112,7 +112,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   const markdownComponents: Components = {
     h1: ({ children }) => (
-      <h1 className="mt-12 mb-6 text-4xl font-bold text-neutral-900 md:text-5xl">
+      <h1 className="mt-10 mb-4 text-3xl font-bold text-neutral-900">
         {children}
       </h1>
     ),
@@ -126,7 +126,7 @@ export default async function PostPage({ params }: PostPageProps) {
       return (
         <h2
           id={id}
-          className="mt-12 mb-4 border-b border-neutral-200 pb-2 text-3xl font-semibold text-neutral-800"
+          className="mt-10 mb-3 text-2xl font-semibold text-neutral-800"
         >
           {children}
         </h2>
@@ -134,19 +134,19 @@ export default async function PostPage({ params }: PostPageProps) {
     },
 
     h3: ({ children }) => (
-      <h3 className="mt-8 mb-3 text-2xl font-semibold text-neutral-800">
+      <h3 className="mt-8 mb-2 text-xl font-semibold text-neutral-800">
         {children}
       </h3>
     ),
 
     h4: ({ children }) => (
-      <h4 className="mt-6 mb-2 text-xl font-semibold text-neutral-800">
+      <h4 className="mt-6 mb-2 text-lg font-semibold text-neutral-800">
         {children}
       </h4>
     ),
 
     p: ({ children }) => (
-      <p className="mb-6 text-[16px] leading-[1.8] text-neutral-700">
+      <p className="mb-5 text-base leading-relaxed text-neutral-700">
         {children}
       </p>
     ),
@@ -163,19 +163,19 @@ export default async function PostPage({ params }: PostPageProps) {
     ),
 
     ul: ({ children }) => (
-      <ul className="mb-6 list-disc pl-6 text-neutral-700">{children}</ul>
+      <ul className="mb-5 list-disc pl-6 text-neutral-700">{children}</ul>
     ),
 
     ol: ({ children }) => (
-      <ol className="mb-6 list-decimal pl-6 text-neutral-700">{children}</ol>
+      <ol className="mb-5 list-decimal pl-6 text-neutral-700">{children}</ol>
     ),
 
     li: ({ children }) => (
-      <li className="mb-2 text-[16px] leading-[1.8]">{children}</li>
+      <li className="mb-1.5 text-base leading-relaxed">{children}</li>
     ),
 
     blockquote: ({ children }) => (
-      <blockquote className="mb-6 border-l-4 border-neutral-300 pl-5 italic text-neutral-600">
+      <blockquote className="mb-5 border-l-4 border-neutral-300 pl-5 italic text-neutral-600">
         {children}
       </blockquote>
     ),
@@ -197,7 +197,7 @@ export default async function PostPage({ params }: PostPageProps) {
     },
 
     pre: ({ children }) => (
-      <pre className="mb-6 overflow-x-auto rounded-lg bg-neutral-900 p-4">
+      <pre className="mb-5 overflow-x-auto rounded-lg bg-neutral-900 p-4">
         {children}
       </pre>
     ),
@@ -207,7 +207,7 @@ export default async function PostPage({ params }: PostPageProps) {
       if (!imageSrc) return null;
 
       return (
-        <div className="relative my-8 aspect-video w-full overflow-hidden rounded-lg">
+        <div className="relative my-6 aspect-video w-full overflow-hidden rounded-lg">
           <Image
             src={imageSrc}
             alt={alt || ""}
@@ -284,7 +284,7 @@ export default async function PostPage({ params }: PostPageProps) {
         )}
 
         {/* CONTENT */}
-        <article className="prose max-w-none">
+        <article className="max-w-none">
           <ReactMarkdown components={markdownComponents}>
             {post.content}
           </ReactMarkdown>

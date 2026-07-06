@@ -8,6 +8,9 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
+// Admin pages are dynamic - don't pre-render
+export const dynamic = "force-dynamic";
+
 export default function LeadsPage() {
   return (
     <div className="min-h-screen bg-[#f5f5f5] pt-24">
