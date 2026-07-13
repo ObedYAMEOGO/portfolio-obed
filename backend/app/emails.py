@@ -30,9 +30,9 @@ BATCH_PAUSE_SECONDS = 1.0
 FULL_NAME = "Obed Yameogo"
 NICKNAME = "TheHatBuddy"
 BRAND_TAGLINE = "ML Engineer & Researcher"
-BRAND_EMAIL = "obed@thehatbuddy.co.in"
-BRAND_DOMAIN = "thehatbuddy.co.in"
-BRAND_URL = "https://www.thehatbuddy.co.in"
+BRAND_EMAIL = "obed@thehatbuddyai.space"
+BRAND_DOMAIN = "thehatbuddyai.space"
+BRAND_URL = "https://www.thehatbuddyai.space"
 
 # =========================================================
 # UNSUBSCRIBE URLS
