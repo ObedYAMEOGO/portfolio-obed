@@ -32,8 +32,6 @@ import CommentsTable from "@/components/admin/comments/CommentsTable";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_EMAIL = "obed@thehatbuddyai.space";
-
 export default async function AdminDashboardPage({
   searchParams,
 }: {
@@ -45,7 +43,12 @@ export default async function AdminDashboardPage({
   const user = await currentUser();
   const email = user?.primaryEmailAddress?.emailAddress;
 
-  if (email !== ADMIN_EMAIL) redirect("/");
+  // Read from env — set ADMIN_EMAIL in Vercel environment variables.
+  // No NEXT_PUBLIC_ prefix needed: this is a server component, so the
+  // value never reaches the client bundle.
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (!email || !adminEmail || email !== adminEmail) redirect("/");
 
   let stats: DashboardStats = {
     total_projects: 0,
