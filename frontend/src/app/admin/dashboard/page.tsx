@@ -43,9 +43,6 @@ export default async function AdminDashboardPage({
   const user = await currentUser();
   const email = user?.primaryEmailAddress?.emailAddress;
 
-  // Read from env — set ADMIN_EMAIL in Vercel environment variables.
-  // No NEXT_PUBLIC_ prefix needed: this is a server component, so the
-  // value never reaches the client bundle.
   const adminEmail = process.env.ADMIN_EMAIL;
 
   if (!email || !adminEmail || email !== adminEmail) redirect("/");
