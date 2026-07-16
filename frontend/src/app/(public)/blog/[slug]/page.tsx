@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { notFound } from "next/navigation";
+import remarkGfm from "remark-gfm";
 
 import type { Components } from "react-markdown";
 
@@ -261,6 +262,45 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
       );
     },
+
+    // Add GFM-specific components if needed
+    table: ({ children }) => (
+      <div className="mb-5 overflow-x-auto">
+        <table className="min-w-full border-collapse border border-neutral-200 text-sm">
+          {children}
+        </table>
+      </div>
+    ),
+
+    th: ({ children }) => (
+      <th className="border border-neutral-200 bg-neutral-50 px-4 py-2 text-left font-semibold">
+        {children}
+      </th>
+    ),
+
+    td: ({ children }) => (
+      <td className="border border-neutral-200 px-4 py-2">
+        {children}
+      </td>
+    ),
+
+    input: ({ type, checked }) => {
+      if (type === "checkbox") {
+        return (
+          <input
+            type="checkbox"
+            checked={checked}
+            disabled
+            className="mr-2 h-4 w-4 accent-blue-600"
+          />
+        );
+      }
+      return null;
+    },
+
+    del: ({ children }) => (
+      <del className="text-neutral-500">{children}</del>
+    ),
   };
 
   return (
@@ -328,11 +368,16 @@ export default async function PostPage({ params }: PostPageProps) {
 
         {/* CONTENT */}
         <article className="max-w-none">
-          <ReactMarkdown components={markdownComponents}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={markdownComponents}
+          >
             {post.content}
           </ReactMarkdown>
         </article>
+
         <PostReactions slug={post.slug} />
+
         {/* AUTHOR & SHARE */}
         <div className="mt-20 flex flex-col items-start justify-between gap-6 border-t pt-10 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
