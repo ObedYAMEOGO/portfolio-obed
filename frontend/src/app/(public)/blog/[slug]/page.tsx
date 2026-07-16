@@ -163,7 +163,7 @@ export default async function PostPage({ params }: PostPageProps) {
       const isEmail = href.startsWith("mailto:");
       const isPhone = href.startsWith("tel:");
 
-      const linkClass = "text-neutral-900 underline decoration-neutral-300 hover:decoration-neutral-900 transition-colors";
+      const linkClass = "text-blue-600 underline hover:text-blue-800 transition-colors cursor-pointer";
 
       // Email or phone link
       if (isEmail || isPhone) {
