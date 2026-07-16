@@ -3,6 +3,7 @@
 import {
   useMemo,
   useState,
+  useEffect,
 } from "react";
 
 import { useQuery } from "@tanstack/react-query";
@@ -25,21 +26,30 @@ export default function CoursesClient() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Use React Query for caching
+  // Use React Query for caching with aggressive caching strategy
   const { 
     data: materials = [], 
     isLoading: loading,
     error: queryError,
+    isFetching,
   } = useQuery({
     queryKey: ["courses"],
     queryFn: () => materialsApi.getPublicCourses(),
-    staleTime: 5 * 60 * 1000, // 5 minutes - data becomes stale after 5 min
-    gcTime: 10 * 60 * 1000,   // 10 minutes - keep in cache for 10 min
+    staleTime: 5 * 60 * 1000,        // 5 minutes - data becomes stale after 5 min
+    gcTime: 30 * 60 * 1000,          // 30 minutes - keep in cache for 30 min (increased from 10)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+    retry: 2,                        // Retry failed requests twice
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
+
+  // Hydration guard
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const categories = useMemo(
     () => [
@@ -93,7 +103,7 @@ export default function CoursesClient() {
   }, [filteredMaterials, safePage]);
 
   // Error state
-  if (queryError) {
+  if (queryError && !materials.length) {
     const errorMessage = queryError instanceof Error ? queryError.message : "Failed to load courses. Please try again later.";
     
     return (
@@ -136,6 +146,9 @@ export default function CoursesClient() {
     );
   }
 
+  // Only show loading on first load, not on refetch
+  const showLoading = loading && !isHydrated;
+
   return (
     <CoursesLayout
       sidebar={
@@ -155,11 +168,12 @@ export default function CoursesClient() {
       }
       content={
         <CoursesContent
-          loading={loading && materials.length === 0} // Only show loading on first load
+          loading={showLoading}
           materials={paginatedMaterials}
           currentPage={currentPage}
           totalPages={totalPages}
           setCurrentPage={setCurrentPage}
+          isFetching={isFetching}
         />
       }
     />

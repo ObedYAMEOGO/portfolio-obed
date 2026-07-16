@@ -181,6 +181,10 @@ export async function getLeads() {
    MATERIALS
 ========================================================= */
 
+export async function getPublicMaterials() {
+  return get<Material[]>("/materials", 300);
+}
+
 export async function getMaterials() {
   return get<Material[]>("/admin/materials");
 }

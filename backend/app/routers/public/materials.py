@@ -54,8 +54,10 @@ async def list_learning_materials(
         ]
     )
 
+    # Cache publicly for 5 minutes (300 seconds)
+    # max-age: browser cache, s-maxage: CDN/proxy cache
     response.headers[
         "Cache-Control"
-    ] = "public, max-age=0, must-revalidate"
+    ] = "public, max-age=300, s-maxage=300"
 
     return response

@@ -10,6 +10,7 @@ interface CoursesContentProps {
   currentPage: number;
   totalPages: number;
   setCurrentPage: (page: number) => void;
+  isFetching?: boolean;
 }
 
 export default function CoursesContent({
@@ -18,11 +19,12 @@ export default function CoursesContent({
   currentPage,
   totalPages,
   setCurrentPage,
+  isFetching = false,
 }: CoursesContentProps) {
   return (
     <section className="w-full overflow-x-hidden overflow-y-hidden">
       <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
-        {/* Show skeletons only on initial load */}
+        {/* Show skeletons only on initial load, not on refetch */}
         {loading && materials.length === 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
@@ -85,6 +87,13 @@ export default function CoursesContent({
           </div>
         ) : (
           <>
+            {/* Show subtle loading indicator during refetch */}
+            {isFetching && (
+              <div className="mb-4 flex items-center gap-2 text-sm text-neutral-500">
+                <div className="h-2 w-2 rounded-full bg-neutral-400 animate-pulse" />
+                Updating materials...
+              </div>
+            )}
             <CoursesGrid loading={loading} materials={materials} />
             {totalPages > 1 && (
               <div className="mt-14">

@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (type === "materials" || type === "all") {
+      revalidatePath("/");  // Revalidate homepage
       revalidatePath("/courses");
     }
 
