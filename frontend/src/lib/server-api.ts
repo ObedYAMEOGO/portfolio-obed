@@ -116,7 +116,7 @@ function del(endpoint: string) {
 ========================================================= */
 
 export async function getProjects() {
-  return get<Project[]>("/projects", 3600);
+  return get<Project[]>("/projects", 300);
 }
 
 /* =========================================================

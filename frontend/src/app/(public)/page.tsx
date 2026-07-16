@@ -20,7 +20,7 @@ import { getProjects } from "@/lib/server-api";
 /* GORDON: Import server-only settings API instead of client API */
 import { getSettingsServer } from "@/lib/api/settings-server";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 // Projects created within this many days are labelled "New".
 // Keep in sync with the same constant in ProjectsClient.tsx.

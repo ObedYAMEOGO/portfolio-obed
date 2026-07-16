@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (type === "projects" || type === "all") {
+      revalidatePath("/");  // Revalidate homepage
       revalidatePath("/projects");
       revalidatePath("/projects/[slug]", "page");
       if (slug) {
