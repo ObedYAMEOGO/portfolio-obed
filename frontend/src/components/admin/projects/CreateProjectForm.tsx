@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Upload, X } from "lucide-react";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 function toSlug(value: string): string {
   return value
@@ -22,7 +23,7 @@ export default function CreateProjectForm() {
   const [uploading, setUploading] = useState(false);
   const [techInput, setTechInput] = useState("");
 
-  const [formData, setFormData] = useState({
+  const INITIAL_FORM_STATE = {
     title:        "",
     slug:         "",
     description:  "",
@@ -32,7 +33,9 @@ export default function CreateProjectForm() {
     live_url:     "",
     image_url:    "",
     is_published: false,
-  });
+  };
+
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
 
   /* =========================================================
      HELPERS
@@ -79,9 +82,10 @@ export default function CreateProjectForm() {
       setUploading(true);
       const imageUrl = await uploadImage(file);
       setFormData((prev) => ({ ...prev, image_url: imageUrl }));
+      toast.success("Image uploaded successfully.");
     } catch (err) {
       console.error(err);
-      alert("Image upload failed.");
+      toast.error("Image upload failed.");
     } finally {
       setUploading(false);
     }
@@ -145,11 +149,21 @@ export default function CreateProjectForm() {
       setLoading(true);
       await api.post("/admin/projects", formData);
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
-      router.push("/admin/dashboard/projects");
-      router.refresh();
+      
+      // Reset form after successful creation
+      setFormData(INITIAL_FORM_STATE);
+      setTechInput("");
+      
+      toast.success("Project created successfully.");
+      
+      // Redirect after brief delay to show success
+      setTimeout(() => {
+        router.push("/admin/dashboard/projects");
+        router.refresh();
+      }, 500);
     } catch (err) {
       console.error(err);
-      alert("Failed to create project.");
+      toast.error("Failed to create project.");
     } finally {
       setLoading(false);
     }

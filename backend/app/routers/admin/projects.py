@@ -27,6 +27,7 @@ from app.schemas import (
 
 from app.crud import (
     ProjectRepository,
+    SubscriberRepository,
 )
 
 from app.core.security import (
@@ -129,33 +130,22 @@ async def create_project(
     # =====================================================
 
     if created_project.is_published:
+        try:
+            subscribers = await SubscriberRepository.get_active(db)
+            emails = [s.email for s in subscribers if s.email]
 
-        users_query = select(User).where(
-            User.receive_notifications == True
-        )
-
-        users_result = await db.execute(
-            users_query
-        )
-
-        users = users_result.scalars().all()
-
-        emails = [
-            user.email
-            for user in users
-            if user.email
-        ]
-
-        if emails:
-            broadcast_new_project_task.delay(
-                subscriber_emails=emails,
-                project_title=created_project.title,
-                project_description=(
-                    created_project.description
-                    or ""
-                ),
-                project_slug=created_project.slug,
-            )
+            if emails:
+                broadcast_new_project_task.delay(
+                    subscriber_emails=emails,
+                    project_title=created_project.title,
+                    project_description=(
+                        created_project.description or ""
+                    ),
+                )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to queue notification task: {e}")
 
     return created_project
 
@@ -221,33 +211,22 @@ async def update_project(
         not was_published
         and project.is_published
     ):
+        try:
+            subscribers = await SubscriberRepository.get_active(db)
+            emails = [s.email for s in subscribers if s.email]
 
-        users_query = select(User).where(
-            User.receive_notifications == True
-        )
-
-        users_result = await db.execute(
-            users_query
-        )
-
-        users = users_result.scalars().all()
-
-        emails = [
-            user.email
-            for user in users
-            if user.email
-        ]
-
-        if emails:
-            broadcast_new_project_task.delay(
-                subscriber_emails=emails,
-                project_title=project.title,
-                project_description=(
-                    project.description
-                    or ""
-                ),
-                project_slug=project.slug,
-            )
+            if emails:
+                broadcast_new_project_task.delay(
+                    subscriber_emails=emails,
+                    project_title=project.title,
+                    project_description=(
+                        project.description or ""
+                    ),
+                )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to queue notification task: {e}")
 
     return project
 

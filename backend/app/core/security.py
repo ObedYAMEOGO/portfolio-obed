@@ -89,7 +89,7 @@ def verify_clerk_token(token: str):
 
 async def get_current_user(
     authorization: str | None = Header(default=None),
-    x_admin_secret: str | None = Header(default=None),
+    x_admin_secret: str | None = Header(default=None, alias="x-admin-secret"),
     db: AsyncSession = Depends(get_db),
 ):
 
