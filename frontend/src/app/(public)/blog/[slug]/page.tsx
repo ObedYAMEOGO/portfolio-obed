@@ -151,16 +151,59 @@ export default async function PostPage({ params }: PostPageProps) {
       </p>
     ),
 
-    a: ({ href, children }) => (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-neutral-900 underline decoration-neutral-300 hover:decoration-neutral-900"
-      >
-        {children}
-      </a>
-    ),
+    a: ({ href, children }) => {
+      // Handle missing or invalid href
+      if (!href) {
+        return <span className="text-neutral-900">{children}</span>;
+      }
+
+      // Check link type
+      const isInternal = href.startsWith("/") && !href.startsWith("//");
+      const isAnchor = href.startsWith("#");
+      const isEmail = href.startsWith("mailto:");
+      const isPhone = href.startsWith("tel:");
+
+      const linkClass = "text-neutral-900 underline decoration-neutral-300 hover:decoration-neutral-900 transition-colors";
+
+      // Email or phone link
+      if (isEmail || isPhone) {
+        return (
+          <a href={href} className={linkClass}>
+            {children}
+          </a>
+        );
+      }
+
+      // Anchor link (table of contents, internal sections)
+      if (isAnchor) {
+        return (
+          <a href={href} className={linkClass}>
+            {children}
+          </a>
+        );
+      }
+
+      // Internal link using Next.js Link (don't open in new tab)
+      if (isInternal) {
+        return (
+          <Link href={href} className={linkClass}>
+            {children}
+          </Link>
+        );
+      }
+
+      // External link (open in new tab)
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={linkClass}
+        >
+          {children}
+        </a>
+      );
+    },
 
     ul: ({ children }) => (
       <ul className="mb-5 list-disc pl-6 text-neutral-700">{children}</ul>
