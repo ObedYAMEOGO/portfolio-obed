@@ -21,12 +21,8 @@ export default function CoursesContent({
   setCurrentPage,
   isFetching = false,
 }: CoursesContentProps) {
-  // Unified signal: true whenever ANY kind of fetch is in flight,
-  // regardless of whether the parent used `loading` or `isFetching`.
-  const isRefetching = loading || isFetching;
-
-  // Initial load: show skeleton (only when we have nothing to show yet)
-  if (loading && materials.length === 0) {
+  // ALWAYS show skeleton during initial load - don't show anything else
+  if (loading) {
     return (
       <section className="w-full overflow-x-hidden overflow-y-hidden">
         <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
@@ -65,11 +61,8 @@ export default function CoursesContent({
     );
   }
 
-  // Loaded but no materials: show empty state.
-  // Guarded with `!loading` so a brief loading=true (e.g. mid-filter-change,
-  // materials already cleared but new ones not in yet) doesn't flash
-  // "No courses found" before the real results arrive.
-  if (!loading && materials.length === 0) {
+  // After loading is done, if no materials show empty state
+  if (materials.length === 0) {
     return (
       <section className="w-full overflow-x-hidden overflow-y-hidden">
         <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
@@ -105,23 +98,20 @@ export default function CoursesContent({
     );
   }
 
-  // Has materials: show grid with a unified indicator for any background refetch
-  // (covers pagination, filter changes, or any other refetch path, whether the
-  // parent signals it via `loading` or `isFetching`).
+  // Materials loaded: show grid
   return (
     <section className="w-full overflow-x-hidden overflow-y-hidden">
       <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
-        {isRefetching && (
+        {/* Show subtle loading indicator during refetch */}
+        {isFetching && (
           <div className="mb-4 flex items-center gap-2 text-sm text-neutral-500">
             <div className="h-2 w-2 rounded-full bg-neutral-400 animate-pulse" />
             Updating materials...
           </div>
         )}
-
-        {/* We already have materials on screen at this point, so the grid
-            itself should render real content rather than its own skeleton. */}
+        
         <CoursesGrid loading={false} materials={materials} />
-
+        
         {totalPages > 1 && (
           <div className="mt-14">
             <CoursesPagination

@@ -3,7 +3,6 @@
 import {
   useMemo,
   useState,
-  useEffect,
 } from "react";
 
 import { useQuery } from "@tanstack/react-query";
@@ -26,30 +25,23 @@ export default function CoursesClient() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [isHydrated, setIsHydrated] = useState(false);
-
   // Use React Query for caching with aggressive caching strategy
   const { 
     data: materials = [], 
-    isLoading: loading,
+    isLoading,
     error: queryError,
     isFetching,
   } = useQuery({
     queryKey: ["courses"],
     queryFn: () => materialsApi.getPublicCourses(),
     staleTime: 5 * 60 * 1000,        // 5 minutes - data becomes stale after 5 min
-    gcTime: 30 * 60 * 1000,          // 30 minutes - keep in cache for 30 min (increased from 10)
+    gcTime: 30 * 60 * 1000,          // 30 minutes - keep in cache for 30 min
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: 2,                        // Retry failed requests twice
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
-
-  // Hydration guard
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   const categories = useMemo(
     () => [
@@ -102,7 +94,7 @@ export default function CoursesClient() {
     return filteredMaterials.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredMaterials, safePage]);
 
-  // Error state
+  // Error state - only show if we have an error AND no cached data
   if (queryError && !materials.length) {
     const errorMessage = queryError instanceof Error ? queryError.message : "Failed to load courses. Please try again later.";
     
@@ -146,9 +138,6 @@ export default function CoursesClient() {
     );
   }
 
-  // Only show loading on first load, not on refetch
-  const showLoading = loading && !isHydrated;
-
   return (
     <CoursesLayout
       sidebar={
@@ -168,7 +157,7 @@ export default function CoursesClient() {
       }
       content={
         <CoursesContent
-          loading={showLoading}
+          loading={isLoading}
           materials={paginatedMaterials}
           currentPage={currentPage}
           totalPages={totalPages}
