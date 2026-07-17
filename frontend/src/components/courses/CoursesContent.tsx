@@ -21,11 +21,11 @@ export default function CoursesContent({
   setCurrentPage,
   isFetching = false,
 }: CoursesContentProps) {
-  return (
-    <section className="w-full overflow-x-hidden overflow-y-hidden">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
-        {/* Show skeletons only on initial load, not on refetch */}
-        {loading && materials.length === 0 ? (
+  // Initial load: show skeleton
+  if (loading && materials.length === 0) {
+    return (
+      <section className="w-full overflow-x-hidden overflow-y-hidden">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="overflow-hidden rounded-xl bg-white shadow-sm border border-neutral-200 animate-pulse">
@@ -56,8 +56,16 @@ export default function CoursesContent({
               </div>
             ))}
           </div>
-        ) : materials.length === 0 ? (
-          /* Not Found State */
+        </div>
+      </section>
+    );
+  }
+
+  // Loaded but no materials: show empty state
+  if (materials.length === 0) {
+    return (
+      <section className="w-full overflow-x-hidden overflow-y-hidden">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
           <div className="flex min-h-100 items-center justify-center">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="rounded-full bg-gray-100 p-4">
@@ -85,26 +93,33 @@ export default function CoursesContent({
               </div>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Show subtle loading indicator during refetch */}
-            {isFetching && (
-              <div className="mb-4 flex items-center gap-2 text-sm text-neutral-500">
-                <div className="h-2 w-2 rounded-full bg-neutral-400 animate-pulse" />
-                Updating materials...
-              </div>
-            )}
-            <CoursesGrid loading={loading} materials={materials} />
-            {totalPages > 1 && (
-              <div className="mt-14">
-                <CoursesPagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  setCurrentPage={setCurrentPage}
-                />
-              </div>
-            )}
-          </>
+        </div>
+      </section>
+    );
+  }
+
+  // Has materials: show grid with optional loading indicator
+  return (
+    <section className="w-full overflow-x-hidden overflow-y-hidden">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
+        {/* Show subtle loading indicator during refetch */}
+        {isFetching && (
+          <div className="mb-4 flex items-center gap-2 text-sm text-neutral-500">
+            <div className="h-2 w-2 rounded-full bg-neutral-400 animate-pulse" />
+            Updating materials...
+          </div>
+        )}
+        
+        <CoursesGrid loading={loading} materials={materials} />
+        
+        {totalPages > 1 && (
+          <div className="mt-14">
+            <CoursesPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              setCurrentPage={setCurrentPage}
+            />
+          </div>
         )}
       </div>
     </section>

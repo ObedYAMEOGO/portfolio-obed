@@ -88,151 +88,151 @@ async def get_material(
     return material
 
 
-    @router.post(
-        "",
-        response_model=MaterialResponse,
-        status_code=status.HTTP_201_CREATED,
+@router.post(
+    "",
+    response_model=MaterialResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_material(
+    material: MaterialCreate,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    existing_query = select(Material).where(
+        Material.slug == material.slug
     )
-    async def create_material(
-        material: MaterialCreate,
-        db: AsyncSession = Depends(get_db),
-        _: None = Depends(verify_admin),
-    ):
-        existing_query = select(Material).where(
-            Material.slug == material.slug
-        )
 
-        existing_result = await db.execute(
-            existing_query
-        )
-
-        existing_material = (
-            existing_result.scalars().first()
-        )
-
-        if existing_material:
-            raise HTTPException(
-                status_code=400,
-                detail="Material already exists.",
-            )
-
-        db_material = Material(
-            **material.model_dump()
-        )
-
-        db.add(db_material)
-
-        await db.commit()
-
-        await db.refresh(db_material)
-
-        # Trigger frontend revalidation
-        await trigger_frontend_revalidation("materials", db_material.slug)
-
-        # =========================================================
-        # SEND NOTIFICATION TO SUBSCRIBERS
-        # =========================================================
-
-        if db_material.is_published:
-            try:
-                subscribers = await SubscriberRepository.get_active(db)
-                emails = [s.email for s in subscribers if s.email]
-
-                if emails:
-                    broadcast_new_material_task.delay(
-                        subscriber_emails=emails,
-                        material_title=db_material.title,
-                        material_description=(
-                            db_material.description or "New learning material available."
-                        ),
-                    )
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Failed to queue notification task: {e}")
-
-        return db_material
-
-
-    @router.put(
-        "/{material_id}",
-        response_model=MaterialResponse,
+    existing_result = await db.execute(
+        existing_query
     )
-    async def update_material(
-        material_id: int,
-        payload: MaterialCreate,
-        db: AsyncSession = Depends(get_db),
-        _: None = Depends(verify_admin),
+
+    existing_material = (
+        existing_result.scalars().first()
+    )
+
+    if existing_material:
+        raise HTTPException(
+            status_code=400,
+            detail="Material already exists.",
+        )
+
+    db_material = Material(
+        **material.model_dump()
+    )
+
+    db.add(db_material)
+
+    await db.commit()
+
+    await db.refresh(db_material)
+
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("materials", db_material.slug)
+
+    # =========================================================
+    # SEND NOTIFICATION TO SUBSCRIBERS
+    # =========================================================
+
+    if db_material.is_published:
+        try:
+            subscribers = await SubscriberRepository.get_active(db)
+            emails = [s.email for s in subscribers if s.email]
+
+            if emails:
+                broadcast_new_material_task.delay(
+                    subscriber_emails=emails,
+                    material_title=db_material.title,
+                    material_description=(
+                        db_material.description or "New learning material available."
+                    ),
+                )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to queue notification task: {e}")
+
+    return db_material
+
+
+@router.put(
+    "/{material_id}",
+    response_model=MaterialResponse,
+)
+async def update_material(
+    material_id: int,
+    payload: MaterialCreate,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    query = select(Material).where(
+        Material.id == material_id
+    )
+
+    result = await db.execute(query)
+
+    material = result.scalars().first()
+
+    if not material:
+        raise HTTPException(
+            status_code=404,
+            detail="Material not found.",
+        )
+
+    # =========================================================
+    # CHECK PREVIOUS STATE
+    # =========================================================
+
+    was_published = (
+        material.is_published
+    )
+
+    old_slug = material.slug
+
+    update_data = (
+        payload.model_dump()
+    )
+
+    for key, value in (
+        update_data.items()
     ):
-        query = select(Material).where(
-            Material.id == material_id
-        )
+        setattr(material, key, value)
 
-        result = await db.execute(query)
+    await db.commit()
 
-        material = result.scalars().first()
+    await db.refresh(material)
 
-        if not material:
-            raise HTTPException(
-                status_code=404,
-                detail="Material not found.",
-            )
+    # Trigger frontend revalidation
+    await trigger_frontend_revalidation("materials", material.slug)
+    if material.slug != old_slug:
+        await trigger_frontend_revalidation("materials", old_slug)
 
-        # =========================================================
-        # CHECK PREVIOUS STATE
-        # =========================================================
+    # =========================================================
+    # SEND ONLY IF:
+    # DRAFT -> PUBLISHED
+    # =========================================================
 
-        was_published = (
-            material.is_published
-        )
+    if (
+        not was_published
+        and material.is_published
+    ):
+        try:
+            subscribers = await SubscriberRepository.get_active(db)
+            emails = [s.email for s in subscribers if s.email]
 
-        old_slug = material.slug
+            if emails:
+                broadcast_new_material_task.delay(
+                    subscriber_emails=emails,
+                    material_title=material.title,
+                    material_description=(
+                        material.description or "New learning material available."
+                    ),
+                )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to queue notification task: {e}")
 
-        update_data = (
-            payload.model_dump()
-        )
-
-        for key, value in (
-            update_data.items()
-        ):
-            setattr(material, key, value)
-
-        await db.commit()
-
-        await db.refresh(material)
-
-        # Trigger frontend revalidation
-        await trigger_frontend_revalidation("materials", material.slug)
-        if material.slug != old_slug:
-            await trigger_frontend_revalidation("materials", old_slug)
-
-        # =========================================================
-        # SEND ONLY IF:
-        # DRAFT -> PUBLISHED
-        # =========================================================
-
-        if (
-            not was_published
-            and material.is_published
-        ):
-            try:
-                subscribers = await SubscriberRepository.get_active(db)
-                emails = [s.email for s in subscribers if s.email]
-
-                if emails:
-                    broadcast_new_material_task.delay(
-                        subscriber_emails=emails,
-                        material_title=material.title,
-                        material_description=(
-                            material.description or "New learning material available."
-                        ),
-                    )
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Failed to queue notification task: {e}")
-
-        return material
+    return material
 
 
 @router.delete(
