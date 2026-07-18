@@ -244,7 +244,7 @@ def send_welcome_email(to_email: str):
         </h1>
         <p style="font-size:14px; line-height:1.6; color:{COLOR_TEXT_SECONDARY};
                    margin:0 0 16px;">
-          I'm Obed. I build production AI systems, write about shipping LLMs and 
+          I'm Obed. I build production AI/ML systems, write about shipping LLMs and 
           RAG architectures, and share what it takes to scale intelligence in 
           the real world. No theory — just engineering that works.
         </p>
