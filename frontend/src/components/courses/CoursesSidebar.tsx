@@ -27,9 +27,7 @@ export default function CoursesSidebar({
             </h1>
           </div>
           <p className="text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400">
-            Some of my curated and recommended notes, research architectures,
-            code modules, and deep-dive tutorials for engineering advanced AI
-            systems.
+            My Curated Notes and Recommended Courses and Tutorials to assist your Growth.
           </p>
         </div>
       </div>
