@@ -160,7 +160,7 @@ export default async function HomePage() {
                   md:text-[3rem]
                 "
               >
-                Most ML models never leave the notebook. I build the production systems that ship them.
+                Most ML models stay in notebooks. I ship them to production.
               </h1>
 
               {/* Sub-label */}
