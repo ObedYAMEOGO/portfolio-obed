@@ -160,7 +160,7 @@ export default async function HomePage() {
                   md:text-[3rem]
                 "
               >
-                Shipping production-grade machine learning systems.
+                Shipping Production Grade Machine Learning Systems.
               </h1>
 
               {/* Sub-label */}
