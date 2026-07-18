@@ -40,7 +40,12 @@ async function ProjectsSection() {
   let projects: Project[] = [];
 
   try {
-    const data = await getProjects();
+    const data = await Promise.race([
+      getProjects(),
+      new Promise<Project[]>((_, reject) =>
+        setTimeout(() => reject(new Error("Projects fetch timeout")), 8000)
+      ),
+    ]);
 
     // Newest first, then take the top 4 for the homepage preview
     projects = data

@@ -34,6 +34,12 @@ engine = create_async_engine(
     echo=False,
     pool_pre_ping=True,
     pool_recycle=300,
+    pool_size=15,
+    max_overflow=30,
+    connect_args={
+        "timeout": 15,
+        "command_timeout": 15,
+    },
 )
 
 # =========================================================
@@ -53,4 +59,10 @@ AsyncSessionLocal = async_sessionmaker(
 
 async def get_db():
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
