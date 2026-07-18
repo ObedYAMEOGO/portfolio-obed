@@ -160,12 +160,12 @@ export default async function HomePage() {
                   md:text-[3rem]
                 "
               >
-                Most ML models stay in notebooks. I ship them to production.
+                Shipping production-grade ML systems.
               </h1>
 
               {/* Sub-label */}
               <span className="block text-sm font-medium uppercase tracking-[0.3em] text-neutral-400">
-                ML Engineering · LLM Systems · Production Scale
+                MLops · RAG · LLMs · AI Agents
               </span>
 
               {/* CTAs */}
