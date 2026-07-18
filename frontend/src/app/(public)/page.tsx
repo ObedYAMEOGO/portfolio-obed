@@ -317,7 +317,7 @@ export default async function HomePage() {
         <ManifestoSection />
 
         {/* CAPABILITIES */}
-        <section className="w-full max-w-7xl">
+        <section className="w-full">
           <CapabilityMatrix />
         </section>
 
