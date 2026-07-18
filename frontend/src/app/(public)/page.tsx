@@ -160,12 +160,12 @@ export default async function HomePage() {
                   md:text-[3rem]
                 "
               >
-                Focused on building production grade ML &amp; intelligent systems.
+                Most ML models never leave the notebook. I build the production systems that ship them.
               </h1>
 
               {/* Sub-label */}
               <span className="block text-sm font-medium uppercase tracking-[0.3em] text-neutral-400">
-                Research · Engineering · Deployment
+                ML Engineering · LLM Systems · Production Scale
               </span>
 
               {/* CTAs */}
@@ -264,7 +264,7 @@ export default async function HomePage() {
                         Obed Yameogo
                       </p>
                       <p className="mt-1 text-[11px] leading-relaxed text-neutral-600">
-                        Machine Learning Engineer, PhD Scholar.
+                        Production ML Engineer
                       </p>
                     </div>
                   </div>
@@ -302,7 +302,7 @@ export default async function HomePage() {
                   <div className="mb-2 flex flex-col gap-2 border-t border-neutral-200 pt-3">
                     <p className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
                       <GraduationCap className="h-4 w-4 text-neutral-400" />
-                     Machine Learning Engineer
+                     Production ML Engineer
                     </p>
                   </div>
                 </div>

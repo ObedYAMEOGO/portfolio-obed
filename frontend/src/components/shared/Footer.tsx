@@ -54,7 +54,7 @@ export default function Footer() {
                   Obed Yameogo
                 </p>
                 <p className="text-[12px] text-neutral-400">
-                  ML Engineer · PhD Scholar
+                  Production ML Engineer
                 </p>
               </div>
             </div>
