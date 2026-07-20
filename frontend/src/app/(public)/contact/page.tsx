@@ -153,7 +153,7 @@ export default function ContactPage() {
                   <label className={styles.fieldLabel}>Full Name</label>
                   <Input
                     required
-                    placeholder="John Doe"
+                    placeholder="Enter Your Fullname"
                     value={formData.full_name}
                     onChange={(e) =>
                       setFormData((p) => ({ ...p, full_name: e.target.value }))
@@ -168,7 +168,7 @@ export default function ContactPage() {
                   <Input
                     required
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder="Your Email Id"
                     value={formData.email}
                     onChange={(e) =>
                       setFormData((p) => ({ ...p, email: e.target.value }))
