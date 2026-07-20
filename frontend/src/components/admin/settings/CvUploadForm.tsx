@@ -167,6 +167,32 @@ export default function CvUploadForm() {
         },
       );
 
+      /* =====================================================
+         TRIGGER CACHE REVALIDATION
+      ===================================================== */
+
+      try {
+        const revalidateSecret = process.env.NEXT_PUBLIC_REVALIDATE_SECRET;
+        if (revalidateSecret) {
+          await fetch(
+            "/api/revalidate",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "authorization": `Bearer ${revalidateSecret}`,
+              },
+              body: JSON.stringify({
+                type: "settings",
+              }),
+            },
+          );
+        }
+      } catch (revalidateError) {
+        console.warn("Revalidation request failed:", revalidateError);
+        // Don't fail the upload if revalidation fails
+      }
+
       toast.success(
         "CV uploaded successfully.",
       );

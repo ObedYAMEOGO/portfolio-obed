@@ -37,6 +37,10 @@ export async function POST(request: NextRequest) {
       revalidatePath("/courses");
     }
 
+    if (type === "settings" || type === "all") {
+      revalidatePath("/");  // Revalidate homepage for CV button
+    }
+
     return NextResponse.json(
       { message: `Revalidated ${type}${slug ? ` - ${slug}` : ""}` },
       { status: 200 }

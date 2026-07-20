@@ -20,7 +20,8 @@ export interface AdminSettings {
 
 export async function getSettingsServer(): Promise<AdminSettings> {
   try {
-    return await apiFetch<AdminSettings>("/admin/settings", { revalidate: 3600 });
+    // Revalidate every 60 seconds so CV updates appear quickly after admin upload
+    return await apiFetch<AdminSettings>("/admin/settings", { revalidate: 60 });
   } catch (error) {
     console.error(
       "SETTINGS_SERVER_ERROR:",
