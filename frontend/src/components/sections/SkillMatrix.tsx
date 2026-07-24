@@ -28,7 +28,7 @@ const capabilities = [
     icon: Globe,
     tag: "Cross-functional",
     description:
-      "Execution-driven engineer aligning technical depth with business goals, making tradeoffs clear, and discussing realities",
+      "Execution-driven engineer aligning technical depth with business goals, making tradeoffs clear, and hyper-realistic.",
   },
 ];
 
