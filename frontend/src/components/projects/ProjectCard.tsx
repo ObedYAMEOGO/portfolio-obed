@@ -44,7 +44,7 @@ export default function ProjectCard({ project, index = 0, isNew = false }: Proje
       {/* RIBBON — diagonal "Recently Added" banner in top-right corner */}
       {isNew && (
         <div className="pointer-events-none absolute -right-11 top-6 z-10 w-40 rotate-45 overflow-hidden">
-          <div className="bg-emerald-500 py-1 text-center text-[10px] font-bold uppercase tracking-widest text-white shadow-sm dark:bg-emerald-600">
+          <div className="bg-emerald-500 py-1 text-center text-[9px] font-bold uppercase tracking-widest text-white shadow-sm dark:bg-emerald-600">
             Recently Added
           </div>
         </div>
