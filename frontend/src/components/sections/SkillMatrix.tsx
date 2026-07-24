@@ -108,7 +108,7 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
   return (
     <article
       ref={cardRef}
-      className="group relative overflow-hidden rounded-2xl border border-[#c17650]/25 bg-linear-to-br from-[#e0a374]/10 via-white to-white transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#c17650]/50 hover:shadow-[0_8px_24px_-4px_rgba(139,90,60,0.18)] dark:border-[#c17650]/25 dark:bg-gradient-to-br dark:from-[#8b5a3c]/15 dark:via-neutral-900 dark:to-neutral-900 dark:hover:border-[#c17650]/40"
+      className="group relative overflow-hidden rounded-2xl border border-[#c17650]/25 bg-linear-to-br from-[#e0a374]/5 via-white to-white transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#c17650]/40 hover:shadow-[0_8px_24px_-4px_rgba(139,90,60,0.12)] dark:border-[#c17650]/20 dark:bg-neutral-900 dark:hover:border-[#c17650]/35"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
@@ -116,7 +116,7 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
       }}
     >
       {/* Hover background wash */}
-      <div className="absolute inset-0 bg-linear-to-br from-[#e0a374]/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-[#8b5a3c]/20" />
+      {/* Hover background wash removed — border handles hover state now */}
 
       <div className="relative p-5">
         {/* Number */}
