@@ -60,7 +60,7 @@ export default function SkillMatrix() {
         transition: "opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1)",
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <p className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-neutral-400 dark:text-neutral-500 mb-2">
@@ -108,7 +108,7 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
   return (
     <article
       ref={cardRef}
-      className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50 via-white to-white transition-all duration-300 ease-out hover:-translate-y-1 hover:border-amber-300/80 hover:shadow-[0_8px_24px_-4px_rgba(180,140,20,0.15)] dark:border-amber-900/40 dark:bg-gradient-to-br dark:from-amber-950/20 dark:via-neutral-900 dark:to-neutral-900 dark:hover:border-amber-700/60"
+      className="group relative overflow-hidden rounded-2xl border border-[#c17650]/25 bg-linear-to-br from-[#e0a374]/10 via-white to-white transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#c17650]/50 hover:shadow-[0_8px_24px_-4px_rgba(139,90,60,0.18)] dark:border-[#c17650]/25 dark:bg-gradient-to-br dark:from-[#8b5a3c]/15 dark:via-neutral-900 dark:to-neutral-900 dark:hover:border-[#c17650]/40"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
@@ -116,17 +116,17 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
       }}
     >
       {/* Hover background wash */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-amber-900/20" />
+      <div className="absolute inset-0 bg-linear-to-br from-[#e0a374]/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-[#8b5a3c]/20" />
 
       <div className="relative p-5">
         {/* Number */}
-        <p className="font-mono text-[10px] font-semibold tracking-[0.15em] text-amber-500/70 dark:text-amber-600/60 mb-4">
+        <p className="font-mono text-[10px] font-semibold tracking-[0.15em] text-[#c17650]/70 dark:text-[#e0a374]/60 mb-4">
           {num}
         </p>
 
         {/* Icon */}
-        <div className="w-10 h-10 flex items-center justify-center rounded-lg border border-amber-200/60 bg-gradient-to-br from-amber-50 to-white mb-4 transition-all duration-200 group-hover:border-amber-300 group-hover:from-amber-100 dark:border-amber-800/40 dark:from-amber-950/30 dark:to-neutral-900">
-          <Icon className="h-4 w-4 text-amber-600/70 transition-all duration-200 group-hover:text-amber-700 dark:text-amber-500/70" strokeWidth={1.5} />
+        <div className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#c17650]/25 bg-linear-to-br from-[#e0a374]/15 to-white mb-4 transition-all duration-200 group-hover:border-[#c17650]/50 group-hover:from-[#e0a374]/25 dark:border-[#c17650]/25 dark:from-[#8b5a3c]/20 dark:to-neutral-900">
+          <Icon className="h-4 w-4 text-[#c17650]/80 transition-all duration-200 group-hover:text-[#c17650] dark:text-[#e0a374]/80" strokeWidth={1.5} />
         </div>
 
         {/* Title */}
@@ -140,7 +140,7 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
         </p>
 
         {/* Divider */}
-        <div className="mb-4 h-px bg-amber-100 transition-colors duration-300 group-hover:bg-amber-200 dark:bg-neutral-800 dark:group-hover:bg-amber-900/40" />
+        <div className="mb-4 h-px bg-[#e0a374]/40 transition-colors duration-300 group-hover:bg-[#c17650]/40 dark:bg-neutral-800 dark:group-hover:bg-[#c17650]/30" />
 
         {/* Tag/footer */}
         <div className="flex items-center gap-1.5">
@@ -149,7 +149,7 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
             height="12"
             viewBox="0 0 13 13"
             fill="none"
-            className="text-amber-500/70 transition-colors duration-300 group-hover:text-amber-600 dark:text-amber-600/60"
+            className="text-[#c17650]/70 transition-colors duration-300 group-hover:text-[#c17650] dark:text-[#e0a374]/60"
           >
             <path
               d="M2 6.5h9M7.5 3l3.5 3.5L7.5 10"

@@ -75,11 +75,11 @@ export default function NewsletterSubscribe() {
             disabled={pending}
             className="
               inline-flex items-center justify-center gap-2 rounded-full
-              bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500
-              bg-[length:200%_auto] px-6 py-3 text-[12px] font-semibold uppercase
+              bg-linear-to-r from-[#8b5a3c] via-[#c17650] to-[#e0a374]
+              bg-size-[200%_auto] px-6 py-3 text-[12px] font-semibold uppercase
               text-white shadow-xs transition-all duration-300
-              hover:bg-[position:right_center] hover:scale-[1.02]
-              hover:shadow-lg hover:shadow-amber-300/40 active:scale-[0.98]
+              hover:bg-position-[right_center] hover:scale-[1.02]
+              hover:shadow-lg hover:shadow-[#c17650]/30 active:scale-[0.98]
               disabled:opacity-60 disabled:hover:scale-100
             "
           >
