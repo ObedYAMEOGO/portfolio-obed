@@ -35,9 +35,9 @@ export default function DesktopNav({ items }: DesktopNavProps) {
               justify-center
               rounded-full
               bg-linear-to-r
-              from-[#8b5a3c]
+              from-[#e0a374]
               via-[#c17650]
-              to-[#e0a374]
+              to-[#8b5a3c] 
               bg-size-[200%_auto]
               px-5
               py-2
