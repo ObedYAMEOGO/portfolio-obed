@@ -41,6 +41,15 @@ export default function ProjectCard({ project, index = 0, isNew = false }: Proje
         transition: `opacity 0.5s cubic-bezier(0.22,1,0.36,1) ${index * 80}ms, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${index * 80}ms, box-shadow 0.3s ease, border-color 0.3s ease`,
       }}
     >
+      {/* RIBBON — diagonal "Recently Added" banner in top-right corner */}
+      {isNew && (
+        <div className="pointer-events-none absolute -right-11 top-6 z-10 w-40 rotate-45 overflow-hidden">
+          <div className="bg-emerald-500 py-1 text-center text-[10px] font-bold uppercase tracking-widest text-white shadow-sm dark:bg-emerald-600">
+            Recently Added
+          </div>
+        </div>
+      )}
+
       {/* TOP-RIGHT GEOMETRIC PATTERN */}
       <div className="pointer-events-none absolute -right-4 -top-4 h-28 w-28 opacity-[0.07] transition-opacity duration-300 group-hover:opacity-[0.12] dark:opacity-[0.06] dark:group-hover:opacity-[0.1]">
         <svg viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -58,17 +67,11 @@ export default function ProjectCard({ project, index = 0, isNew = false }: Proje
 
       <div className="relative p-5">
 
-        {/* Eyebrow — "New" badge replaces "Project" label when recently added */}
+        {/* Eyebrow */}
         <div className="mb-3 flex items-center gap-2">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400 transition-colors duration-200 group-hover:text-neutral-500 dark:text-neutral-500 dark:group-hover:text-neutral-400">
             Project
           </p>
-          {isNew && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:ring-emerald-800">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-              New
-            </span>
-          )}
         </div>
 
         {/* Title */}
