@@ -34,7 +34,11 @@ export default function DesktopNav({ items }: DesktopNavProps) {
               items-center
               justify-center
               rounded-full
-              bg-[#c17650]
+              bg-gradient-to-r
+              from-amber-500
+              via-yellow-400
+              to-amber-500
+              bg-[length:200%_auto]
               px-5
               py-2
               text-[12px]
@@ -42,9 +46,9 @@ export default function DesktopNav({ items }: DesktopNavProps) {
               uppercase
               tracking-widest
               text-white
-              transition-colors
-              duration-200
-              hover:bg-[#c17650] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
+              transition-all
+              duration-300
+              hover:bg-[position:right_center] hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-300/40 active:scale-[0.98]
 
               md:inline-flex"
             >
