@@ -108,7 +108,7 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
   return (
     <article
       ref={cardRef}
-      className="group relative overflow-hidden rounded-2xl border border-[#c17650]/25 bg-linear-to-br from-[#e0a374]/5 via-white to-white transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#c17650]/40 hover:shadow-[0_8px_24px_-4px_rgba(139,90,60,0.12)] dark:border-[#c17650]/20 dark:bg-neutral-900 dark:hover:border-[#c17650]/35"
+      className="group relative overflow-hidden rounded-2xl border border-[#c17650]/25 bg-white transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#c17650]/40 hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] dark:border-[#c17650]/20 dark:bg-neutral-900 dark:hover:border-[#c17650]/35"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
@@ -125,7 +125,7 @@ function SkillCard({ capability, index }: { capability: typeof capabilities[0]; 
         </p>
 
         {/* Icon */}
-        <div className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#c17650]/25 bg-linear-to-br from-[#e0a374]/15 to-white mb-4 transition-all duration-200 group-hover:border-[#c17650]/50 group-hover:from-[#e0a374]/25 dark:border-[#c17650]/25 dark:from-[#8b5a3c]/20 dark:to-neutral-900">
+        <div className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#c17650]/25 bg-gradient-to-br from-[#e0a374]/15 to-white mb-4 transition-all duration-200 group-hover:border-[#c17650]/50 group-hover:from-[#e0a374]/25 dark:border-[#c17650]/25 dark:from-[#8b5a3c]/20 dark:to-neutral-900">
           <Icon className="h-4 w-4 text-[#c17650]/80 transition-all duration-200 group-hover:text-[#c17650] dark:text-[#e0a374]/80" strokeWidth={1.5} />
         </div>
 
